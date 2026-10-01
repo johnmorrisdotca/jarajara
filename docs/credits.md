@@ -67,3 +67,11 @@ both ends, brought to the same peak level, and encoded as AAC at 48 kbit/s in an
 Safari on an iPhone included. The empty padding the encoder leaves in the file was taken out. Then `pnpm sounds` writes
 them into `src/sounds.ts` as base64, and a test fails if that module and the files fall out of step, or if a file is not
 named on this page.
+
+## Ideas
+
+The challenges of Awase (the gold tile, the spark, the rush, fortune, the sand, the purge, blackout) and its options (hints,
+shuffles and undo given or taken away, matching tiles shown) are written for this package from the ideas of **Mah**
+by ffalt, [https://github.com/ffalt/mah](https://github.com/ffalt/mah), a mahjong solitaire under the MIT licence
+(read 2026-10-01). No code and no layout of Mah's is used. The layouts here are Jarajara's own drawings of shapes anyone
+may draw.

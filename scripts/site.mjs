@@ -27,7 +27,6 @@ const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").repla
 const body = readFileSync("demo/body.html", "utf8")
   .replace("__UNREVIEWED__", familyUnreviewed({ id }))
   .replace("__USES__", uses.map((line) => `<li><code>${escape(line)}</code></li>`).join("\n            "))
-  .replace("__CHALLENGE_ROW__", "")
   .trimEnd();
 
 const page = `<!doctype html>

@@ -6,6 +6,7 @@
  */
 export * from "./tiles.ts";
 export * from "./layouts.ts";
+export { MORE_LAYOUTS } from "./layouts-more.ts";
 export * from "./board.ts";
 export * from "./deal.ts";
 export * from "./moves.ts";

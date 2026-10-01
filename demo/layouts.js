@@ -1,5 +1,5 @@
 // The layouts: one looked over, its slots sorted by x, y and z; and every layout as a deal, to play.
-import { MAHJONG_LAYOUTS, layoutExtent } from "./dist/index.js";
+import { ALL_LAYOUTS as LAYOUTS, layoutExtent } from "./dist/index.js";
 import { generateAwase } from "./dist/awase-entry.js";
 import { layoutSvg } from "./dist/faces-entry.js";
 import { readSlotKeys } from "./dist/index.js";
@@ -13,13 +13,13 @@ export function initLayouts(ctx) {
   let keys = "z y x";
 
   const fill = () => {
-    sizeSelect.replaceChildren(...MAHJONG_LAYOUTS.map((layout) => Object.assign(document.createElement("option"), { value: String(layout.size), textContent: `${layoutName(layout)} (${layout.size})`, selected: layout.size === size })));
+    sizeSelect.replaceChildren(...LAYOUTS.map((layout) => Object.assign(document.createElement("option"), { value: String(layout.size), textContent: `${layoutName(layout)} (${layout.size})`, selected: layout.size === size })));
     for (const button of document.querySelectorAll("[data-sort]")) button.setAttribute("aria-pressed", String(button.dataset.sort === keys));
   };
   const draw = () => {
     inspect.setAttribute("size", String(size));
     inspect.setAttribute("sort", keys);
-    const layout = MAHJONG_LAYOUTS.find((one) => one.size === size);
+    const layout = LAYOUTS.find((one) => one.size === size);
     note.textContent = ctx.word("inspectNote")(layout.slots.length, readSlotKeys(keys).join(" "));
     ctx.show("inspect-code", `<jarajara-layout size="${size}" view="lined" sort="${keys}" static></jarajara-layout>\n\nimport { sortSlots } from "@johnmorrisdotca/jarajara";\nsortSlots(layout, ${JSON.stringify(readSlotKeys(keys))});   // the slots, in that order`);
     fill();
@@ -40,7 +40,7 @@ export function initLayouts(ctx) {
   const gallery = document.getElementById("gallery");
   const paint = () => {
     gallery.replaceChildren(
-      ...MAHJONG_LAYOUTS.map((layout) => {
+      ...LAYOUTS.map((layout) => {
         const deal = generateAwase(layout.size, "easy", 20261001 + layout.size);
         const { layers } = layoutExtent(layout);
         const card = document.createElement(layout.key === "tiny" ? "div" : "button");

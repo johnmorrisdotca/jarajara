@@ -89,11 +89,22 @@ right. Only free tiles may be taken.
 | 8 | Torii | 64 | 3 |
 | 9 | Fuji | 100 | 5 |
 | 10 | Castle | 120 | 5 |
+| 11 | Pagoda | 94 | 4 |
+| 12 | Fortress | 116 | 3 |
+| 13 | Pyramid | 142 | 4 |
+| 14 | Bridge | 84 | 4 |
 | 15 | Turtle | 144 | 5 |
+| 16 | Butterfly | 112 | 4 |
+| 17 | Dragon | 142 | 4 |
 
 The Turtle is the layout the solitaire has been played on since it was first
 published. A layout's size is its width in tiles, and names it. Tiny is for
-tests, cleared in four pairs.
+tests, cleared in four pairs. `MAHJONG_LAYOUTS` holds the first five, which
+never change (itsutsu.com's kept games are made on them); the other six are
+Jarajara's own drawings of shapes anyone may draw, in `MORE_LAYOUTS`, and
+`ALL_LAYOUTS` holds them all. Every one is dealt and cleared by the same
+reverse dealing, and a test deals each at every level from several seeds and
+plays its own answer out.
 
 ## Awase
 
@@ -111,6 +122,37 @@ shuffled where they lie, drawn from the deal so a replay draws the same.
 A solve is written as text: each pair its two slots in base 36 (`"0a1c"`), a
 shuffle `*`. `checkAwase` plays it on the deal and asks that the layout ends
 empty: a few thousand steps, no search, safe to run on a server.
+
+### Options and challenges
+
+The same deal can be played for something else. Hints, shuffles and undo can be given, limited or taken away, and seven
+challenges lay a goal and a clock over a deal. None of it changes a deal, so every one can still be cleared.
+
+```ts
+import { dailyAwase, generateAwase, readRun, runHint, runTake, startRun } from "@johnmorrisdotca/jarajara/awase";
+
+const deal = generateAwase(15, "medium", 12345);
+let run = startRun(deal, { challenge: "rush", hints: 3, shuffles: 1 });   // a game: plain data
+const hint = runHint(run);                                                // { run, pair } or null once the hints are spent
+run = runTake(hint!.run, ...hint!.pair, Date.now()) ?? run;               // the new game, or null where the rules say no
+readRun(run, Date.now());                                                 // { state, because, remainingMs, goal, multiplier, ... }
+dailyAwase("2026-10-01");                                                 // today's layout, level, seed and challenge, from the date alone
+```
+
+| Challenge | What it asks |
+| --- | --- |
+| `gold` | Take a pair of the gold face, four tiles ringed in gold. Hints and undo are allowed |
+| `spark` | Clear the layout before time runs out, 2.5 s a tile. A pair of the spark face adds 20 s and sends the spark on. No undo |
+| `rush` | Make the goal number of pairs (30, fewer on a small layout) in three minutes; the layout need not be cleared |
+| `fortune` | Reach the goal score before time runs out; pairs within five seconds of each other build a multiplier up to three |
+| `sand` | Start with 45 s, every pair adds 5 s (a quick one 1 s more), to a limit of a minute; clear the layout in time |
+| `purge` | Take every tile of the marked group before time runs out |
+| `blackout` | Only the free tiles show their faces; the covered ones are drawn blank (`hideBlocked`). Hints are allowed, undo is not |
+
+A run has no clock of its own: every move is given `at`, milliseconds on any clock you keep, so a run is testable and a server
+may replay one. The challenges come from the ideas of Mah's challenge modes (see [docs/credits.md](docs/credits.md)); the
+code, the numbers and the layouts are Jarajara's own. `<jarajara-layout challenge="spark" timer controls>` plays them, its
+clock counting down.
 
 ## Awase at a table
 
@@ -180,7 +222,7 @@ Or `import "@johnmorrisdotca/jarajara/element/define"` in a bundle; `@johnmorris
 | --- | --- |
 | `<jarajara-tile code="F">` | One tile, face up or down, any design and back, turned by a tap with `flip` (and `sound`); `size` `small` / `medium` / `large` or a `width`; `marked`; `spin()` |
 | `<jarajara-rack tiles="…">` | Tiles lined up in front of you: `hide()`, `show()`, `toggle(tiles?)`, `sort(order?)`, `group("suit" \| "kind")`, `ungroup()`, `unsort()`, `mixUp(seed?)`, `take(tile)`, `add(tile, at?)`, `replace()`, `lift()`, `lower()`, `mark()`, `unmark()`, `spin()`; a tap raises a tile with `pick` |
-| `<jarajara-layout size="15">` | A game of Awase to play on a stacked layout: free tiles, pick two to take, hint, shuffle, undo, a timer, limits on hints and shuffles, matching tiles ringed, and the same layout lined up sorted by x, y and z |
+| `<jarajara-layout size="15">` | A game of Awase to play on a stacked layout: free tiles, pick two to take, hint, shuffle, undo, a timer, limits on hints and shuffles, the seven challenges, matching tiles ringed, and the same layout lined up sorted by x, y and z |
 | `<jarajara-table players="3">` | Awase at a table of two to four, with computers in the seats that are not people's |
 | `<jarajara-viewer query="east">` | A tile looked up by its code, a name in English or Japanese, or hand notation, with what it is |
 | `<jarajara-group group="winds">` | A group of the set shown: a suit, `honours`, `bonus`, `terminals`, `simples`, … |
@@ -188,7 +230,7 @@ Or `import "@johnmorrisdotca/jarajara/element/define"` in a bundle; `@johnmorris
 
 Tiles in a rack are named by their place as written (`0`, `3`) when a method wants one tile, or by a letter or name (`"F"`, `"east"`) for every tile of that face. A rack keeps the room of its widest arrangement, so grouping, sorting and closing the groups never change its size, and `capacity` keeps it the size of that many tiles however many it holds. Every change is a bubbling event: `jarajara-rack`, `jarajara-pick`, `jarajara-take`, `jarajara-flip`, and for a layout `jarajara-take`, `jarajara-shuffle`, `jarajara-stuck`, `jarajara-clear`, `jarajara-hint`, `jarajara-undo`, `jarajara-deal`.
 
-`<jarajara-layout>` attributes: `size`, `level` (`easy`, `medium`, `hard`), `seed`, `cells` (a position of your own), `show-free`, `show-matching`, `hints` and `shuffles` (a number, `off` or `unlimited`), `undo="off"`, `timer`, `controls`, `view="lined"` with `sort="z y x"` (any of `x`, `y`, `z`, a `-` before one for the other way round), `static`, `cloth`, `design`, `lang`. `restore(moves)` plays a kept game back on the deal.
+`<jarajara-layout>` attributes: `size`, `level` (`easy`, `medium`, `hard`), `seed`, `cells` (a position of your own), `show-free`, `show-matching`, `hints` and `shuffles` (a number, `off` or `unlimited`), `undo="off"`, `challenge`, `timer`, `controls`, `view="lined"` with `sort="z y x"` (any of `x`, `y`, `z`, a `-` before one for the other way round), `static`, `cloth`, `design`, `lang`. `restore(moves)` plays a kept game back on the deal.
 
 A table, a rack, a layout, a group, a set and a viewer all take `cloth`: `green`, `blue`, `red`, `black` or `wood`, the family's five, which a page can follow from the demo header's `family-cloth` event.
 
@@ -266,8 +308,8 @@ The [API reference](https://johnmorrisdotca.github.io/jarajara/api.html) lists e
 
 | Import | What it holds |
 | --- | --- |
-| `@johnmorrisdotca/jarajara` | the set (`MAHJONG_FACES`, `faceOf`, `tilesMatch`, `matchClass`, `bonusRuleOf`, `setPairs`, `pairPoints`), names and lookup (`faceWords`, `tileName`, `findFace`, `findFaces`, `readTiles`, `writeTiles`, `readNotation`, `writeNotation`, `TILE_GROUPS`, `groupFaces`, `setInventory`, `copiesOf`, `countTiles`), arranging (`arrangeTiles`, `arrangeIndexes`, `groupTiles`, `mixTiles`, `sortSlots`, `readSlotKeys`, `describeSlot`), the layouts (`MAHJONG_LAYOUTS`, `layoutFor`, `layoutExtent`), the board (`geometryOf`, `isFree`, `freeSlots`, `freePairs`, `blockedBy`, `canTake`, `takePair`, `tilesLeft`, `isCleared`), dealing (`layPairs`, `pairsLeft`, `shuffleTiles`), games as text (`encodeMoves`, `decodeMoves`, `playSolve`, `dealFits`), `seededRandom` and `shuffled` |
-| `@johnmorrisdotca/jarajara/awase` | `generateAwase(size, level, seed)`, `checkAwase(size, givens, answer)`, `freshAwaseSeed(rule)`, `bonusRuleOfSeed`, `clearRate` |
+| `@johnmorrisdotca/jarajara` | the set (`MAHJONG_FACES`, `faceOf`, `tilesMatch`, `matchClass`, `bonusRuleOf`, `setPairs`, `pairPoints`), names and lookup (`faceWords`, `tileName`, `findFace`, `findFaces`, `readTiles`, `writeTiles`, `readNotation`, `writeNotation`, `TILE_GROUPS`, `groupFaces`, `setInventory`, `copiesOf`, `countTiles`), arranging (`arrangeTiles`, `arrangeIndexes`, `groupTiles`, `mixTiles`, `sortSlots`, `readSlotKeys`, `describeSlot`), the layouts (`MAHJONG_LAYOUTS`, `MORE_LAYOUTS`, `ALL_LAYOUTS`, `layoutFor`, `layoutExtent`), the board (`geometryOf`, `isFree`, `freeSlots`, `freePairs`, `blockedBy`, `canTake`, `takePair`, `tilesLeft`, `isCleared`), dealing (`layPairs`, `pairsLeft`, `shuffleTiles`), games as text (`encodeMoves`, `decodeMoves`, `playSolve`, `dealFits`), `seededRandom` and `shuffled` |
+| `@johnmorrisdotca/jarajara/awase` | `generateAwase(size, level, seed)`, `checkAwase(size, givens, answer)`, `freshAwaseSeed(rule)`, `bonusRuleOfSeed`, `clearRate`; options and challenges: `AWASE_CHALLENGES`, `awaseRules`, `startRun`, `runTake`, `runShuffle`, `runUndo`, `runHint`, `runStart`, `runTick`, `runRemaining`, `runPairs`, `runMarked`, `readRun`, `dailyAwase` |
 | `@johnmorrisdotca/jarajara/table` | `startTable`, `readTable`, `tablePairs`, `playAtTable`, `takeAtTable`, `undoAtTable`, `computerPair`, `encodeTable`, `decodeTable`, `seatName`, `SEAT_WINDS` |
 | `@johnmorrisdotca/jarajara/faces` | `tileSvg`, `tileFaceSvg`, `tileFaceSymbols`, `faceWords`, `layoutSvg`, `layoutBox`, `tileAt`, the backs (`tileBackSvg`, `tileBackFace`, `TILE_BACKS`), designs (`jarajaraDesign`, `loadTileDesign`, `TILE_DESIGNS`, `redFiveIndexes`), cloths (`JARAJARA_CLOTHS`, `CLOTHS`, `isCloth`, `clothVars`), and the colours `TILE_INK`, `TILE_BODY`, `TILE_MARKS` |
 | `@johnmorrisdotca/jarajara/tile-sounds` | `createTileSounds`, `TILE_SOUND_KINDS`, `soundTimes` |
@@ -295,12 +337,14 @@ src/
 ├── tiles.ts          the 144 tiles in 42 faces, matching, and what a pair scores
 ├── names.ts          what each tile is called in English and Japanese, finding one by name, hand notation
 ├── arrange.ts        sorting, grouping and mixing tiles; putting a layout's slots in order by x, y, z
-├── layouts.ts        the five stacked layouts, Tiny to the Turtle
+├── layouts.ts        the five stacked layouts, Tiny to the Turtle, and every layout by size
+├── layouts-more.ts   six more layouts, Jarajara's own: a pagoda, fortress, pyramid, bridge, butterfly and dragon
 ├── board.ts          which tiles are free, the pairs that can be taken, taking one
 ├── deal.ts           laying pairs in reverse so a deal can always be cleared; shuffling
 ├── moves.ts          a game written as text, and played back on a deal
 ├── awase.ts          a deal of Awase from a seed, at three levels
 ├── check.ts          whether a finished game clears its deal
+├── challenge.ts      options and challenges: a game as plain data, its clock, goals and the day's game
 ├── table.ts          the rules at a table: turns, scores, shuffles and the end
 ├── computer.ts       the computer's choice of pair at the table
 ├── faces.ts          each face as SVG text, one tile on its own, and their colours

@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.3.0 — 2026-10-01
+
+More layouts, and challenges and options for Awase. No existing deal changes: sizes 4, 8, 9, 10 and 15 and every deal
+made on them are exactly as they were (a test plays every deal itsutsu.com made again).
+
+- **Six new layouts**, Jarajara's own drawings of shapes anyone may draw: Pagoda (11 across), Fortress (12), Pyramid (13),
+  Bridge (14), Butterfly (16) and Dragon (17). `MORE_LAYOUTS` holds them, `ALL_LAYOUTS` every layout, and `layoutFor`
+  finds any by size. Each is dealt and cleared at every level from several seeds, with its own answer played out, by the
+  tests.
+- **Options and challenges** for Awase (`@johnmorrisdotca/jarajara/awase`): a game as plain data (`startRun`, `runTake`,
+  `runShuffle`, `runUndo`, `runHint`, `readRun`), with hints, shuffles and undo given, limited or taken away, and seven
+  challenges: gold, spark, rush, fortune, sand, purge and blackout, with a clock and a goal laid over the deal. The ideas
+  are from Mah's challenge modes (MIT, credited); the code and numbers are Jarajara's own.
+- **`dailyAwase(date)`**: the day's layout, level, seed and challenge, the same for everybody, from the date alone.
+- `<jarajara-layout>` plays them: `challenge`, a clock that counts down, a goal line, gold rings on the tiles hunted, blank
+  tiles in the blackout, `jarajara-lost`, and `score` and `run`. Its limits (`hints`, `shuffles`, `undo`) now belong to the
+  game's rules.
+- The demo has a challenge chooser, a button for today's game, a Challenges panel, and every layout in the chooser, the
+  gallery and the looked-over layout.
+- The code of conduct names Jarajara, and the family's footer lists Suido.
+
 ## 1.2.0 — 2026-10-01
 
 A second design, and sounds.

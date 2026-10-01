@@ -17,7 +17,12 @@
           <label><span data-say="designWord"></span> <select id="game-design" class="fam-field" data-testid="game-design"></select></label>
           <button type="button" class="fam-button" id="sound-toggle" data-testid="sound-toggle" data-say="soundWord" aria-pressed="false"></button>
         </div>
-        __CHALLENGE_ROW__
+        <div class="fam-row setup">
+          <span class="fam-label" data-say="challengeWord"></span>
+          <div class="fam-seg" role="group" data-say-label="challengeWord" id="challenge-picks" data-testid="challenge-picks"></div>
+          <button type="button" class="fam-button" id="daily" data-testid="daily" data-say="daily"></button>
+        </div>
+        <p class="how" id="challenge-note" data-testid="challenge-note"></p>
         <p class="how" data-say="howTo"></p>
       </section>
       <div class="table-stage">
@@ -152,6 +157,12 @@
           </div>
           <jarajara-table id="table-demo" data-testid="table-demo" players="2" size="8" cloth="green" delay="500"></jarajara-table>
           <pre class="snippet" id="table-code" data-testid="table-code" tabindex="0"></pre>
+        </section>
+        <section class="wide" aria-labelledby="challenges-title" id="challenges-panel">
+          <h2 id="challenges-title" data-say="challengesTitle"></h2>
+          <p data-say="challengesNote"></p>
+          <ul class="challenge-list" id="challenge-list" data-testid="challenge-list"></ul>
+          <pre class="snippet" id="challenge-code" data-testid="challenge-code" tabindex="0"></pre>
         </section>
         <section class="wide" aria-labelledby="designs-title" id="designs">
           <h2 id="designs-title" data-say="designsTitle"></h2>

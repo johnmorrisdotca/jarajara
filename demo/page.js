@@ -10,6 +10,7 @@ import { initLayouts } from "./layouts.js";
 import { initTable } from "./tableDemo.js";
 import { initDesigns } from "./designs.js";
 import { initSounds } from "./sounds.js";
+import { initChallenges } from "./challenges.js";
 
 const listeners = [];
 // `familyLanguage` is the family's shared script, loaded before this one.
@@ -71,3 +72,4 @@ initLayouts(ctx);
 initTable(ctx);
 initDesigns(ctx);
 initSounds(ctx);
+initChallenges(ctx);

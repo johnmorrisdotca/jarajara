@@ -1,6 +1,7 @@
 // The play panel: Awase on any layout and level, as the <jarajara-layout> element plays it, kept on this device between visits.
-import { MAHJONG_LAYOUTS } from "./dist/index.js";
+import { ALL_LAYOUTS } from "./dist/index.js";
 import { TILE_DESIGNS as DESIGNS } from "./dist/faces-entry.js";
+import { AWASE_CHALLENGES, dailyAwase } from "./dist/awase-entry.js";
 
 const KEY = "jarajara.page";
 const LEVELS = ["easy", "medium", "hard"];
@@ -52,7 +53,7 @@ function options(select, values, label, chosen) {
 
 export function initPlay(ctx) {
   const game = document.getElementById("game");
-  const layouts = MAHJONG_LAYOUTS.filter((layout) => layout.key !== "tiny");
+  const layouts = ALL_LAYOUTS.filter((layout) => layout.key !== "tiny");
   const sizes = layouts.map((layout) => layout.size);
   const kept = read();
   const state = {
@@ -64,6 +65,7 @@ export function initPlay(ctx) {
     shuffles: ALLOWANCES.includes(kept.shuffles) ? kept.shuffles : "unlimited",
     undo: kept.undo === "off" ? "off" : "on",
     design: DESIGNS.includes(kept.design) ? kept.design : "jarajara",
+    challenge: AWASE_CHALLENGES.includes(kept.challenge) ? kept.challenge : "none",
     seed: Number.isInteger(kept.seed) ? kept.seed : null,
     moves: typeof kept.moves === "string" ? kept.moves : "",
   };
@@ -91,6 +93,13 @@ export function initPlay(ctx) {
       game.setAttribute("level", level);
       refresh();
     });
+    segment(document.getElementById("challenge-picks"), ["none", ...AWASE_CHALLENGES], (name) => (name === "none" ? ctx.word("challengeNone") : ctx.word("challenges")[name]), state.challenge, (name) => {
+      state.challenge = name;
+      if (name === "none") game.removeAttribute("challenge");
+      else game.setAttribute("challenge", name);
+      refresh();
+    });
+    document.getElementById("challenge-note").textContent = state.challenge === "none" ? "" : ctx.word("challengeNotes")[state.challenge];
     const allowance = (value) => (value === "unlimited" ? ctx.word("unlimited") : value === "off" ? ctx.word("off") : value);
     for (const [id, key] of [["hints", "hints"], ["shuffles", "shuffles"]]) {
       const select = document.getElementById(id);
@@ -132,16 +141,30 @@ export function initPlay(ctx) {
     });
   }
 
+  document.getElementById("daily").addEventListener("click", () => {
+    const day = dailyAwase(new Date());
+    state.size = day.size;
+    state.level = day.level;
+    state.challenge = day.challenge;
+    game.setAttribute("size", String(day.size));
+    game.setAttribute("level", day.level);
+    game.setAttribute("challenge", day.challenge);
+    game.newDeal(day.seed);
+    refresh();
+    document.getElementById("challenge-note").textContent = `${ctx.word("dailyNote")} ${day.date}: ${ctx.word("challenges")[day.challenge]}. ${ctx.word("challengeNotes")[day.challenge]}`;
+  });
+
   // The kept game: the layout and level, then the deal's seed, then the moves played on it.
   apply();
   game.setAttribute("size", String(state.size));
   game.setAttribute("level", state.level);
+  if (state.challenge !== "none") game.setAttribute("challenge", state.challenge);
   if (state.seed !== null) {
     game.setAttribute("seed", String(state.seed));
     if (state.moves !== "") game.restore(state.moves);
   }
   // Whatever happens on the board is kept.
-  for (const name of ["jarajara-deal", "jarajara-take", "jarajara-shuffle", "jarajara-undo", "jarajara-clear"]) game.addEventListener(name, save);
+  for (const name of ["jarajara-deal", "jarajara-take", "jarajara-shuffle", "jarajara-undo", "jarajara-clear", "jarajara-lost"]) game.addEventListener(name, save);
   labels();
   save();
   ctx.onLang(labels);

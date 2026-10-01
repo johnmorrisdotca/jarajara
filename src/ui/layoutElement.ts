@@ -1,16 +1,17 @@
 import { freshAwaseSeed, generateAwase } from "../awase.ts";
 import { describeSlot, readSlotKeys, sortSlots } from "../arrange.ts";
-import { canTake, freePairs, geometryOf, isCleared, isFree, tilesLeft } from "../board.ts";
-import { shuffleTiles } from "../deal.ts";
-import { layoutSvg } from "../draw.ts";
+import { canTake, freePairs, geometryOf, isFree, tilesLeft } from "../board.ts";
+import { isAwaseChallenge, PURGE_GROUPS, readRun, runHint, runMarked, runPairs, runShuffle, runStart, runTake, runTick, runUndo, startRun, type AwaseOptions, type AwaseRun } from "../challenge.ts";
+import type { TileDesign } from "../design.types.ts";
 import { redFiveIndexes } from "../designs.ts";
+import { layoutSvg } from "../draw.ts";
 import { tileFaceSymbols, tileSvg } from "../faces.ts";
 import { layoutFor } from "../layouts.ts";
-import { decodeMoves, encodeMoves, playSolve, type Replayed } from "../moves.ts";
+import { decodeMoves, encodeMoves } from "../moves.ts";
 import { tileName } from "../names.ts";
+import { groupWords, type TileLanguage } from "../names.ts";
 import { bonusRuleOf, isFaceCode, pairPoints } from "../tiles.ts";
-import type { AwaseLevel, MahjongBonusRule, MahjongLayout, MahjongMove } from "../types.ts";
-import type { TileDesign } from "../design.types.ts";
+import type { AwaseLevel, MahjongBonusRule, MahjongLayout } from "../types.ts";
 import { CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, playSound, say, wearCloth } from "./elementKit.ts";
 
 /** How many of a thing a game allows: a number, or no limit at all. */
@@ -41,6 +42,12 @@ export function hintPair(layout: MahjongLayout, cells: string, rule: MahjongBonu
   return best;
 }
 
+/** `m:ss` for a number of milliseconds, rounded up to the second so a clock never reads 0:00 with time left. */
+function clockOf(ms: number): string {
+  const seconds = Math.ceil(Math.max(0, ms) / 1000);
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
+
 /**
  * A GAME OF AWASE ON ANY PAGE: `<jarajara-layout size="15">`, a stacked layout of tiles drawn on a cloth, with the
  * rules of the solitaire in it: tap a free tile, then its match, and the pair goes. The free tiles can be lit, the tiles
@@ -61,7 +68,8 @@ export function hintPair(layout: MahjongLayout, cells: string, rule: MahjongBonu
  *   hints          how many hints a game may use: a number, `off`, or `unlimited` (unless said)
  *   shuffles       how many shuffles a game may use, the same way
  *   undo           `off` takes undo away
- *   timer          shows the game's clock, which starts at the first pair taken and stops when the layout is clear
+ *   challenge      `gold`, `spark`, `rush`, `fortune`, `sand`, `purge` or `blackout`: the deal played for something else (`AWASE_CHALLENGES`); the clocks and goals are worked out from the layout
+ *   timer          shows the game's clock: the time left in a challenge that has a clock, otherwise the time taken, from the first pair taken until the layout is clear
  *   controls       draws New deal, Undo, Hint and Shuffle buttons and the line that says how the game stands
  *   view           `stack` (unless said) draws the layout; `lined` draws its tiles lined up in a row, in the order `sort` gives, each with where it lies
  *   sort           how `lined` puts the slots in order: the keys `x`, `y` and `z`, `-` before one for the other way round: `"z y x"` (unless said), `"x"`, `"-z x"`
@@ -70,13 +78,13 @@ export function hintPair(layout: MahjongLayout, cells: string, rule: MahjongBonu
  *   design, red-fives, lang, cloth   as on the other elements
  *
  * Methods: `newDeal(seed?)`, `take(a, b)`, `hint()`, `shuffle()`, `undo()`, `restore(moves)`, `sortBy(keys)`. Properties: `seed`, `cells`,
- * `moves` (as `encodeMoves` writes them), `tilesLeft`. Events, all bubbling: `jarajara-take` (`{ pair, codes, tilesLeft }`),
- * `jarajara-shuffle`, `jarajara-stuck`, `jarajara-clear` (`{ moves, seconds }`), `jarajara-hint`, `jarajara-undo` and `jarajara-deal`
+ * `moves` (as `encodeMoves` writes them), `tilesLeft`, `score` and `run`, the game as an `AwaseRun`. Events, all bubbling: `jarajara-take` (`{ pair, codes, tilesLeft }`),
+ * `jarajara-shuffle`, `jarajara-stuck`, `jarajara-clear` (`{ moves, seconds, score }`, a game won), `jarajara-lost` (`{ because }`: `time` or `stuck`), `jarajara-hint`, `jarajara-undo` and `jarajara-deal`
  * (`{ size, level, seed }`, a deal made, which a page that keeps the game listens for).
  */
 export class JarajaraLayout extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["size", "level", "seed", "cells", "show-free", "show-matching", "hints", "shuffles", "undo", "timer", "controls", "view", "sort", "static", "design", "red-fives", "lang", "cloth", "sound"];
+    return ["size", "level", "seed", "cells", "show-free", "show-matching", "hints", "shuffles", "undo", "challenge", "timer", "controls", "view", "sort", "static", "design", "red-fives", "lang", "cloth", "sound"];
   }
 
   #root: ShadowRoot | null = null;
@@ -86,12 +94,11 @@ export class JarajaraLayout extends ElementBase {
   #seed = 0;
   /** The `seed` attribute last dealt from, so a new deal draws a fresh seed instead of dealing the same tiles again. */
   #dealtFrom: string | null = null;
-  #moves: MahjongMove[] = [];
-  #played: Replayed | null = null;
+  #run: AwaseRun | null = null;
   #chosen: number | null = null;
   #hinted: number[] = [];
-  #hintsUsed = 0;
   #note = "";
+  /** When the first pair was taken, for a game that counts up, and how long the game took once it was won. */
   #startedAt: number | null = null;
   #seconds: number | null = null;
   #ticker: ReturnType<typeof setInterval> | null = null;
@@ -103,17 +110,27 @@ export class JarajaraLayout extends ElementBase {
 
   /** The tiles as they lie, one letter a slot, `.` where one has been taken. */
   get cells(): string {
-    return this.#played?.cells ?? this.#givens;
+    return this.#run?.cells ?? this.#givens;
   }
 
   /** The moves played so far, written as `encodeMoves` writes them. */
   get moves(): string {
-    return encodeMoves(this.#moves);
+    return encodeMoves(this.#run?.moves ?? []);
   }
 
   /** How many tiles are still on the layout. */
   get tilesLeft(): number {
     return tilesLeft(this.cells);
+  }
+
+  /** The points scored so far: a pair is worth its layer, and quick pairs in a row are worth more. */
+  get score(): number {
+    return this.#run?.score ?? 0;
+  }
+
+  /** The game as the rules hold it (`AwaseRun`): its moves, its clock, its goal and whether it is won or lost. Null before the first deal. */
+  get run(): AwaseRun | null {
+    return this.#run;
   }
 
   #layout(): MahjongLayout {
@@ -124,8 +141,15 @@ export class JarajaraLayout extends ElementBase {
     return bonusRuleOf(this.#givens);
   }
 
-  #shufflesUsed(): number {
-    return this.#played?.shuffles ?? 0;
+  /** The options the attributes give a game. */
+  #options(): AwaseOptions {
+    const challenge = this.getAttribute("challenge");
+    return {
+      challenge: isAwaseChallenge(challenge) ? challenge : null,
+      hints: allowanceOf(this.getAttribute("hints")),
+      shuffles: allowanceOf(this.getAttribute("shuffles")),
+      undo: !this.hasAttribute("undo") || isOn(this, "undo"),
+    };
   }
 
   /** Deal again, from `seed` or a fresh one, at the size and level the attributes give. */
@@ -142,144 +166,142 @@ export class JarajaraLayout extends ElementBase {
     const own = this.getAttribute("cells");
     if (own !== null && own.length === this.#layout().slots.length && [...own].every((code) => code === "." || isFaceCode(code))) this.#givens = own;
     else this.#givens = generateAwase(this.#size, level !== null && LEVELS.includes(level) ? level : "medium", this.#seed).givens;
-    this.#moves = [];
+    this.#run = startRun({ size: this.#size, seed: this.#seed, givens: this.#givens }, this.#options());
     this.#chosen = null;
     this.#hinted = [];
-    this.#hintsUsed = 0;
     this.#note = "";
     this.#startedAt = null;
     this.#seconds = null;
-    this.#played = this.#playedFrom(this.#moves);
+    this.#stopClock();
     this.#draw();
     this.dispatchEvent(new CustomEvent("jarajara-deal", { bubbles: true, composed: true, detail: { size: this.#size, level: this.getAttribute("level") ?? "medium", seed: this.#seed } }));
   }
 
   /**
    * Play a game written as text (`encodeMoves`) on the deal being played, as a kept game is opened again. Answers
-   * whether every move was one the rules allow; if one was not, the game is left as it was.
+   * whether every move was one the rules allow; if one was not, the game is left as it was. No time passes while it is
+   * played back, so a challenge's clock is where it was kept, which is the start.
    */
   restore(moves: string): boolean {
     const decoded = decodeMoves(moves, this.#layout().slots.length);
-    const played = decoded === null ? null : this.#playedFrom(decoded);
-    if (decoded === null || played === null) return false;
-    this.#moves = decoded;
-    this.#played = played;
+    if (decoded === null || this.#run === null) return false;
+    const now = Date.now();
+    let run: AwaseRun | null = startRun({ size: this.#size, seed: this.#seed, givens: this.#givens }, this.#options(), now);
+    for (const move of decoded) {
+      if (run === null) break;
+      run = "shuffle" in move ? runShuffle(run, now) : runTake(run, move.pair[0], move.pair[1], now);
+    }
+    if (run === null) return false;
+    this.#run = run;
     this.#chosen = null;
     this.#hinted = [];
     this.#note = "";
-    if (decoded.length > 0 && !isCleared(played.cells)) this.#startClock();
+    if (decoded.length > 0 && run.over === null) this.#startClock();
     this.#draw();
     return true;
-  }
-
-  /** The moves played on this deal, from its givens: by the rules' own replay, or, for a position of your own with slots left empty, move by move. */
-  #playedFrom(moves: readonly MahjongMove[]): Replayed | null {
-    if (!this.#givens.includes(".")) return playSolve(this.#size, this.#givens, moves);
-    let cells = this.#givens;
-    let shuffles = 0;
-    const geometry = geometryOf(this.#layout());
-    const rule = this.#rule();
-    for (const move of moves) {
-      if ("shuffle" in move) {
-        const next = shuffleTiles(geometry, cells, rule, shuffles);
-        if (next === null) return null;
-        cells = next;
-        shuffles += 1;
-      } else if (canTake(geometry, cells, rule, move.pair[0], move.pair[1])) cells = [...cells].map((code, at) => (at === move.pair[0] || at === move.pair[1] ? "." : code)).join("");
-      else return null;
-    }
-    return { cells, shuffles };
   }
 
   /** The tiles as they last lay all together, as dealt or as last shuffled: what the red fives are decided by, so one stays the same tile as the others are taken. */
   #epoch(): string {
-    const last = this.#moves.map((move) => "shuffle" in move).lastIndexOf(true);
-    return last === -1 ? this.#givens : (this.#playedFrom(this.#moves.slice(0, last + 1))?.cells ?? this.#givens);
+    const run = this.#run;
+    if (run === null) return this.#givens;
+    const last = run.moves.map((move) => "shuffle" in move).lastIndexOf(true);
+    if (last === -1) return this.#givens;
+    return last === run.moves.length - 1 ? run.cells : (run.history[last + 1]?.cells ?? this.#givens);
   }
 
-  /** Take a pair, as a player's two taps do. Answers whether the pair could be taken: two free tiles that match. */
+  /** Take a pair, as a player's two taps do. Answers whether the pair could be taken: two free tiles that match, in a game that is not over. */
   take(a: number, b: number): boolean {
-    const cells = this.cells;
-    if (isOn(this, "static") || !canTake(geometryOf(this.#layout()), cells, this.#rule(), a, b)) return false;
+    const run = this.#run;
+    if (run === null || isOn(this, "static")) return false;
+    const before = this.cells;
+    const next = runTake(run, a, b, Date.now());
+    if (next === null) return false;
+    // A pair taken after the clock ran out is the move that finds it out: it is not taken.
+    if (next.pairs === run.pairs) {
+      this.#run = next;
+      this.#finish(next, run);
+      this.#draw();
+      return false;
+    }
     this.#startClock();
-    const next = [...this.#moves, { pair: [a, b] as [number, number] }];
-    const played = this.#playedFrom(next);
-    if (played === null) return false;
-    this.#moves = next;
-    this.#played = played;
+    this.#run = next;
     this.#chosen = null;
     this.#hinted = [];
     this.#note = "";
-    playSound(this, isCleared(played.cells) ? "win" : "pair");
-    this.dispatchEvent(new CustomEvent("jarajara-take", { bubbles: true, composed: true, detail: { pair: [a, b], codes: [cells[a], cells[b]], points: pairPoints(cells[a]!), tilesLeft: tilesLeft(played.cells) } }));
-    if (isCleared(played.cells)) {
-      this.#seconds = this.#elapsed();
-      this.#stopClock();
-      this.dispatchEvent(new CustomEvent("jarajara-clear", { bubbles: true, composed: true, detail: { moves: this.moves, seconds: this.#seconds } }));
-    } else if (freePairs(geometryOf(this.#layout()), played.cells, this.#rule()).length === 0) {
-      this.dispatchEvent(new CustomEvent("jarajara-stuck", { bubbles: true, composed: true, detail: { tilesLeft: tilesLeft(played.cells) } }));
-    }
+    playSound(this, next.over === "won" ? "win" : "pair");
+    this.dispatchEvent(new CustomEvent("jarajara-take", { bubbles: true, composed: true, detail: { pair: [a, b], codes: [before[a], before[b]], points: pairPoints(before[a]!), score: next.score, tilesLeft: tilesLeft(next.cells) } }));
+    this.#finish(next, run);
+    if (next.over === null && runPairs(next).length === 0) this.dispatchEvent(new CustomEvent("jarajara-stuck", { bubbles: true, composed: true, detail: { tilesLeft: tilesLeft(next.cells) } }));
     this.#draw();
     return true;
+  }
+
+  /** Tell the page that a game has been won or lost, once, when it first is. */
+  #finish(next: AwaseRun, before: AwaseRun): void {
+    if (next.over === null || before.over !== null) return;
+    this.#seconds = this.#elapsed();
+    this.#stopClock();
+    if (next.over === "won") this.dispatchEvent(new CustomEvent("jarajara-clear", { bubbles: true, composed: true, detail: { moves: this.moves, seconds: this.#seconds, score: next.score, because: next.because } }));
+    else this.dispatchEvent(new CustomEvent("jarajara-lost", { bubbles: true, composed: true, detail: { because: next.because } }));
   }
 
   /** Light the pair a hint names, if hints are left and a pair can be taken. Answers the pair. */
   hint(): [number, number] | null {
-    const allowed = allowanceOf(this.getAttribute("hints"));
-    if (isOn(this, "static") || isCleared(this.cells)) return null;
-    if (allowed !== null && this.#hintsUsed >= allowed) {
-      this.#note = say(languageOf(this), "noHints");
-      this.#draw();
+    const run = this.#run;
+    if (run === null || isOn(this, "static") || run.over !== null) return null;
+    const hint = runHint(run);
+    if (hint === null) {
+      if (run.rules.hints !== null && run.hintsUsed >= run.rules.hints) {
+        this.#note = say(languageOf(this), "noHints");
+        this.#draw();
+      }
       return null;
     }
-    const pair = hintPair(this.#layout(), this.cells, this.#rule());
-    if (pair === null) return null;
-    this.#hintsUsed += 1;
-    this.#hinted = [...pair];
+    this.#run = hint.run;
+    this.#hinted = [...hint.pair];
     this.#chosen = null;
     this.#note = "";
-    this.dispatchEvent(new CustomEvent("jarajara-hint", { bubbles: true, composed: true, detail: { pair } }));
+    this.dispatchEvent(new CustomEvent("jarajara-hint", { bubbles: true, composed: true, detail: { pair: hint.pair } }));
     this.#draw();
-    return pair;
+    return hint.pair;
   }
 
   /** Shuffle the tiles that are left, which is for when no pair can be taken. Answers whether it was done. */
   shuffle(): boolean {
-    const allowed = allowanceOf(this.getAttribute("shuffles"));
+    const run = this.#run;
     const language = languageOf(this);
-    if (isOn(this, "static") || isCleared(this.cells)) return false;
-    if (allowed !== null && this.#shufflesUsed() >= allowed) {
-      this.#note = say(language, "noShuffles");
+    if (run === null || isOn(this, "static") || run.over !== null) return false;
+    const next = runShuffle(run, Date.now());
+    if (next === null) {
+      const out = run.rules.shuffles !== null && run.shuffles >= run.rules.shuffles;
+      this.#note = say(language, out ? "noShuffles" : "lost");
       this.#draw();
       return false;
     }
-    const next = [...this.#moves, { shuffle: true as const }];
-    const played = this.#playedFrom(next);
-    if (played === null || freePairs(geometryOf(this.#layout()), this.cells, this.#rule()).length > 0) {
-      this.#note = say(language, "lost");
-      this.#draw();
-      return false;
-    }
-    this.#moves = next;
-    this.#played = played;
+    this.#startClock();
+    this.#run = next;
     this.#chosen = null;
     this.#hinted = [];
     this.#note = "";
     playSound(this, "shuffle");
-    this.dispatchEvent(new CustomEvent("jarajara-shuffle", { bubbles: true, composed: true, detail: { shuffles: played.shuffles } }));
+    this.dispatchEvent(new CustomEvent("jarajara-shuffle", { bubbles: true, composed: true, detail: { shuffles: next.shuffles } }));
+    this.#finish(next, run);
     this.#draw();
     return true;
   }
 
-  /** Take the last move back. Answers whether there was one to take back. */
+  /** Take the last move back. Answers whether there was one to take back, and the rules allow it. */
   undo(): boolean {
-    if (isOn(this, "static") || !this.#undoAllowed() || this.#moves.length === 0) return false;
-    this.#moves = this.#moves.slice(0, -1);
-    this.#played = this.#playedFrom(this.#moves);
+    const run = this.#run;
+    if (run === null || isOn(this, "static")) return false;
+    const next = runUndo(run, Date.now());
+    if (next === null) return false;
+    this.#run = next;
     this.#chosen = null;
     this.#hinted = [];
     this.#note = "";
-    if (this.#seconds !== null) {
+    if (this.#seconds !== null && next.over === null) {
       this.#seconds = null;
       this.#startClock();
     }
@@ -288,20 +310,17 @@ export class JarajaraLayout extends ElementBase {
     return true;
   }
 
-  #undoAllowed(): boolean {
-    return !this.hasAttribute("undo") || isOn(this, "undo");
-  }
-
   /** Put the lined-up view in the order the keys give (`"x"`, `"-z y x"`) and show it. */
   sortBy(keys: string): void {
     this.setAttribute("sort", keys);
     this.setAttribute("view", "lined");
   }
 
+  /** The game's clock goes on from the first pair: it counts the seconds, and a challenge's clock runs down. */
   #startClock(): void {
-    if (this.#startedAt !== null) return;
-    this.#startedAt = Date.now();
-    if (isOn(this, "timer") && this.#ticker === null) this.#ticker = setInterval(() => this.#tick(), 1000);
+    if (this.#startedAt === null) this.#startedAt = Date.now();
+    if (this.#run !== null) this.#run = runStart(this.#run, Date.now());
+    if ((isOn(this, "timer") || this.#run?.rules.timeMs != null) && this.#ticker === null && this.#run?.over === null) this.#ticker = setInterval(() => this.#tick(), 250);
   }
 
   #stopClock(): void {
@@ -313,13 +332,26 @@ export class JarajaraLayout extends ElementBase {
     return this.#startedAt === null ? 0 : Math.max(1, Math.round((Date.now() - this.#startedAt) / 1000));
   }
 
+  /** Once a quarter second: bring the clock up to date, and find out whether time ran out. */
   #tick(): void {
+    const run = this.#run;
+    if (run === null) return;
+    const next = runTick(run, Date.now());
+    if (next !== run) {
+      this.#run = next;
+      this.#finish(next, run);
+      this.#draw();
+      return;
+    }
     const clock = this.#root?.querySelector(".clock");
     if (clock !== null && clock !== undefined) clock.textContent = this.#clockText();
   }
 
   #clockText(): string {
-    if (!isOn(this, "timer")) return "";
+    const run = this.#run;
+    if (run === null || !(isOn(this, "timer") || run.rules.timeMs !== null)) return "";
+    // A challenge with a clock counts down; any other game counts up.
+    if (run.rules.timeMs !== null) return clockOf(readRun(run, Date.now()).remainingMs ?? 0);
     const seconds = this.#seconds ?? (this.#startedAt === null ? 0 : Math.round((Date.now() - this.#startedAt) / 1000));
     return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
   }
@@ -343,15 +375,21 @@ export class JarajaraLayout extends ElementBase {
 
   attributeChangedCallback(name: string, before: string | null, after: string | null): void {
     if (this.#root === null || before === after) return;
-    // A different layout, level, deal or position is a new deal; anything else is the same game drawn again.
-    if (["size", "level", "seed", "cells"].includes(name)) {
+    // A different layout, level, deal, position or challenge is a new deal; anything else is the same game drawn again.
+    if (["size", "level", "seed", "cells", "challenge"].includes(name)) {
       if (name === "seed") this.#seed = 0;
       this.newDeal();
       return;
     }
+    // The limits are the game's own: changing them changes the rules from here on, never what has been played.
+    if (["hints", "shuffles", "undo"].includes(name) && this.#run !== null) {
+      const options = this.#options();
+      const rules = startRun({ size: this.#size, seed: this.#seed, givens: this.#givens }, options).rules;
+      this.#run = { ...this.#run, rules: { ...this.#run.rules, hints: rules.hints, shuffles: rules.shuffles, undo: rules.undo } };
+    }
     if (name === "timer") {
       if (isOn(this, "timer") && this.#startedAt !== null && this.#seconds === null) this.#startClock();
-      else this.#stopClock();
+      else if (this.#run?.rules.timeMs == null) this.#stopClock();
     }
     this.#draw();
   }
@@ -368,7 +406,8 @@ export class JarajaraLayout extends ElementBase {
       return;
     }
     const tile = path.find((one): one is Element => one instanceof Element && one.hasAttribute("data-slot"));
-    if (tile === undefined || isOn(this, "static") || isCleared(this.cells)) return;
+    const run = this.#run;
+    if (tile === undefined || run === null || isOn(this, "static") || run.over !== null) return;
     const slot = Number(tile.getAttribute("data-slot"));
     const language = languageOf(this);
     this.#hinted = [];
@@ -379,6 +418,7 @@ export class JarajaraLayout extends ElementBase {
       return;
     }
     this.#note = "";
+    this.#startClock();
     if (this.#chosen === null || this.#chosen === slot) {
       playSound(this, this.#chosen === slot ? "place" : "pick");
       this.#chosen = this.#chosen === slot ? null : slot;
@@ -386,6 +426,7 @@ export class JarajaraLayout extends ElementBase {
       return;
     }
     if (this.take(this.#chosen, slot)) return;
+    if (this.#run?.over !== null) return;
     this.#note = say(language, "noMatch");
     this.#chosen = slot;
     this.#draw();
@@ -398,48 +439,64 @@ export class JarajaraLayout extends ElementBase {
     tile.animate([{ transform: at }, { transform: `${at} translate(-2.5 0)` }, { transform: `${at} translate(2.5 0)` }, { transform: at }], { duration: 220 });
   }
 
+  /** What the challenge asks, in words: the gold tile, the group to purge, the pairs or points to reach. */
+  #goalLine(language: TileLanguage): string {
+    const run = this.#run;
+    if (run === null || run.rules.challenge === null) return "";
+    const goal = readRun(run, Date.now()).goal;
+    if (goal?.kind === "pairs") return say(language, "rush", { done: goal.done, goal: goal.of });
+    if (goal?.kind === "score") return say(language, "fortune", { score: goal.done, goal: goal.of });
+    if (goal?.kind === "purge") {
+      const group = PURGE_GROUPS.find((one) => one.key === run.purge);
+      return say(language, "purge", { suit: group === undefined ? "" : groupWords(group.key === "honours" ? "honours" : group.key, language), done: goal.done, goal: goal.of });
+    }
+    if (run.rules.challenge === "gold") return say(language, "gold");
+    if (run.rules.challenge === "spark") return say(language, "spark", { tile: run.spark === null ? "" : tileName(run.spark, language) });
+    if (run.rules.challenge === "sand") return say(language, "sand");
+    if (run.rules.challenge === "blackout") return say(language, "blackout");
+    return "";
+  }
+
   /** The line that says how the game stands. */
-  #status(language: "en" | "ja"): string {
-    const cells = this.cells;
-    if (isCleared(cells)) return say(language, "cleared", { seconds: this.#seconds ?? this.#elapsed() });
-    const pairs = freePairs(geometryOf(this.#layout()), cells, this.#rule()).length;
-    if (pairs === 0) return say(language, this.#shufflesLeft() === 0 ? "lost" : "stuck");
-    return say(language, "left", { tiles: tilesLeft(cells), pairs, pairsWord: say(language, pairs === 1 ? "pair" : "pairs") });
+  #status(language: TileLanguage): string {
+    const run = this.#run;
+    if (run === null) return "";
+    if (run.over === "won") return run.because === "cleared" ? say(language, "cleared", { seconds: this.#seconds ?? this.#elapsed() }) : say(language, "won", { score: run.score });
+    if (run.over === "lost") return say(language, run.because === "time" ? "timeUp" : "lost");
+    const pairs = runPairs(run).length;
+    if (pairs === 0) return say(language, run.rules.shuffles !== null && run.shuffles >= run.rules.shuffles ? "lost" : "stuck");
+    return say(language, "left", { tiles: tilesLeft(run.cells), pairs, pairsWord: say(language, pairs === 1 ? "pair" : "pairs") });
   }
 
-  #shufflesLeft(): number | null {
-    const allowed = allowanceOf(this.getAttribute("shuffles"));
-    return allowed === null ? null : Math.max(0, allowed - this.#shufflesUsed());
-  }
-
-  /** What the drawn skeleton was made for: when it changes the whole of it is made again, otherwise only its parts are brought up to date. */
+  /** What the elements keeps of the skeleton: when it changes the whole of it is made again, otherwise only its parts are brought up to date. */
   #built = "";
 
   #draw(): void {
     const root = this.#root;
-    if (root === null || this.#played === null) return;
+    const run = this.#run;
+    if (root === null || run === null) return;
     wearCloth(this);
     const language = languageOf(this);
     const { design, ready } = designNamed(this.getAttribute("design"));
     if (ready !== null) void ready.then(() => this.#draw());
     const layout = this.#layout();
-    const cells = this.cells;
+    const cells = run.cells;
     const geometry = geometryOf(layout);
     const rule = this.#rule();
-    const pairs = freePairs(geometry, cells, rule).length;
+    const pairs = runPairs(run).length;
     const left = tilesLeft(cells);
-    const playable = !isOn(this, "static") && left > 0;
+    const playable = !isOn(this, "static") && run.over === null && left > 0;
     const redFives = isOn(this, "red-fives");
     const reds = redFives && design?.red !== undefined;
     const controls = isOn(this, "controls");
-    const status = controls || isOn(this, "timer");
+    const status = controls || isOn(this, "timer") || run.rules.challenge !== null;
     // The skeleton: the faces' symbols (a design's are big, so they are made once), the board and the controls.
     const key = [design?.name ?? "", reds, controls, status, language].join("|");
     if (key !== this.#built) {
       this.#built = key;
       const symbols = design === null ? "" : tileFaceSymbols("jjl", { design, red: reds });
       const buttons = controls ? `<div class="controls" part="controls">${["new", "undo", "hint", "shuffle"].map((action) => `<button type="button" part="button" data-action="${action}"></button>`).join("")}</div>` : "";
-      const lines = status ? `<div class="status" part="status" aria-live="polite"><span class="line"></span><span class="clock" part="clock"></span><span class="note"></span></div>` : "";
+      const lines = status ? `<div class="status" part="status" aria-live="polite"><span class="goal"></span><span class="clock" part="clock"></span><span class="line"></span><span class="note"></span></div>` : "";
       root.innerHTML = `<style>${LAYOUT_STYLE}</style><svg class="defs" width="0" height="0" aria-hidden="true">${symbols}</svg><div class="board" part="board"></div>${lines}${buttons}`;
     }
     const matching = this.#chosen !== null && isOn(this, "show-matching") ? [...cells].flatMap((code, at) => (at !== this.#chosen && code !== "." && canTake(geometry, cells, rule, this.#chosen as number, at) ? [at] : [])) : [];
@@ -447,10 +504,9 @@ export class JarajaraLayout extends ElementBase {
     const board = root.querySelector(".board") as HTMLElement;
     board.dataset.view = lined ? "lined" : "stack";
     board.dataset.playable = String(playable);
-    board.innerHTML = design === null ? "" : lined ? this.#lined(layout, cells, design, reds, language) : (layoutSvg(this.#size, cells, { chosen: this.#chosen, hinted: this.#hinted, matching, showFree: isOn(this, "show-free"), design, redFives, prefix: "jjl", symbols: false, redFrom: this.#epoch() }) ?? "");
-    const allowedHints = allowanceOf(this.getAttribute("hints"));
-    const hintsLeft = allowedHints === null ? null : Math.max(0, allowedHints - this.#hintsUsed);
-    const shufflesLeft = this.#shufflesLeft();
+    board.innerHTML = design === null ? "" : lined ? this.#lined(layout, cells, design, reds, language) : (layoutSvg(this.#size, cells, { chosen: this.#chosen, hinted: this.#hinted, matching, marked: runMarked(run), showFree: isOn(this, "show-free"), hideBlocked: run.rules.hideBlocked && run.over === null, design, redFives, prefix: "jjl", symbols: false, redFrom: this.#epoch() }) ?? "");
+    const hintsLeft = run.rules.hints === null ? null : Math.max(0, run.rules.hints - run.hintsUsed);
+    const shufflesLeft = run.rules.shuffles === null ? null : Math.max(0, run.rules.shuffles - run.shuffles);
     const set = (selector: string, text: string) => {
       const found = root.querySelector(selector);
       if (found !== null) found.textContent = text;
@@ -463,11 +519,12 @@ export class JarajaraLayout extends ElementBase {
         found.disabled = disabled;
       };
       button("new", say(language, "newDeal"), false);
-      button("undo", say(language, "undo"), isOn(this, "static") || this.#moves.length === 0 || !this.#undoAllowed());
+      button("undo", say(language, "undo"), isOn(this, "static") || run.history.length === 0 || !run.rules.undo || (run.over === "lost" && run.because === "time"));
       button("hint", `${say(language, "hint")}${hintsLeft === null ? "" : ` (${hintsLeft})`}`, !playable || pairs === 0 || hintsLeft === 0);
       button("shuffle", `${say(language, "shuffle")}${shufflesLeft === null ? "" : ` (${shufflesLeft})`}`, !playable || pairs > 0 || shufflesLeft === 0);
     }
     if (status) {
+      set(".goal", this.#goalLine(language));
       set(".line", this.#status(language));
       set(".clock", this.#clockText());
       set(".note", this.#note);
@@ -477,7 +534,7 @@ export class JarajaraLayout extends ElementBase {
   }
 
   /** The tiles lined up in the order the sort keys give, each with where its slot lies. */
-  #lined(layout: MahjongLayout, cells: string, design: TileDesign, reds: boolean, language: "en" | "ja"): string {
+  #lined(layout: MahjongLayout, cells: string, design: TileDesign, reds: boolean, language: TileLanguage): string {
     const order = sortSlots(layout, readSlotKeys(this.getAttribute("sort")).length === 0 ? ["z", "y", "x"] : readSlotKeys(this.getAttribute("sort")));
     const redSet = reds ? redFiveIndexes(this.#epoch()) : new Set<number>();
     const geometry = geometryOf(layout);
@@ -505,7 +562,8 @@ const LAYOUT_STYLE = `
 .lined .tile { display: block; width: 44px; aspect-ratio: 32 / 42; }
 .lined .tile svg { display: block; width: 100%; height: 100%; }
 .lined .gone { display: block; width: 100%; height: 100%; border: 1px dashed currentColor; border-radius: 4px; opacity: .35; box-sizing: border-box; }
-.status { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; margin-top: 10px; min-height: 4.2em; align-content: start; font-weight: 600; }
+.status { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; margin-top: 10px; min-height: 5.6em; align-content: start; font-weight: 600; }
+.status .goal { grid-column: 1; grid-row: 1; min-height: 1.4em; opacity: .9; }
 .status .line { text-align: center; grid-column: 1 / -1; min-height: 1.4em; }
 .status .clock { grid-column: 2; grid-row: 1; font-variant-numeric: tabular-nums; }
 .status .note { grid-column: 1 / -1; text-align: center; min-height: 1.4em; color: var(--jarajara-note, #b5452c); }
