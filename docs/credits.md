@@ -21,7 +21,7 @@ its back (`Back.svg`) and the red fives (`Man5-Dora.svg`, `Pin5-Dora.svg`, `Sou5
 `Black/`. Not used: `Blank.svg` and the PNG exports. The set has no flowers or seasons; those are Jarajara's own within the
 designs. **What was done to them**, by `scripts/designs-riichi.mjs`: each 300 by 400 drawing was made smaller with svgo
 (multipass, one decimal place, its size and Inkscape's own markings taken off, its ids given a prefix of its own so any
-number may share a page) and written into `src/designs/riichi.ts` and `riichi-black.ts` as text. About 118 kB of drawings
+number may share a page) and written into `src/designs/riichi.ts` and `riichi-black.ts` as text. Over a hundred kilobytes of drawings
 each, fetched by an element only when a page asks for the design.
 
 ## The tile sounds

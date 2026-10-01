@@ -1,7 +1,7 @@
 <h1 align="center">Jarajara <sub>ジャラジャラ</sub></h1>
 
 <p align="center"><strong>Mahjong tiles for JavaScript and TypeScript.</strong><br>
-The 144-tile set in 42 faces, drawn as SVG, with backs and cloths; custom elements for one tile, a rack, a layout to play, a table and viewers of the set; the stacked layouts tile games are played on; which tiles are free, which match, dealing and shuffling; a game written as text; and Awase, the matching solitaire, alone or at a table of two to four with a computer player. Seeded, and every deal can be cleared. No dependencies.</p>
+The 144-tile set in 42 faces, drawn as SVG, with backs and cloths; custom elements for one tile, a rack, a layout to play, a table and viewers of the set; the stacked layouts tile games are played on; which tiles are free, which match, dealing and shuffling; a game written as text; Awase, the matching solitaire, alone or at a table of two to four with a computer player; and a command line. Seeded, and every deal can be cleared. No dependencies.</p>
 
 <p align="center">
   <a href="https://github.com/johnmorrisdotca/jarajara/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/johnmorrisdotca/jarajara/actions/workflows/ci.yml/badge.svg"></a>
@@ -48,6 +48,19 @@ isCleared(cells);                                  // not yet
 checkAwase(15, deal.givens, deal.solution);        // { ok: true }: the deal's own answer clears it
 ```
 
+And in a page, a game to play, with nothing else to set up:
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@johnmorrisdotca/jarajara@1/dist/element-define.js"></script>
+<jarajara-layout size="15" level="medium" seed="12345" controls timer cloth="green"></jarajara-layout>
+```
+
+Or from a terminal, with no code at all:
+
+```sh
+npx @johnmorrisdotca/jarajara deal --layout turtle --seed 12345
+```
+
 ## Who it is for
 
 - **Game sites and apps** that want tiles with the rules already right: a
@@ -55,6 +68,124 @@ checkAwase(15, deal.givens, deal.solution);        // { ok: true }: the deal's o
   by playing it, and the faces drawn as text that goes into any page.
 - **Anyone making a tile game of their own**, who wants the set, the free
   rule, the layouts and the drawing, and to write only the game.
+- **Pages that just want the tiles**: a tile, a rack to sort and mix, a table
+  of the whole set or a tile looked up by name, as one tag each, in English or
+  Japanese.
+- **People at a terminal**, who want to deal, check or look something up without
+  writing code: [the command line](#the-command-line).
+
+## Features
+
+- **The whole set.** 144 tiles in 42 faces, each written as one letter, so a layout is a string; names in English and Japanese; hands written in the notation riichi players use (`123m456p`).
+- **Eleven stacked layouts**, from the Turtle to a Dragon, each with the geometry of what lies on and beside every slot worked out once.
+- **Awase, always clearable.** A deal is laid in reverse from a seed, so every deal can be cleared, at three levels. A finished game is written as text and checked by playing it, with no search, so a server can trust it.
+- **Options, seven challenges and the day's game.** Hints, shuffles and undo given, limited or taken away; a clock and a goal laid over a deal; and `dailyAwase(date)`, the same game for everybody from the date alone.
+- **Awase at a table** of two to four, with a computer in any seat.
+- **Solid tiles drawn as SVG text**, in two designs (Jarajara's own, and FluffyStuff's riichi tiles), with five backs and the family's five cloths; a layout seen from the other side, and Find, which lights every tile that matches the one you point at.
+- **Seven custom elements**: `<jarajara-tile>`, `<jarajara-rack>`, `<jarajara-layout>`, `<jarajara-table>`, `<jarajara-viewer>`, `<jarajara-group>` and `<jarajara-set>`, with no framework needed and recipes for React, Vue, Svelte and Angular.
+- **Sounds, off until asked**: tile clacks, fetched the first time one plays.
+- **A command line** that deals, checks a solve, gives the day's game, looks tiles up and plays computers at a table.
+- **English and Japanese**, in the tags, the command line and the demo.
+- **No dependencies**, and every function is pure: it returns new values and never changes what it was given.
+
+## Use it in your project
+
+Jarajara is four things, each usable without the others: **the rules** (the set, the layouts, free tiles, matching, dealing, Awase and the table, as plain functions over strings), **the drawing** (SVG text), **the tags** (custom elements that draw and play them in a page) and **the command line**. The table under [API](#api) says which entry holds which.
+
+### 1. The API alone, on a server
+
+```ts
+import { generateAwase, checkAwase } from "@johnmorrisdotca/jarajara/awase";
+
+const { givens } = generateAwase(15, "medium", 12345);   // send `givens` to the browser; keep the seed and the answer
+checkAwase(15, givens, answerFromThePlayer);              // { ok: true } or { ok: false, reason }, with no search
+```
+
+Importing the main entry, `/awase` or `/table` on a server is safe: they touch no page. So are `/faces` (it makes strings) and `/element` (the classes extend nothing where there is no page).
+
+### 2. One tag, no bundler
+
+```html
+<script type="module" src="https://cdn.jsdelivr.net/npm/@johnmorrisdotca/jarajara@1/dist/element-define.js"></script>
+<jarajara-tile code="east" size="large" flip></jarajara-tile>
+<jarajara-layout id="game" size="15" controls></jarajara-layout>
+<script>
+  document.getElementById("game").addEventListener("jarajara-clear", (event) => console.log(event.detail.moves));
+</script>
+```
+
+### 3. A bundler, and a framework
+
+`import "@johnmorrisdotca/jarajara/element/define"` once, in code that runs in the browser, and the seven tags are tags like any other. They draw inside a shadow root, speak through bubbling DOM events (`jarajara-take`, `jarajara-clear` and the rest, each with a `detail`), and are set by attributes, each read again when it changes.
+
+```jsx
+// React 19
+import { useEffect, useRef } from "react";
+import "@johnmorrisdotca/jarajara/element/define";
+
+export function Game({ seed, onCleared }) {
+  const game = useRef(null);
+  useEffect(() => {
+    const listen = (event) => onCleared(event.detail.moves);
+    game.current?.addEventListener("jarajara-clear", listen);
+    return () => game.current?.removeEventListener("jarajara-clear", listen);
+  }, [onCleared]);
+  return <jarajara-layout ref={game} size="15" level="medium" seed={seed} controls />;
+}
+```
+
+```vue
+<!-- Vue 3: tell the compiler the tags are not Vue components -->
+<script setup>
+import "@johnmorrisdotca/jarajara/element/define";
+defineProps({ seed: Number });
+</script>
+<template>
+  <jarajara-layout size="15" level="medium" :seed="seed" controls @jarajara-clear="(event) => console.log(event.detail.moves)" />
+</template>
+<!-- in vite.config: vue({ template: { compilerOptions: { isCustomElement: (tag) => tag.startsWith("jarajara-") } } }) -->
+```
+
+```svelte
+<!-- Svelte 5 -->
+<script>
+  import "@johnmorrisdotca/jarajara/element/define";
+  let { seed } = $props();
+  let game;
+  $effect(() => {
+    const listen = (event) => console.log(event.detail.moves);
+    game.addEventListener("jarajara-clear", listen);
+    return () => game.removeEventListener("jarajara-clear", listen);
+  });
+</script>
+<jarajara-layout bind:this={game} size="15" level="medium" seed={seed} controls></jarajara-layout>
+```
+
+```ts
+// Angular: a standalone component with CUSTOM_ELEMENTS_SCHEMA
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from "@angular/core";
+import "@johnmorrisdotca/jarajara/element/define";
+
+@Component({
+  selector: "app-game",
+  standalone: true,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  template: `<jarajara-layout size="15" level="medium" seed="12345" controls (jarajara-clear)="cleared($event)"></jarajara-layout>`,
+})
+export class Game {
+  cleared(event: Event) { console.log((event as CustomEvent).detail.moves); }
+}
+```
+
+In Next.js or any server-rendering framework, import the define entry from a client component, so the tags are defined in the browser.
+
+React, Vue and Svelte set a **property** on a custom element that has one of the attribute's name, so `<jarajara-tile flip>` would be `tile.flip = true`. Four names are methods too (`flip` on a tile, `group` and `mark` on a rack, `undo` on a layout) and three are read-only values (`seed`, `cells` and `mirror` on a layout): assigning one sets the attribute, and the method still works, so these all do what they say in every framework. `pnpm test:frameworks` builds a page in each of the four and a plain one from the packed tarball, with a layout, a flippable tile and a listener, opens each in Chromium and WebKit, plays the layout to its end and taps the tile, and `e2e/properties.demo.mjs` holds the assignments.
+
+### What a developer gets
+
+- **Typed results**, with a doc comment on every export. Every function is pure and returns new values.
+- **No dependencies.** ES modules, an entry per concern, and `sideEffects` set so that only the define entry has an effect.
+- **Where it runs.** See [Browser support](#browser-support); on a server, Node 22 or later.
 
 ## The tiles
 
@@ -251,7 +382,7 @@ Or `import "@johnmorrisdotca/jarajara/element/define"` in a bundle; `@johnmorris
 
 | Element | What it is |
 | --- | --- |
-| `<jarajara-tile code="F">` | One tile, face up or down, any design and back, turned by a tap with `flip` (and `sound`); `size` `small` / `medium` / `large` or a `width`; `marked`; `spin()` |
+| `<jarajara-tile code="F">` | One tile, face up or down, any design and back, turned by a tap with `flip` (and `sound`); `marked`; `spin()` |
 | `<jarajara-rack tiles="…">` | Tiles lined up in front of you: `hide()`, `show()`, `toggle(tiles?)`, `sort(order?)`, `group("suit" \| "kind")`, `ungroup()`, `unsort()`, `mixUp(seed?)`, `take(tile)`, `add(tile, at?)`, `replace()`, `lift()`, `lower()`, `mark()`, `unmark()`, `spin()`; a tap raises a tile with `pick` |
 | `<jarajara-layout size="15">` | A game of Awase to play on a stacked layout: free tiles, pick two to take, hint, shuffle, undo, a timer, limits on hints and shuffles, the seven challenges, matching tiles ringed, and the same layout lined up sorted by x, y and z |
 | `<jarajara-table players="3">` | Awase at a table of two to four, with computers in the seats that are not people's |
@@ -259,11 +390,105 @@ Or `import "@johnmorrisdotca/jarajara/element/define"` in a bundle; `@johnmorris
 | `<jarajara-group group="winds">` | A group of the set shown: a suit, `honours`, `bonus`, `terminals`, `simples`, … |
 | `<jarajara-set>` | The whole set as an inventory: 42 faces and their counts, or all 144 tiles; given `tiles`, it counts what a hand holds |
 
-Tiles in a rack are named by their place as written (`0`, `3`) when a method wants one tile, or by a letter or name (`"F"`, `"east"`) for every tile of that face. A rack keeps the room of its widest arrangement, so grouping, sorting and closing the groups never change its size, and `capacity` keeps it the size of that many tiles however many it holds. Every change is a bubbling event: `jarajara-rack`, `jarajara-pick`, `jarajara-take`, `jarajara-flip`, and for a layout `jarajara-take`, `jarajara-shuffle`, `jarajara-stuck`, `jarajara-clear`, `jarajara-hint`, `jarajara-undo`, `jarajara-deal`.
+Every attribute below is read again when it changes. Where a table says "as on `<jarajara-tile>`", it means that row's meaning.
 
-`<jarajara-layout>` attributes: `size`, `level` (`easy`, `medium`, `hard`), `seed`, `cells` (a position of your own), `show-free`, `show-matching`, `find` (pointing at a tile with a mouse, or choosing one, lights every tile that matches it: a solid ring for one that could be taken with it now, a dashed ring for one that is held), `hints` and `shuffles` (a number, `off` or `unlimited`), `undo="off"`, `challenge`, `timer`, `controls` (with `flippable`, a Flip button too), `mirror` (`none`, `horizontal`, `vertical`, `both`: the board from the other side, a view only; `flipView()` goes to the next), `box` (`landscape`, `portrait`, `square` or `3/2`: one steady box whatever the layout, the layout scaled to fit and centred, and `--jarajara-box` for a page to set it), `view="lined"` with `sort="z y x"` (any of `x`, `y`, `z`, a `-` before one for the other way round), `static`, `cloth`, `design`, `lang`. `restore(moves)` plays a kept game back on the deal. A hint with a tile chosen lights that tile's match first, and says so (`jarajara-hint`'s `found`) when it has none.
+#### `<jarajara-tile>`
 
-A board on a `cloth` sits in a frame inside the felt with one padding all round (`--jarajara-pad`). A tile turns as a block tipping over on its edge, its thickness showing, and sets down on its back; `rack.deal(tiles)` deals a new hand. Every action of a tile, a rack and a board makes its sound from the element's own method when the element has `sound` (turning, sorting, grouping, mixing, raising, lowering, marking, spinning, a hint, a pair, an undo, a shuffle, a win), never more than `MOST_SOUNDING` clicks at once; `setPageSounds` gives the page's own player, or a test's.
+| Attribute | What it does |
+| --- | --- |
+| `code` | the tile: its letter (`F`), or any name it goes by (`east`, `red dragon`, `3p`, `三筒`) |
+| `design` | `jarajara` unless said; the riichi sets are named in `TILE_DESIGNS` and fetched the first time they are asked for |
+| `back` | `jade` unless said, `bamboo`, `blue`, `red` or `ink`, or a design's own back |
+| `back-colour`, `mark` | recolour the back, or put a few letters across it, as `tileBackSvg` takes them |
+| `face-down` | shows the back; the face is not in the page while it is down |
+| `flip` | a tap, Enter or Space turns it over; a device that asks for less motion skips the turn |
+| `marked` | a dot on its corner, seen face up and face down, to follow it as it moves |
+| `red` | draws the red five of a design that has one, for a five |
+| `size`, `width` | `small`, `medium` unless said, or `large`; or `width` in pixels; or the page's `--jarajara-tile-width` |
+| `sound` | the turn makes a sound |
+| `lang` | `ja` for Japanese names; the page's language unless said |
+
+Each turn is a `jarajara-flip` event that bubbles, with `{ code, faceDown }`. `flip()` turns it, `spin(options?)` spins it where it lies, slowing to a stop as it was; `faceDown` and `tile` are read as properties.
+
+#### `<jarajara-rack>`
+
+| Attribute | What it does |
+| --- | --- |
+| `tiles` | the tiles, as codes run together (`abcF`), as names (`east red-dragon`) or as hand notation (`123m456p789s11z`), in the order they were dealt |
+| `face-down` | every tile shows its back |
+| `turned` | the places (from 0, as dealt) of tiles that show the other side from the rest |
+| `lifted` | the places of tiles picked up, raised above the row |
+| `marked` | the places of tiles that carry a mark |
+| `order` | `suit`, `rank`, `kind` or `code` puts the tiles in that order; left out they lie as dealt |
+| `group` | `suit` or `kind` leaves a gap between groups of the sorted tiles |
+| `pick` | a tap, Enter or Space picks a tile up or puts it down, and the arrow keys move between tiles; `pick="one"` lets only one be up at a time |
+| `capacity` | how many tiles' room the rack keeps whatever it holds, so taking tiles out leaves it the size it was |
+| `red-fives` | draws the first five of each suit red, in a design that has them |
+| `sound` | the changes make their sounds: tiles turned, set down and picked up, shuffled |
+| `design`, `back`, `back-colour`, `mark`, `size`, `width`, `lang` | as on `<jarajara-tile>` |
+| `cloth` | lays the rack on a cloth: `green`, `blue`, `red`, `black` or `wood` |
+
+A rack keeps the room of its widest arrangement, so grouping, sorting and closing the groups never change its size. The methods answer a promise that settles when the tiles have stopped moving: `hide(options?)`, `show(options?)` and `toggle(tiles?, options?)`, `sort(order?)`, `group(by?)`, `ungroup()`, `unsort()` and `mixUp(seed?)`, `take(tile)`, `add(tile, at?)` and `replace(tile, next)`, `lift(tiles?)`, `lower(tiles?)` and `liftToggle(tiles)`, `mark(tiles)`, `unmark(tiles?)` and `spin(tiles?, options?)`, and `deal(tiles)` for a new hand. A tile is named by its place as written (`0`, `3`) when a method wants one tile, or by a letter or name (`"F"`, `"east"`) for every tile of that face. Every change is a `jarajara-rack` event that bubbles, a tap that picks is `jarajara-pick` (`{ index, code, lifted }`), and a tile taken out is `jarajara-take`.
+
+#### `<jarajara-layout>`
+
+| Attribute | What it does |
+| --- | --- |
+| `size` | the layout's width in tiles, which names it: 15, the Turtle, unless said |
+| `level` | `easy`, `medium` unless said, or `hard`: how forgiving the deal is |
+| `seed` | the deal's seed: the same seed deals the same tiles (a fresh one unless said) |
+| `cells` | a position of your own to play from, one letter a slot and `.` for a slot left empty, instead of a deal |
+| `show-free` | washes the blocked tiles darker so the free ones stand out |
+| `show-matching` | rings the tiles that match the one chosen |
+| `find` | pointing at a tile (a mouse) or choosing one lights every tile that matches it: a solid ring for one that could be taken with it now, a dashed ring for one that is held |
+| `hints`, `shuffles` | how many a game may use: a number, `off` or `unlimited` |
+| `undo` | `off` takes undo away |
+| `challenge` | one of the seven: `gold`, `spark`, `rush`, `fortune`, `sand`, `purge` or `blackout`; the clock and the goal are worked out from the layout |
+| `timer` | shows the clock: the time left in a challenge that has one, otherwise the time taken |
+| `controls` | draws New deal, Undo, Hint and Shuffle buttons and the line that says how the game stands |
+| `flippable` | with `controls`, a Flip button that turns the board's view through the four |
+| `mirror` | `none` unless said, `horizontal`, `vertical` or `both`: the board seen from the other side, a view only (`flipView()` goes to the next) |
+| `view`, `sort` | `view="lined"` draws the tiles lined up in a row, in the order `sort` gives: any of `x`, `y` and `z`, a `-` before one for the other way round (`"z y x"` unless said) |
+| `box` | keeps the board in one steady box whatever the layout, scaled to fit: `landscape`, `portrait`, `square` or a ratio such as `3/2` |
+| `static` | the tiles may be looked at but not played |
+| `sound` | a tile chosen, a hint, a pair, an undo, a shuffle and a cleared layout make their sounds |
+| `design`, `red-fives`, `lang`, `cloth` | as on the other elements |
+
+Methods: `newDeal(seed?)`, `take(a, b)`, `hint()`, `shuffle()`, `undo()`, `restore(moves)` (plays a kept game back on the deal), `sortBy(keys)` and `flipView()`. Properties: `seed`, `cells`, `moves` (as `encodeMoves` writes them), `tilesLeft`, `score` and `run`, the game as an `AwaseRun`. Events, all bubbling: `jarajara-take` (`{ pair, codes, points, score, tilesLeft }`), `jarajara-shuffle`, `jarajara-stuck`, `jarajara-clear` (`{ moves, seconds, score, because }`, a game won), `jarajara-lost` (`{ because }`), `jarajara-hint` (`{ pair, found }`: `found` says whether the pair is the chosen tile's match, another pair, or any pair), `jarajara-undo` and `jarajara-deal` (`{ size, level, seed }`, which a page that keeps the game listens for). A board on a `cloth` sits in a frame inside the felt with one padding all round (`--jarajara-pad`); a hint with a tile chosen lights that tile's match first.
+
+#### `<jarajara-table>`
+
+| Attribute | What it does |
+| --- | --- |
+| `players` | how many sit at the table, two to four (2 unless said) |
+| `people` | how many of the seats are people's, the first ones; the rest are computers (1 unless said) |
+| `names` | the people's names, separated by commas; a seat with none is called by its wind |
+| `size`, `level`, `seed` | as on `<jarajara-layout>`; the Castle (10) unless said |
+| `delay` | how long a computer thinks before it takes its pair, in milliseconds (700 unless said) |
+| `show-free` | washes the blocked tiles darker |
+| `mirror`, `box` | as on `<jarajara-layout>` |
+| `sound` | each pair taken, and a game won, make their sounds |
+| `design`, `lang`, `cloth` | as on the other elements |
+
+`deal(seed?)` deals again, and the `table` property holds the game as `encodeTable` keeps it. Each pair taken is a `jarajara-table` event that bubbles, with `{ seat, pair, codes, points, scores, over, winners }`.
+
+#### `<jarajara-viewer>`, `<jarajara-group>` and `<jarajara-set>`
+
+| Attribute | On | What it does |
+| --- | --- | --- |
+| `query` | viewer | what to look up: a code, any name `findFace` knows, a group, or a list of tiles |
+| `editable` | viewer | adds a box to type a query into; `lookup(text)` looks one up |
+| `group` | group | a group `TILE_GROUPS` names: `winds` unless said |
+| `tiles` | group, set | tiles of your own, as codes, names or hand notation, in place of `group`; on a set, what to count |
+| `mode` | set | `faces` unless said draws each face once with its count; `tiles` draws every tile of the set |
+| `captions`, `copies`, `heading` | group (`captions` on a set too) | `off` takes the names, the counts or the group's name away |
+| `face-down`, `flip` | group | draws the tiles face down, to be turned over by a tap, to learn them |
+| `red-fives` | group, set | draws the first five of each suit red, in a design that has them |
+| `design`, `back`, `back-colour`, `mark`, `size`, `width`, `lang`, `cloth` | all three | as on `<jarajara-tile>`; a viewer's `width` is the big tile's, large unless said |
+
+A tap on a tile is a `jarajara-view` event, `{ code }` (and `query` on a viewer).
+
+Tiles in a rack, a group and a set are `<jarajara-tile>` elements, so a page can style or find them. A tile turns as a block tipping over on its edge, its thickness showing, and sets down on its back. Every action of a tile, a rack and a board makes its sound from the element's own method when the element has `sound` (turning, sorting, grouping, mixing, raising, lowering, marking, spinning, a hint, a pair, an undo, a shuffle, a win), never more than `MOST_SOUNDING` clicks at once; `setPageSounds` gives the page's own player, or a test's.
 
 A table, a rack, a layout, a group, a set and a viewer all take `cloth`: `green`, `blue`, `red`, `black` or `wood`, the family's five, which a page can follow from the demo header's `family-cloth` event.
 
@@ -307,7 +532,7 @@ decoded, a short click made in the browser stands in, and a platform with no aud
 element takes `sound` and is silent without it: every action of a tile and a rack (turned, spun, sorted, grouped, mixed, raised,
 lowered, marked, taken out, put in, dealt), and of a board a tile chosen, a hint, a pair taken, an undo, a shuffle and a cleared layout, a
 pair at a table. The recordings are `@johnmorrisdotca/jarajara/sounds`,
-about 50 kB as text.
+tens of kilobytes as text.
 
 ## Looking tiles up
 
@@ -336,6 +561,83 @@ mixTiles(hand, 42);                  // another order, the same one for the same
 sortSlots(layout, ["-z", "x", "y"]); // a layout's slots from the top of the stacks, then across
 ```
 
+## The command line
+
+```sh
+npx @johnmorrisdotca/jarajara --help       # or: npm install -g @johnmorrisdotca/jarajara, then `jarajara`
+```
+
+For a terminal, a script or a teacher's handout: the same deals, checks and tiles as the functions, with nothing to write. Every deal comes from its seed, so the same command prints the same tiles on every machine.
+
+```text
+$ jarajara layouts
+ 4  tiny         8 tiles, 3 layers
+ 8  torii       64 tiles, 3 layers
+ 9  fuji       100 tiles, 5 layers
+10  castle     120 tiles, 5 layers
+11  pagoda      94 tiles, 4 layers
+12  fortress   116 tiles, 3 layers
+13  pyramid    142 tiles, 4 layers
+14  bridge      84 tiles, 4 layers
+15  turtle     144 tiles, 5 layers
+16  butterfly  112 tiles, 4 layers
+17  dragon     142 tiles, 4 layers
+$ jarajara deal --layout 4 --seed 7
+Tiny, 8 tiles, medium, seed 7, usual rule
+
+Layer 1
+s u F F
+
+Layer 2
+ m s u
+
+Layer 3
+   m
+
+Tiles: suFFmsum
+One way to clear it: 0704000506010302
+$ jarajara check 0704000506010302 --layout 4 --seed 7
+Cleared: 4 pairs and 0 shuffles take every tile.
+$ jarajara daily --date 2026-10-01
+2026-10-01: Pyramid, hard, seed 473803850, challenge gold
+jarajara deal --layout 13 --level hard --seed 473803850
+$ jarajara tile three circles
+l  3 of circles  三筒  Circles 3, 4 in the set, written 3p
+$ jarajara play --players 3 --layout 8 --seed 5
+Awase at a table of 3: Torii, medium, seed 5. 32 pairs taken, 0 shuffles.
+Computer 1: 20 points, 11 pairs
+Computer 2: 17 points, 11 pairs
+Computer 3: 18 points, 10 pairs
+Winner: Computer 1.
+```
+
+A deal is drawn one layer at a time, bottom first. A tile is a face letter (see [The tiles](#the-tiles)) where its top left corner is, two characters across and two lines down, so a tile set half a tile over sits half a tile over. `Tiles:` is the deal as `generateAwase` makes it and `One way to clear it:` its answer, which is what `check` takes.
+
+| Command | What it does |
+| --- | --- |
+| `layouts` | the layouts: width, name, tiles and layers |
+| `deal` | makes a deal of Awase and prints it layer by layer, with its tiles and one way to clear it |
+| `daily` | the day's game, `dailyAwase(date)`, with the `deal` command that makes it |
+| `check <moves>` | plays a solve on a deal (`--seed` and `--level`, or `--givens`) and says whether it clears it; `--stdin` reads the moves from standard input |
+| `play` | computers play Awase at a table to the end, with their points, and the game as `encodeTable` keeps it under `--json` |
+| `tile <name>` | looks a tile up by a name in English or Japanese, a code, hand notation, or the name of a group of tiles |
+
+| Option | What it does |
+| --- | --- |
+| `-l`, `--layout` | a layout by its width (`15`) or its name (`turtle`, `亀`); the Turtle if left out |
+| `--level` | `easy`, `medium` or `hard`; `medium` if left out |
+| `-s`, `--seed` | a whole number from 1 to 2,147,483,647; drawn, and said on standard error, if left out |
+| `--rule` | `group` or `same`: how flowers and seasons match, for a seed the command draws |
+| `-p`, `--players` | at the table, 2 to 4; 2 if left out |
+| `--date` | the day, as `2026-10-01`; today, in UTC, if left out |
+| `--givens` | `check`: a deal written as text, instead of a seed |
+| `--stdin` | `check`: read the moves from standard input |
+| `-j`, `--json` | print JSON, for a script |
+| `--lang` | `en` or `ja`; left out, the environment's (`LC_ALL`, `LC_MESSAGES`, `LANG`), then the system's |
+| `-h`, `--help`, `-v`, `--version` | the usage, and the version |
+
+The exit code is 0 when all went well, 1 when what was asked for could not be done (a solve that does not clear its deal, a tile with no such name) and 2 when the command itself was wrong. It speaks English and Japanese. The command line is `runCli(args, surroundings)` in `src/cli.ts`, a pure function from arguments to what to print and the code to exit with, which is how its tests run it; `bin/jarajara.mjs` hands it the real process, and `pnpm test:cli` runs the built command as a child process on whatever system it is on.
+
 ## API
 
 The [API reference](https://johnmorrisdotca.github.io/jarajara/api.html) lists every export of every entry point with its signature and its doc comment. It is made from the source by `pnpm site`, so it cannot fall behind the code.
@@ -346,14 +648,95 @@ The [API reference](https://johnmorrisdotca.github.io/jarajara/api.html) lists e
 | `@johnmorrisdotca/jarajara/awase` | `generateAwase(size, level, seed)`, `checkAwase(size, givens, answer)`, `freshAwaseSeed(rule)`, `bonusRuleOfSeed`, `clearRate`; options and challenges: `AWASE_CHALLENGES`, `awaseRules`, `startRun`, `runTake`, `runShuffle`, `runUndo`, `runHint(run, chosen?)`, `runStart`, `runTick`, `runRemaining`, `runPairs`, `runMarked`, `readRun`, `dailyAwase` |
 | `@johnmorrisdotca/jarajara/table` | `startTable`, `readTable`, `tablePairs`, `playAtTable`, `takeAtTable`, `undoAtTable`, `computerPair`, `encodeTable`, `decodeTable`, `seatName`, `SEAT_WINDS` |
 | `@johnmorrisdotca/jarajara/faces` | `tileSvg`, `tileFaceSvg`, `tileFaceSymbols`, `faceWords`, `layoutSvg`, `layoutBox`, `layoutFrame`, `tileAt`, `TILE_BOX`, the block (`blockColours`, `blockSvg`, `shadowSvg`, `faceEdgeSvg`, `TILE_DEPTH`, `TILE_MIRRORS`), the backs (`tileBackSvg`, `tileBackFace`, `backBase`, `TILE_BACKS`), designs (`jarajaraDesign`, `loadTileDesign`, `TILE_DESIGNS`, `redFiveIndexes`), cloths (`JARAJARA_CLOTHS`, `CLOTHS`, `isCloth`, `clothVars`), and the colours `TILE_INK`, `TILE_BODY`, `TILE_MARKS` |
-| `@johnmorrisdotca/jarajara/tile-sounds` | `createTileSounds`, `TILE_SOUND_KINDS`, `soundTimes` |
+| `@johnmorrisdotca/jarajara/tile-sounds` | `createTileSounds`, `TILE_SOUND_KINDS`, `MOST_SOUNDS_AT_ONCE`, `soundTimes` |
 | `@johnmorrisdotca/jarajara/sounds` | `TILE_SOUND_DATA`, the recordings as base64 AAC |
-| `@johnmorrisdotca/jarajara/designs/riichi`, `/designs/riichi-black` | `RIICHI`, `RIICHI_BLACK`: the riichi tiles as drawings, about 118 kB each |
-| `@johnmorrisdotca/jarajara/element` | the element classes (`JarajaraTile`, `JarajaraRack`, `JarajaraLayout`, `JarajaraTable`, `JarajaraGroup`, `JarajaraSet`, `JarajaraViewer`), `hintPair`, `setPageSounds`, `MOST_SOUNDING`, `rackPlaces`, `rackWidth`, `ELEMENT_SIZES` |
+| `@johnmorrisdotca/jarajara/designs/riichi` | `RIICHI`: the regular riichi tiles as drawings, over a hundred kilobytes |
+| `@johnmorrisdotca/jarajara/designs/riichi-black` | `RIICHI_BLACK`: the black riichi tiles as drawings, over a hundred kilobytes |
+| `@johnmorrisdotca/jarajara/element` | the element classes (`JarajaraTile`, `JarajaraRack`, `JarajaraLayout`, `JarajaraTable`, `JarajaraGroup`, `JarajaraSet`, `JarajaraViewer`), `hintPair`, `setPageSounds`, `MOST_SOUNDING`, `rackPlaces`, `rackWidth`, `ELEMENT_SIZES`, `STRINGS`, `followLanguage`, `languageOf`, `allowanceOf` |
 | `@johnmorrisdotca/jarajara/element/define` | defines the seven tags on the page, for its effect |
 
 Every function is pure: it returns new values and never changes what it was
 given.
+
+## Theming
+
+Nothing here is branded. The tiles are light objects and their colours are fixed, since a tile looks the same on any table (`TILE_INK`, `TILE_BODY` and `TILE_MARKS` hold them, to read); the table under them is the page's. The tags are themed by custom properties, which pass into their shadow roots, so a page sets only the ones it wants different, on the tag or above it:
+
+| Property | What it styles | Default |
+| --- | --- | --- |
+| `--jarajara-tile-width` | the width of a tile in `<jarajara-tile>` and in the viewers, when no `size` or `width` says | `48px` |
+| `--jarajara-pad` | the padding between a cloth's rim and the board | `14px` |
+| `--jarajara-box` | the board's box, as a ratio, under `box` | the ratio `box` names |
+| `--jarajara-felt` | a cloth's felt | set by `cloth` |
+| `--jarajara-felt-deep` | a cloth's deep edge | set by `cloth` |
+| `--jarajara-felt-ink` | the ink written on a cloth, and its rim | `#f3efe4` |
+| `--jarajara-focus` | the ring round a tile, a rack's tile or a viewer's choice that has the keyboard | `#b5452c` |
+| `--jarajara-marker` | the dot of a marked tile | `#f2b134` |
+| `--jarajara-note` | the board's line of notes, such as "That tile is not free" | `#b5452c` |
+| `--jarajara-flip-ms` | how long a tile takes to turn over | `520ms` |
+
+```css
+jarajara-layout { --jarajara-pad: 8px; --jarajara-note: #7a1f12; }
+jarajara-tile { --jarajara-tile-width: 64px; --jarajara-flip-ms: 300ms; }
+```
+
+A `cloth` is one choice of the three felt properties, which `clothVars(name)` gives as an object for a page that wants the felt without a tag:
+
+| Cloth | Felt | Deep edge | Ink |
+| --- | --- | --- | --- |
+| `green` | `#2f5d4a` | `#1f4135` | `#f3efe4` |
+| `blue` | `#2865a6` | `#1a4677` | `#f3efe4` |
+| `red` | `#a3342e` | `#7a231f` | `#f3efe4` |
+| `black` | `#2f3236` | `#1b1d20` | `#ece8dc` |
+| `wood` | `#e2ba7a` | `#c4954f` | `#2b1d0e` |
+
+The buttons and the viewer's box are drawn light too, with dark text, whatever the page's theme; on a dark page the tags look best on a `cloth`. The demo's own page is the worked example: its green felt and its cloth patches are the family's stylesheet, [`demo/family.css`](./demo/family.css), the same file byte for byte in every sibling's demo. The parts of the tags carry `part` names (`back`, `board`, `button`, `clock`, `controls`, `face`, `frame`, `marker`, `rack`, `seats`, `status` and `tile`) for anything a property cannot reach.
+
+## Limits
+
+All of these are held by tests, and the ones with a name are exported.
+
+| Limit | Value | Where |
+| --- | --- | --- |
+| The set | 144 tiles in 42 faces | `MAHJONG_FACES`, `setInventory` |
+| Layouts | eleven, 8 to 144 tiles, widths 4 and 8 to 17 | `ALL_LAYOUTS`, `layoutFor` |
+| Levels | `easy`, `medium`, `hard` | `generateAwase` |
+| A seed | a whole number from 1 to 2,147,483,647 | `SEED_MOST`, `freshAwaseSeed` |
+| Seeds for the identical rule | 1,500,000,000 to 1,599,999,999 | `AWASE_SAME_BLOCK`, `bonusRuleOfSeed` |
+| A table | 2 to 4 players, a name up to 20 characters | `AWASE_TABLE` |
+| Challenges | seven | `AWASE_CHALLENGES` |
+| A solve | each pair is its two slots in four base-36 characters, a shuffle is `*` | `encodeMoves`, `decodeMoves` |
+| What a check does | plays the moves once: a few thousand steps at most, no search | `checkAwase` |
+| Clicks at once | 12 from one element, and 8 from one call of the sound player | `MOST_SOUNDING`, `MOST_SOUNDS_AT_ONCE` |
+| A tile's width | at most 600 pixels, from `width` | `<jarajara-tile>`, the viewers |
+| The riichi designs | over a hundred kilobytes of drawings each, fetched when first asked for | `/designs/riichi`, `/designs/riichi-black` |
+| The recordings | tens of kilobytes as text, fetched when the first sound plays | `/sounds` |
+
+A level is chosen by laying five deals from the seed and playing each out at random, so making a deal is real work, and a server that only checks should never make one: `checkAwase` plays the moves it is given and nothing more.
+
+## Browser support
+
+The tags need custom elements, shadow DOM, container queries, `:has()` and `color-mix()`: Chrome and Edge 111, Safari 16.2 and Firefox 121, all of which are from 2023 on. The tiles' thickness is drawn with CSS 3D transforms, and sounds use the Web Audio API, which a browser without it replaces with silence. These are read off the features the code uses, not a tested list: the demo is played in a real Chromium at a phone's width (with touch) and a desk's, and in WebKit, Safari's engine, at a phone's width. Firefox is not in that run.
+
+The package itself, the drawing (which is SVG text) and the command line need no DOM: they run in Node 22 or later, which CI tests on Linux, macOS and Windows, on 22 and 24. On a server the main entry, `/awase`, `/table`, `/faces` and `/element` are safe to import.
+
+## Accessibility
+
+Every tile has a name a screen reader says, in English or Japanese (`aria-label`, and "blocked" in a layout for a tile that cannot be taken now), and the board's line of how it stands is a polite live region. A flippable tile and a rack's tiles are keyboard controls: Tab to one, Enter or Space to turn it or pick it up, and the arrow keys to move along a rack. A tile turning, a rack rearranging, a spin and a pair lifting off are all skipped under `prefers-reduced-motion: reduce`. A layout's tiles are played by pointer: they are not yet reachable by keyboard (see [Roadmap](#roadmap)).
+
+## Languages
+
+English and Japanese. A tag speaks its own `lang`, or the nearest one above it, or the page's, and follows the page's language when it changes. The words of the tags are `STRINGS` (in `@johnmorrisdotca/jarajara/element`), the tiles' names are `faceWords` and `faceWordsJa` (`tileName(code, language)`), and the command line has its own words in `src/cliWords.ts`. The demo has a chooser of its own and takes the browser's language on a first visit. **Japanese: included; not yet reviewed by a native reader. Corrections welcome.** Every string of the tags and the command line is listed beside its English in [docs/strings-ja.md](./docs/strings-ja.md), made from the source by `pnpm docs:make` and held by a test, and a wrong one is a *Fix a translation* issue away: [open one](https://github.com/johnmorrisdotca/jarajara/issues/new?template=fix-a-translation.md).
+
+## Roadmap
+
+Not here yet, and each welcome as an [issue](https://github.com/johnmorrisdotca/jarajara/issues):
+
+- Playing a layout by keyboard: moving between the free tiles and choosing one.
+- A board turned a quarter, and free rotation. `docs/LOOK.md` says what they would take.
+- More layouts: [suggest one](https://github.com/johnmorrisdotca/jarajara/issues/new?template=suggest-a-layout.md).
+
+Left out on purpose: any account, ranking or storage. A page keeps its own games: `jarajara-take` and `jarajara-deal` hand over what is needed, `moves` is the game as text and `restore(moves)` plays it back. The first five layouts, and every deal made on them, never change.
 
 ## Architecture
 
@@ -379,6 +762,8 @@ src/
 ├── awase.ts          a deal of Awase from a seed, at three levels
 ├── check.ts          whether a finished game clears its deal
 ├── challenge.ts      options and challenges: a game as plain data, its clock, goals and the day's game
+├── cli.ts            the command line as a pure function: arguments in, what to print and the exit code out
+├── cliWords.ts       what the command line says in English and Japanese, and the layouts' names in Japanese
 ├── table.ts          the rules at a table: turns, scores, shuffles and the end
 ├── computer.ts       the computer's choice of pair at the table
 ├── faces.ts          each face as SVG text, one tile on its own, and their colours
@@ -412,8 +797,8 @@ src/
 
 Tests sit beside the code they test (`*.test.ts`). `site.fixture.json` holds
 every deal and table game itsutsu.com made before the move, played again on
-every build. `demo/` is the playable page, `e2e/` its browser tests (`pnpm test:demo`), and `scripts/` builds it and its API reference page and checks
-the package as npm packs it.
+every build. `demo/` is the playable page, `e2e/` its browser tests (`pnpm test:demo`), `bin/` is the command line's few lines, and `scripts/` builds the demo
+and its API reference page, checks the package as npm packs it and the command line as a child process, and builds a page in each framework.
 
 ## The name
 
@@ -423,15 +808,67 @@ table before a game. It is said in four beats, *ja-ra-ja-ra*. *Awase* (合わせ
 is "matching", "putting together", from *awaseru* (合わせる), to join two
 things into a pair.
 
+## Where it comes from, and where it is used
+
+Jarajara was built for [Itsutsu](https://itsutsu.com), a site for board games, puzzles, card games and dice games
+played at your own pace. *Itsutsu* (五つ) is Japanese for "five", after five in a row, the game the site began
+with. Its [Mahjong](https://itsutsu.com/games/mahjong) was made there, with its layouts, its deals and its table for
+two to four, and once the tiles and the solitaire stood alone it seemed worth sharing them. The deals and table games
+the site made before the move are made again, exactly, on every build.
+
+### Used by
+
+- [Itsutsu](https://itsutsu.com), for its Mahjong: the tiles, the layouts, the deals, the check and the table.
+
+Using Jarajara in something? Open an *Add my project* issue and we will add you.
+
+### The family
+
+Jarajara is one of sixteen packages, each made for the same site, each MIT, each at
+[github.com/johnmorrisdotca](https://github.com/johnmorrisdotca):
+
+- [Korokoro](https://github.com/johnmorrisdotca/korokoro) (コロコロ, the sound of something small rolling): dice, with notation, exact odds and games.
+- [Kyuubu](https://github.com/johnmorrisdotca/kyuubu) (キューブ, how Japanese says "cube"): a turning cube for the browser, 2×2 to 7×7.
+- [Hitotsu](https://github.com/johnmorrisdotca/hitotsu) (一つ, "one"): a colour-card game, named for the call a player makes with one card left.
+- [Toranpu](https://github.com/johnmorrisdotca/toranpu) (トランプ, the everyday Japanese word for a deck of playing cards): card games as pure rules.
+- [Tane](https://github.com/johnmorrisdotca/tane) (種, a seed, the kind you plant): seeded random numbers and daily seeds.
+- [Narabe](https://github.com/johnmorrisdotca/narabe) (並べ, "line them up"): a rules engine for gomoku, Reversi, Go, checkers and many more.
+- [Tenka](https://github.com/johnmorrisdotca/tenka) (天下, "under heaven"): a world-conquest game for two to six.
+- [Kumimoji](https://github.com/johnmorrisdotca/kumimoji) (組み文字, "letters put together"): a crossword tile race in English and Japanese.
+- [Tsunagi](https://github.com/johnmorrisdotca/tsunagi) (繋ぎ, "joining"): a line-joining puzzle.
+- [Jarajara](https://github.com/johnmorrisdotca/jarajara) (ジャラジャラ, the rattle of mahjong tiles being shuffled): mahjong tiles and a matching solitaire.
+- [Suido](https://github.com/johnmorrisdotca/suido) (水道, "waterworks"): a pipe puzzle.
+- [Domino](https://github.com/johnmorrisdotca/domino) (ドミノ, the Japanese word for dominoes): dominoes and Mexican Train.
+- [Kotoba](https://github.com/johnmorrisdotca/kotoba) (言葉, "words"): word lists and word-game rules.
+- [Sugoroku](https://github.com/johnmorrisdotca/sugoroku) (双六, backgammon's Japanese name): backgammon and its variants.
+- [Kazu](https://github.com/johnmorrisdotca/kazu) (数, "number"): grid number puzzles, Sudoku and five more.
+- [Meikyuu](https://github.com/johnmorrisdotca/meikyuu) (迷宮, "labyrinth"): mazes to draw a line through.
+
+**This package is Jarajara.** The demos of all sixteen share one header and footer, so each links the rest.
+
 ## Development
 
 ```sh
 pnpm install
-pnpm check          # lint, types and every test, every recorded deal made again
-pnpm test:package   # pack, install and import it as somebody who installed it would
-pnpm site           # build the demo into site/, as the Pages workflow publishes it
-pnpm test:demo      # build it and run the browser tests of the elements and the page
+pnpm check            # lint, types and every test, every recorded deal made again
+pnpm test:package     # pack, install and import it as somebody who installed it would, and run its command line
+pnpm test:cli         # build it and run the command line as a child process
+pnpm test:demo        # build the demo and play it in a real browser, at a phone's width and a desk's
+pnpm test:frameworks  # build React, Vue, Svelte, Angular and plain pages from the packed tarball and play them in a browser
+pnpm site             # build the demo into site/, as the Pages workflow publishes it
+pnpm pictures         # take the README's two pictures from the built demo
+pnpm docs:make        # rewrite docs/strings-ja.md after changing a word of the tags or the command line
 ```
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md). The commands are under [Development](#development).
+
+Please follow the [code of conduct](./CODE_OF_CONDUCT.md). A way to make the check or a deal run for a very long time, or text that gets out of a drawing into the page, is for the [security policy](./SECURITY.md), not a public issue.
+
+## Changes
+
+See [CHANGELOG.md](./CHANGELOG.md).
 
 ## Licence
 

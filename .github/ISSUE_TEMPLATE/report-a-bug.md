@@ -1,6 +1,6 @@
 ---
 name: Report a bug
-about: A rule played wrongly, a game that does not read back, something on the table that looks or behaves wrong
+about: A deal that cannot be cleared, a pair taken or refused wrongly, a tile drawn wrongly, a tag or the command line that misbehaves
 title: ""
 labels: bug
 ---
@@ -11,6 +11,6 @@ labels: bug
 
 **What happened:**
 
-**The game**, if you have it: the table's *Save as JSON* file, or its seed, the players and the moves. A saved game replays exactly, so it is the quickest way to show a bug.
+**The deal**, if it is about one: the layout (its width or name), the level and the seed, and the moves if you have them (a tag's `moves` property, or what `jarajara check` takes). A deal is made again from its seed and a game replays from its moves, so this is the quickest way to show a bug.
 
-**Where**: the version of the package, and the browser or the version of Node.
+**Where**: the version of the package (`jarajara --version`, or `VERSION`), which part it was (the functions, the drawing, a tag or the command line), and the browser or the version of Node.

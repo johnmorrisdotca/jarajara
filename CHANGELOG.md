@@ -1,9 +1,65 @@
 # Changelog
 
-## 1.4.0 — 2026-10-01
+All notable changes to this project are written here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
+[Semantic Versioning](https://semver.org/).
+
+## [Unreleased]
+
+## [1.5.0] - 2026-10-01
+
+A command line, and a framework check. No deal, layout, rule or saved game changes (a test plays every deal itsutsu.com made
+again), and nothing that was exported changes. The only behaviour that changes is what assigning to a tag's property of an attribute's name did (see Fixed).
+
+### Added
+
+- **A command line**, `jarajara`: `layouts`, `deal` (a deal drawn layer by layer, with its answer), `daily` (the day's game),
+  `check <moves>` (plays a solve on a deal and says whether it clears it, from a seed or from the tiles written out, with
+  `--stdin`), `play` (computers at a table to the end) and `tile <name>` (a tile by name, code, hand notation or group). It
+  speaks English and Japanese (`--lang`, or the environment's), prints JSON with `--json`, and exits 0, 1 or 2. It is `runCli` in
+  `src/cli.ts`, a pure function tested as data, run as a child process by `pnpm test:cli` on Linux, macOS and Windows, on Node 22
+  and 24, and installed from the packed tarball by `pnpm test:package`.
+- **`pnpm test:frameworks`**: builds a React, a Vue, a Svelte, an Angular and a plain page from the packed tarball, each with a
+  layout, a flippable tile and a listener, opens each in Chromium and WebKit, plays the layout to its end and taps the tile. It
+  runs in CI.
+- **`docs/strings-ja.md`**: every word of the tags and of the command line beside its Japanese, and the layouts' Japanese names,
+  made by `pnpm docs:make` and held by a test. `src/docs.test.js` holds the README to the code: the layouts, the challenges, the
+  tags' attributes, the properties, the limits, the command line's output, the family list, the links and the community files.
+- The README gains Features, Use it in your project (with React, Vue, Svelte and Angular recipes), the command line, Theming,
+  Limits, Browser support, Accessibility, Languages, Roadmap, where it comes from and the sixteen-package family. An issue template
+  to suggest a layout, one to add a project, and a pull request template; `SECURITY.md` and `CODE_OF_CONDUCT.md` are the family's
+  master text, kept in `scripts/community` and held equal by a test.
+
+### Changed
+
+- **Node 22 or later**: `engines` says `>=22`, as CI has always run it (on 22 and 24). The package job now runs on both.
+- The changelog follows Keep a Changelog.
+
+### Fixed
+
+- **A framework can set an attribute that is also a method or a read-only value.** React 19, Vue 3 and Svelte 5 set a property on
+  a custom element that has one of the attribute's name. `<jarajara-tile flip>` therefore replaced `flip()` with `true` and left
+  the tile unflippable; `group` and `mark` on a rack and `undo` on a layout did the same; and `seed`, `cells` and `mirror` on a layout
+  and `lifted` on a rack threw, as did a string for a rack's `tiles`. Now each is an accessor that sets the attribute, the methods
+  still work, and a rack's `tiles` takes a string or a list (`e2e/properties.demo.mjs`).
+- The README and `docs/credits.md` said the riichi designs were about 118 kB each; they are over a hundred kilobytes.
+
+## [1.4.0] - 2026-10-01
 
 How the tiles look, how the board sits, and what the board does for the player. No deal, layout, rule or saved game
 changes (a test plays every deal itsutsu.com made again); the drawing's calls keep working, with options added.
+
+### Added
+
+- **Find.** `matchesOf(geometry, cells, rule, slot)` gives every tile that matches one, told apart by whether it could be taken
+  with it now. `find` on `<jarajara-layout>` lights them when a mouse points at a tile or one is chosen: a solid ring for a free
+  match, a dashed ring for a held one, in a colour that is neither the chosen ring's nor the hint's. `layoutSvg`'s `found` draws them.
+- **The board seen from the other side.** `mirror` (`none`, `horizontal`, `vertical`, `both`) on `layoutSvg` and the elements, and a Flip
+  button (`flippable`). A view only: slots, what is free, hints and replays are the layout's own, and the thickness, the lift and
+  the shadows follow the view. Quarter-turns and free rotation are not built; `docs/LOOK.md` says what they would take.
+- `docs/LOOK.md` records what the established mahjong solitaires do (Mah, KMahjongg, mahseum and others) and what was taken from it.
+
+### Changed
 
 - **Tiles are solid blocks.** An ivory face over a back plate, its thickness showing on two sides (the ivory layer nearest the
   face, the back plate's own colour beyond), each layer of a stack lifted by exactly that thickness, a soft shadow that reaches
@@ -18,28 +74,26 @@ changes (a test plays every deal itsutsu.com made again); the drawing's calls ke
 - **One steady frame, centred on what is drawn.** `layoutFrame(size, { mirror, margin })` is the box that holds a layout's solid
   tiles, their thickness and their layer lift, and `layoutSvg(..., { margin })` draws on it. A board on a cloth sits in an inner
   frame with one padding all round, scaled into a box that does not change with the layout (`box="landscape"`, `--jarajara-box`).
-- **Find.** `matchesOf(geometry, cells, rule, slot)` gives every tile that matches one, told apart by whether it could be taken
-  with it now. `find` on `<jarajara-layout>` lights them when a mouse points at a tile or one is chosen: a solid ring for a free
-  match, a dashed ring for a held one, in a colour that is neither the chosen ring's nor the hint's. `layoutSvg`'s `found` draws them.
 - **A hint looks first for the chosen tile's match.** `hintFor(geometry, cells, rule, chosen?)` answers `match`, `other` (the chosen
   tile has none free: another pair), `any` or `none`; `runHint(run, chosen?)` and the element's `hint()` use it, and
   `jarajara-hint` says which it found. `hintPair` is as it was.
-- **The board seen from the other side.** `mirror` (`none`, `horizontal`, `vertical`, `both`) on `layoutSvg` and the elements, and a Flip
-  button (`flippable`). A view only: slots, what is free, hints and replays are the layout's own, and the thickness, the lift and
-  the shadows follow the view. Quarter-turns and free rotation are not built; `docs/LOOK.md` says what they would take.
+- **The demo is one screen, not nine.** The board is one fixed box that fits the window with its controls, the options are the family's
+  label-and-chips rows, the panels under it are tabs (Tiles, Rack, Viewers, Layouts, Table, Designs, Rules), and the gallery's
+  cards are one size with each layout scaled into the same thumbnail. The page is a fifth as tall.
+
+### Fixed
+
 - **Every action has its sound.** A rack's Face down and Face up were silent (an attribute with no value looked unchanged to the
   rack, so it also told a caller its change was over at once); they and the rest of the rack's actions, the tile's spin and the board's
   hint, undo and new deal now sound from the element's own method, with `sound` on, never more than `MOST_SOUNDING` clicks at once.
   `rack.deal(tiles)` deals a new hand; `setPageSounds(player)` gives the page's own player.
-- **The demo is one screen, not nine.** The board is one fixed box that fits the window with its controls, the options are the family's
-  label-and-chips rows, the panels under it are tabs (Tiles, Rack, Viewers, Layouts, Table, Designs, Rules), and the gallery's
-  cards are one size with each layout scaled into the same thumbnail. The page is a fifth as tall.
-- `docs/LOOK.md` records what the established mahjong solitaires do (Mah, KMahjongg, mahseum and others) and what was taken from it.
 
-## 1.3.0 — 2026-10-01
+## [1.3.0] - 2026-10-01
 
 More layouts, and challenges and options for Awase. No existing deal changes: sizes 4, 8, 9, 10 and 15 and every deal
 made on them are exactly as they were (a test plays every deal itsutsu.com made again).
+
+### Added
 
 - **Six new layouts**, Jarajara's own drawings of shapes anyone may draw: Pagoda (11 across), Fortress (12), Pyramid (13),
   Bridge (14), Butterfly (16) and Dragon (17). `MORE_LAYOUTS` holds them, `ALL_LAYOUTS` every layout, and `layoutFor`
@@ -57,9 +111,11 @@ made on them are exactly as they were (a test plays every deal itsutsu.com made 
   gallery and the looked-over layout.
 - The code of conduct names Jarajara, and the family's footer lists Suido.
 
-## 1.2.0 — 2026-10-01
+## [1.2.0] - 2026-10-01
 
 A second design, and sounds.
+
+### Added
 
 - **The riichi designs**: FluffyStuff's riichi mahjong tiles (public domain, CC0, confirmed at the source and recorded
   in `docs/credits.md`), regular and black, with their own backs and red fives. `design="riichi"` and `"riichi-black"` on
@@ -76,9 +132,11 @@ A second design, and sounds.
   nothing is fetched until the first sound plays, and every element takes `sound`.
 - The demo has a Designs panel, a Sounds panel, a Sound switch and a design chooser for the game.
 
-## 1.1.0 — 2026-10-01
+## [1.1.0] - 2026-10-01
 
 Elements, viewers and backs: the tiles on any page, with the things done with tiles in front of you.
+
+### Added
 
 - **Seven custom elements**, defined by `@johnmorrisdotca/jarajara/element/define` (classes alone in `/element`):
   `<jarajara-tile>` (one tile, face up or down, turned by a tap, any size), `<jarajara-rack>` (tiles lined up: turn
@@ -98,19 +156,23 @@ Elements, viewers and backs: the tiles on any page, with the things done with ti
 - The demo is a page of panels with browser tests in three browsers (`pnpm test:demo`).
 - No existing deal changes: the deals and games itsutsu.com made are made again, exactly, on every build.
 
-
-## 1.0.1 — 2026-10-01
+## [1.0.1] - 2026-10-01
 
 Nothing that was exported has changed.
+
+### Added
 
 - An API reference page, `api.html` on the demo site: every export of every
   entry point with its signature and its doc comment, made from the source
   when the site is built, so it cannot fall behind the code. The README and
   the demo's header link to it, and a test holds it to the source.
-## 1.0.0 — 2026-10-01
+
+## [1.0.0] - 2026-10-01
 
 The first release: the tiles and Awase as played at itsutsu.com, taken out of
 the site into their own package.
+
+### Added
 
 - The 144-tile set in 42 faces, each a letter; the two ways the flowers and
   seasons match; the free rule; the five layouts, Tiny to the Turtle.
