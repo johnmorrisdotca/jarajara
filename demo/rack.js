@@ -102,5 +102,5 @@ export function initRack(ctx) {
   });
 
   showHand();
-  ctx.cloth([]);
+  ctx.soundy([rack]);
 }

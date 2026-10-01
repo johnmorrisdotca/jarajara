@@ -6,7 +6,7 @@ import { layoutFor } from "../layouts.ts";
 import { AWASE_TABLE, isComputerSeat, playAtTable, readTable, seatName, SEAT_WINDS, startTable, tablePlayersAsked, tidySeatName } from "../table.ts";
 import type { AwaseTable, AwaseTableState } from "../table.types.ts";
 import type { AwaseLevel } from "../types.ts";
-import { CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, say, wearCloth } from "./elementKit.ts";
+import { CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, playSound, say, wearCloth } from "./elementKit.ts";
 
 const LEVELS: readonly AwaseLevel[] = ["easy", "medium", "hard"];
 
@@ -27,6 +27,7 @@ const LEVELS: readonly AwaseLevel[] = ["easy", "medium", "hard"];
  *   size       the layout's width in tiles (10, the Castle, unless said), level, seed   as on `<jarajara-layout>`
  *   delay      how long a computer thinks before it takes its pair, in milliseconds (700 unless said)
  *   show-free  washes the blocked tiles darker
+ *   sound      each pair taken, and a game won, make their sounds
  *   design, lang, cloth   as on the other elements
  *
  * `deal(seed?)` deals again. The `table` property holds the game as `encodeTable` keeps it. Each pair taken is a
@@ -34,7 +35,7 @@ const LEVELS: readonly AwaseLevel[] = ["easy", "medium", "hard"];
  */
 export class JarajaraTable extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["players", "people", "names", "size", "level", "seed", "delay", "show-free", "design", "lang", "cloth"];
+    return ["players", "people", "names", "size", "level", "seed", "delay", "show-free", "design", "lang", "cloth", "sound"];
   }
 
   #root: ShadowRoot | null = null;
@@ -139,6 +140,7 @@ export class JarajaraTable extends ElementBase {
     this.#chosen = null;
     this.#note = "";
     const last = played.state.taken[played.state.taken.length - 1]!;
+    playSound(this, played.state.over ? "win" : "pair");
     this.#draw();
     this.dispatchEvent(new CustomEvent("jarajara-table", { bubbles: true, composed: true, detail: { seat, pair: [a, b], codes: last.codes, points: last.points, scores: played.state.scores, over: played.state.over, winners: played.state.winners } }));
     this.#maybeComputer();

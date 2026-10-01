@@ -11,7 +11,7 @@ import { tileName } from "../names.ts";
 import { bonusRuleOf, isFaceCode, pairPoints } from "../tiles.ts";
 import type { AwaseLevel, MahjongBonusRule, MahjongLayout, MahjongMove } from "../types.ts";
 import type { TileDesign } from "../design.types.ts";
-import { CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, say, wearCloth } from "./elementKit.ts";
+import { CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, playSound, say, wearCloth } from "./elementKit.ts";
 
 /** How many of a thing a game allows: a number, or no limit at all. */
 export type Allowance = number | null;
@@ -66,7 +66,8 @@ export function hintPair(layout: MahjongLayout, cells: string, rule: MahjongBonu
  *   view           `stack` (unless said) draws the layout; `lined` draws its tiles lined up in a row, in the order `sort` gives, each with where it lies
  *   sort           how `lined` puts the slots in order: the keys `x`, `y` and `z`, `-` before one for the other way round: `"z y x"` (unless said), `"x"`, `"-z x"`
  *   static         the tiles may be looked at but not played
- *   design, red-fives, size is the layout's, lang, cloth   as on the other elements
+ *   sound          a tile chosen, a pair taken, a shuffle and a cleared layout make their sounds
+ *   design, red-fives, lang, cloth   as on the other elements
  *
  * Methods: `newDeal(seed?)`, `take(a, b)`, `hint()`, `shuffle()`, `undo()`, `restore(moves)`, `sortBy(keys)`. Properties: `seed`, `cells`,
  * `moves` (as `encodeMoves` writes them), `tilesLeft`. Events, all bubbling: `jarajara-take` (`{ pair, codes, tilesLeft }`),
@@ -75,7 +76,7 @@ export function hintPair(layout: MahjongLayout, cells: string, rule: MahjongBonu
  */
 export class JarajaraLayout extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["size", "level", "seed", "cells", "show-free", "show-matching", "hints", "shuffles", "undo", "timer", "controls", "view", "sort", "static", "design", "red-fives", "lang", "cloth"];
+    return ["size", "level", "seed", "cells", "show-free", "show-matching", "hints", "shuffles", "undo", "timer", "controls", "view", "sort", "static", "design", "red-fives", "lang", "cloth", "sound"];
   }
 
   #root: ShadowRoot | null = null;
@@ -209,6 +210,7 @@ export class JarajaraLayout extends ElementBase {
     this.#chosen = null;
     this.#hinted = [];
     this.#note = "";
+    playSound(this, isCleared(played.cells) ? "win" : "pair");
     this.dispatchEvent(new CustomEvent("jarajara-take", { bubbles: true, composed: true, detail: { pair: [a, b], codes: [cells[a], cells[b]], points: pairPoints(cells[a]!), tilesLeft: tilesLeft(played.cells) } }));
     if (isCleared(played.cells)) {
       this.#seconds = this.#elapsed();
@@ -263,6 +265,7 @@ export class JarajaraLayout extends ElementBase {
     this.#chosen = null;
     this.#hinted = [];
     this.#note = "";
+    playSound(this, "shuffle");
     this.dispatchEvent(new CustomEvent("jarajara-shuffle", { bubbles: true, composed: true, detail: { shuffles: played.shuffles } }));
     this.#draw();
     return true;
@@ -377,6 +380,7 @@ export class JarajaraLayout extends ElementBase {
     }
     this.#note = "";
     if (this.#chosen === null || this.#chosen === slot) {
+      playSound(this, this.#chosen === slot ? "place" : "pick");
       this.#chosen = this.#chosen === slot ? null : slot;
       this.#draw();
       return;

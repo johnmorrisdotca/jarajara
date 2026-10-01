@@ -1,4 +1,5 @@
 import { copiesOf, countTiles, findFaces, groupFaces, groupWords, isNotation, isTileGroup, readTiles, setInventory, SUIT_WORDS, tileName, writeNotation } from "../names.ts";
+import { RED_FIVE_CODES, redFiveIndexes } from "../designs.ts";
 import { faceOf, pairPoints } from "../tiles.ts";
 import { CLOTH_STYLE, ELEMENT_SIZES, ElementBase, followLanguage, isOn, languageOf, say, wearCloth } from "./elementKit.ts";
 
@@ -15,13 +16,16 @@ function tilePixels(element: Element, fallback: number | null): number | null {
 const PASSED = ["design", "back", "back-colour", "mark", "lang"] as const;
 
 /** One tile as a viewer draws it: a `<jarajara-tile>` carrying the viewer's design and back, with its caption and copies under it. */
-function tileFigure(viewer: Element, code: string, options: { caption: boolean; copies: number | null; down: boolean; flip: boolean; dim?: boolean; have?: number }): string {
+function tileFigure(viewer: Element, code: string, options: { caption: boolean; copies: number | null; down: boolean; flip: boolean; dim?: boolean; have?: number; red?: boolean }): string {
   const language = languageOf(viewer);
   const passed = PASSED.flatMap((name) => (viewer.getAttribute(name) === null ? [] : [` ${name}="${(viewer.getAttribute(name) as string).replace(/"/g, "&quot;")}"`])).join("");
   const copies = options.copies === null ? "" : `<span class="copies">${options.have === undefined ? say(language, "copies", { n: options.copies }) : `${options.have}/${options.copies}`}</span>`;
   const caption = options.caption ? `<span class="name">${tileName(code, language)}</span>` : "";
-  return `<figure class="figure" data-code="${code}"${options.dim === true ? ' data-dim="true"' : ""}><jarajara-tile code="${code}"${passed}${options.down ? " face-down" : ""}${options.flip ? " flip" : ""}></jarajara-tile>${caption}${copies}</figure>`;
+  return `<figure class="figure" data-code="${code}"${options.dim === true ? ' data-dim="true"' : ""}><jarajara-tile code="${code}"${passed}${options.red === true ? " red" : ""}${options.down ? " face-down" : ""}${options.flip ? " flip" : ""}></jarajara-tile>${caption}${copies}</figure>`;
 }
+
+/** The fives a set may make red. */
+const RED_FIVE: readonly string[] = RED_FIVE_CODES;
 
 const FIGURE_STYLE = `
 :host { display: block; max-width: 100%; box-sizing: border-box; }
@@ -48,12 +52,13 @@ ${CLOTH_STYLE}
  * Attributes, all optional: `group` (unless said, `winds`); `tiles` (tiles written as codes, names or hand notation, in
  * place of `group`); `captions="off"` takes the names away; `copies="off"` takes the counts away; `heading="off"` takes the
  * group's name away; `face-down` and `flip` draw the tiles face down, to be turned over by a tap (to learn them); and
+ * `red-fives` draws the first five of each suit red, in a design that has them; and
  * `design`, `back`, `back-colour`, `mark`, `size`, `width`, `lang` and `cloth` as on `<jarajara-tile>`. A tap on a tile
  * is a `jarajara-view` event, `{ code }`.
  */
 export class JarajaraGroup extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["group", "tiles", "captions", "copies", "heading", "face-down", "flip", "design", "back", "back-colour", "mark", "size", "width", "lang", "cloth"];
+    return ["group", "tiles", "captions", "copies", "heading", "face-down", "flip", "red-fives", "design", "back", "back-colour", "mark", "size", "width", "lang", "cloth"];
   }
 
   #root: ShadowRoot | null = null;
@@ -101,7 +106,8 @@ export class JarajaraGroup extends ElementBase {
     else this.style.removeProperty("--jarajara-tile-width");
     const captions = !this.hasAttribute("captions") || isOn(this, "captions");
     const counts = !this.hasAttribute("copies") || isOn(this, "copies");
-    const figures = tiles.map((code) => tileFigure(this, code, { caption: captions, copies: counts ? copiesOf(code) : null, down: this.hasAttribute("face-down"), flip: isOn(this, "flip") }));
+    const reds = isOn(this, "red-fives") ? redFiveIndexes(tiles) : new Set<number>();
+    const figures = tiles.map((code, at) => tileFigure(this, code, { caption: captions, copies: counts ? copiesOf(code) : null, down: this.hasAttribute("face-down"), flip: isOn(this, "flip"), red: reds.has(at) }));
     this.setAttribute("role", "group");
     this.setAttribute("aria-label", say(language, "groupLabel", { group: heading || tiles.length, tiles: tiles.map((code) => tileName(code, language)).join(", ") }));
     root.innerHTML = `<style>${FIGURE_STYLE}</style>${heading === "" ? "" : `<h3>${heading}</h3>`}<div class="row">${figures.join("")}</div>`;
@@ -118,12 +124,12 @@ export class JarajaraGroup extends ElementBase {
  *
  * Attributes, all optional: `tiles` (what to count: codes, names or hand notation); `mode` (`faces`, unless said, draws each
  * face once with its count; `tiles` draws every tile of the set, four of each ordinary face, one flower, one season);
- * `captions="off"` takes the names away; and `design`, `back`, `size`, `width`, `lang` and `cloth` as on `<jarajara-tile>`.
+ * `captions="off"` takes the names away; `red-fives` makes one five of each suit red (in `tiles` mode, in a design that has them); and `design`, `back`, `size`, `width`, `lang` and `cloth` as on `<jarajara-tile>`.
  * A tap on a tile is a `jarajara-view` event, `{ code }`.
  */
 export class JarajaraSet extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["tiles", "mode", "captions", "design", "back", "back-colour", "mark", "size", "width", "lang", "cloth"];
+    return ["tiles", "mode", "captions", "red-fives", "design", "back", "back-colour", "mark", "size", "width", "lang", "cloth"];
   }
 
   #root: ShadowRoot | null = null;
@@ -161,6 +167,7 @@ export class JarajaraSet extends ElementBase {
     const pixels = tilePixels(this, every ? ELEMENT_SIZES.small : null);
     if (pixels !== null) this.style.setProperty("--jarajara-tile-width", `${pixels}px`);
     else this.style.removeProperty("--jarajara-tile-width");
+    const redFives = isOn(this, "red-fives");
     const inventory = setInventory();
     const suits = [...new Set(inventory.map((one) => one.face.suit))];
     const held = counts === null ? null : [...counts.values()].reduce((total, count) => total + count, 0);
@@ -169,7 +176,7 @@ export class JarajaraSet extends ElementBase {
       const figures = faces.flatMap(({ face, copies }) => {
         const have = counts?.get(face.code) ?? 0;
         if (!every) return [tileFigure(this, face.code, { caption: captions, copies, have: counts === null ? undefined : have, down: false, flip: false, dim: counts !== null && have === 0 })];
-        return Array.from({ length: copies }, (_, at) => tileFigure(this, face.code, { caption: false, copies: null, down: false, flip: false, dim: counts !== null && at >= have }));
+        return Array.from({ length: copies }, (_, at) => tileFigure(this, face.code, { caption: false, copies: null, down: false, flip: false, dim: counts !== null && at >= have, red: redFives && at === 0 && RED_FIVE.includes(face.code) }));
       });
       return `<div class="suit"><h3>${SUIT_WORDS[suit][language]}</h3><div class="row">${figures.join("")}</div></div>`;
     });

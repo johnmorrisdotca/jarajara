@@ -10,6 +10,7 @@ import { isTileDesignName, jarajaraDesign, loadTileDesign } from "../designs.ts"
 import { tileSvg } from "../faces.ts";
 import { findFace, tileName, type TileLanguage } from "../names.ts";
 import { STRINGS, fillIn } from "./strings.ts";
+import { createTileSounds, type PlayTileSoundOptions, type TileSoundKind, type TileSounds } from "./tileSounds.ts";
 
 /** What the elements extend: HTMLElement, or on a server, where there is none, an empty class, so that importing them never throws. */
 export const ElementBase: typeof HTMLElement = typeof HTMLElement === "undefined" ? (class {} as unknown as typeof HTMLElement) : HTMLElement;
@@ -176,3 +177,15 @@ export function spinElement(element: HTMLElement, options: SpinOptions = {}, del
 
 /** The aspect of a tile's picture, with the sliver of its side: 32 by 42 in the drawing's units. */
 export const TILE_ASPECT = "32 / 42";
+
+let sounds: TileSounds | null = null;
+/** One set of sounds for every element on the page, made the first time an element with `sound` makes one. */
+export function pageSounds(): TileSounds {
+  sounds ??= createTileSounds();
+  return sounds;
+}
+
+/** Make a sound if the element has `sound`; nothing, and nothing fetched, if it does not. */
+export function playSound(element: Element, kind: TileSoundKind, options?: PlayTileSoundOptions): void {
+  if (isOn(element, "sound")) pageSounds().play(kind, options);
+}

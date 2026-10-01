@@ -1,5 +1,5 @@
 import { isFaceCode } from "../tiles.ts";
-import { codeOf, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, say, spinElement, tileDrawing, tileLabel, TILE_ASPECT, widthOf, type SpinOptions } from "./elementKit.ts";
+import { codeOf, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, playSound, say, spinElement, tileDrawing, tileLabel, TILE_ASPECT, widthOf, type SpinOptions } from "./elementKit.ts";
 
 /**
  * ONE TILE ON ANY PAGE: `<jarajara-tile code="F">`, in any design and with any back, face up or face down, turned over
@@ -18,6 +18,7 @@ import { codeOf, designNamed, ElementBase, followLanguage, isOn, languageOf, les
  *   marked        a mark on its corner, seen face up and face down, to follow it as it moves
  *   red           draws the red five of a design that has one, for a five
  *   size          `small`, `medium` (unless said) or `large`; or `width` in pixels; or the page's `--jarajara-tile-width`
+ *   sound         the turn makes a sound
  *   lang          `ja` for Japanese names; the page's language unless said
  *
  * Each turn is a `jarajara-flip` event that bubbles, with `{ code, faceDown }` as its detail. `spin(options?)`
@@ -25,7 +26,7 @@ import { codeOf, designNamed, ElementBase, followLanguage, isOn, languageOf, les
  */
 export class JarajaraTile extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["code", "design", "back", "back-colour", "mark", "face-down", "flip", "marked", "red", "size", "width", "lang"];
+    return ["code", "design", "back", "back-colour", "mark", "face-down", "flip", "marked", "red", "size", "width", "lang", "sound"];
   }
 
   #root: ShadowRoot | null = null;
@@ -52,6 +53,7 @@ export class JarajaraTile extends ElementBase {
     // Turning, both sides are drawn, so the face is in the page only while it can be seen.
     this.#turning = !lessMotion();
     this.faceDown = !this.faceDown;
+    playSound(this, "flip");
     this.dispatchEvent(new CustomEvent("jarajara-flip", { bubbles: true, composed: true, detail: { code, faceDown: this.faceDown } }));
   }
 

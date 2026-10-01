@@ -1,6 +1,6 @@
 {
   "name": "@johnmorrisdotca/jarajara",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Jarajara, mahjong tiles for JavaScript and TypeScript: the 144-tile set in 42 faces drawn as SVG, the stacked layouts tile games are played on, which tiles are free, matching, dealing and shuffling, a game written as text, and Awase, the matching solitaire, alone or at a table for two to four with a computer player. Seeded, every deal clearable. Zero dependencies.",
   "keywords": [
     "mahjong",
@@ -68,10 +68,31 @@
       "types": "./dist/element-define.d.ts",
       "import": "./dist/element-define.js",
       "default": "./dist/element-define.js"
+    },
+    "./designs/riichi": {
+      "types": "./dist/designs/riichi.d.ts",
+      "import": "./dist/designs/riichi.js",
+      "default": "./dist/designs/riichi.js"
+    },
+    "./designs/riichi-black": {
+      "types": "./dist/designs/riichi-black.d.ts",
+      "import": "./dist/designs/riichi-black.js",
+      "default": "./dist/designs/riichi-black.js"
+    },
+    "./tile-sounds": {
+      "types": "./dist/tile-sounds.d.ts",
+      "import": "./dist/tile-sounds.js",
+      "default": "./dist/tile-sounds.js"
+    },
+    "./sounds": {
+      "types": "./dist/sounds.d.ts",
+      "import": "./dist/sounds.js",
+      "default": "./dist/sounds.js"
     }
   },
   "files": [
     "dist",
+    "docs/credits.md",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"
@@ -88,7 +109,8 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test",
     "prepublishOnly": "pnpm check && pnpm build",
     "site": "pnpm build && node scripts/site.mjs",
-    "test:demo": "pnpm site && playwright test"
+    "test:demo": "pnpm site && playwright test",
+    "sounds": "node scripts/sounds.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",

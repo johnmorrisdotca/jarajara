@@ -11,4 +11,5 @@ export function initTable(ctx) {
   document.getElementById("table-deal").addEventListener("click", () => table.deal());
   code();
   ctx.cloth([table]);
+  ctx.soundy([table]);
 }

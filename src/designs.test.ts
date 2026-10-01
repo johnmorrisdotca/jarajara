@@ -148,3 +148,62 @@ describe("the cloths", () => {
     expect(clothVars(null)).toEqual({});
   });
 });
+
+describe("the riichi designs", () => {
+  it("are fetched by name, and kept", async () => {
+    const regular = await loadTileDesign("riichi");
+    const black = await loadTileDesign("riichi-black");
+    expect(regular?.name).toBe("riichi");
+    expect(black?.name).toBe("riichi-black");
+    expect(await loadTileDesign("riichi")).toBe(regular);
+    expect(isTileDesignName("riichi-black")).toBe(true);
+    expect(TILE_DESIGNS).toEqual(["jarajara", "riichi", "riichi-black"]);
+  });
+
+  it("draw the 34 faces of a riichi set, each different, and the red fives apart from the plain", async () => {
+    for (const name of ["riichi", "riichi-black"]) {
+      const design = (await loadTileDesign(name))!;
+      expect(Object.keys(design.faces)).toHaveLength(34);
+      expect(Object.keys(design.faces).filter((code) => "IJKLMNOP".includes(code))).toEqual([]);
+      expect(new Set(Object.values(design.faces)).size).toBe(34);
+      expect(Object.keys(design.red!).sort()).toEqual(["e", "n", "w"]);
+      for (const code of ["e", "n", "w"]) expect(design.red![code]).not.toBe(design.faces[code]);
+      expect(design.body).toContain("<");
+      expect(design.back).toContain("<");
+      expect(design.box).toEqual([300, 400]);
+      // Whatever it draws is text a page may hold: no script, no outside reference.
+      for (const drawing of [design.body!, design.back, ...Object.values(design.faces), ...Object.values(design.red!)]) {
+        expect(drawing).not.toMatch(/<script|href="http|xlink:href="http|onload=/);
+      }
+    }
+  });
+
+  it("keep Jarajara's own flowers and seasons, on a light panel in the black one", async () => {
+    const regular = (await loadTileDesign("riichi"))!;
+    const black = (await loadTileDesign("riichi-black"))!;
+    expect(tileFaceSvg("I", regular)).toBe(tileFaceSvg("I"));
+    expect(tileFaceSvg("M", black)).toBe(`${black.plate}${tileFaceSvg("M")}`);
+    expect(black.plate).toContain("<rect");
+  });
+
+  it("draw every one of the 42 as a tile, in either set", async () => {
+    for (const name of ["riichi", "riichi-black"]) {
+      const design = (await loadTileDesign(name))!;
+      for (const face of MAHJONG_FACES) {
+        const svg = tileSvg(face.code, { design })!;
+        expect(svg).toContain("<svg");
+        expect(svg.length).toBeGreaterThan(300);
+      }
+    }
+  });
+
+  it("keep the pictures to a size a page can afford, and give every drawing's ids a prefix of its own", async () => {
+    for (const name of ["riichi", "riichi-black"]) {
+      const design = (await loadTileDesign(name))!;
+      const size = [design.body!, design.back, ...Object.values(design.faces), ...Object.values(design.red!)].reduce((sum, one) => sum + one.length, 0);
+      expect(size).toBeLessThan(160_000);
+      const ids = [...[design.body!, design.back, ...Object.values(design.faces), ...Object.values(design.red!)].join("").matchAll(/ id="([^"]+)"/g)].map((match) => match[1]);
+      expect(new Set(ids).size).toBe(ids.length);
+    }
+  });
+});

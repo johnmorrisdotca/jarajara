@@ -1,5 +1,6 @@
 // The play panel: Awase on any layout and level, as the <jarajara-layout> element plays it, kept on this device between visits.
 import { MAHJONG_LAYOUTS } from "./dist/index.js";
+import { TILE_DESIGNS as DESIGNS } from "./dist/faces-entry.js";
 
 const KEY = "jarajara.page";
 const LEVELS = ["easy", "medium", "hard"];
@@ -62,6 +63,7 @@ export function initPlay(ctx) {
     hints: ALLOWANCES.includes(kept.hints) ? kept.hints : "unlimited",
     shuffles: ALLOWANCES.includes(kept.shuffles) ? kept.shuffles : "unlimited",
     undo: kept.undo === "off" ? "off" : "on",
+    design: DESIGNS.includes(kept.design) ? kept.design : "jarajara",
     seed: Number.isInteger(kept.seed) ? kept.seed : null,
     moves: typeof kept.moves === "string" ? kept.moves : "",
   };
@@ -73,6 +75,9 @@ export function initPlay(ctx) {
     game.setAttribute("hints", state.hints);
     game.setAttribute("shuffles", state.shuffles);
     game.setAttribute("undo", state.undo);
+    if (state.design === "jarajara") game.removeAttribute("design");
+    else game.setAttribute("design", state.design);
+    game.toggleAttribute("red-fives", state.design !== "jarajara");
   };
   const labels = () => {
     const layoutName = (size) => ctx.word("layouts")[layouts.find((layout) => layout.size === size).key];
@@ -96,6 +101,13 @@ export function initPlay(ctx) {
         save();
       };
     }
+    const designSelect = document.getElementById("game-design");
+    options(designSelect, ["jarajara", ...DESIGNS.filter((name) => name !== "jarajara")], (name) => name, state.design);
+    designSelect.onchange = () => {
+      state.design = designSelect.value;
+      apply();
+      save();
+    };
     const undo = document.getElementById("undo-allowed");
     options(undo, ["on", "off"], (value) => (value === "on" ? ctx.word("on") : ctx.word("off")), state.undo);
     undo.onchange = () => {
@@ -134,4 +146,5 @@ export function initPlay(ctx) {
   save();
   ctx.onLang(labels);
   ctx.cloth([game]);
+  ctx.soundy([game]);
 }

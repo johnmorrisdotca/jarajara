@@ -9,7 +9,7 @@ import { MAHJONG_FACES } from "./tiles.ts";
  * own backs and red fives, and each is fetched the first time it is asked for, so a page that stays with the default
  * pays nothing for them. They draw no flowers or seasons, so those stay Jarajara's own within them.
  */
-export const TILE_DESIGNS = ["jarajara"] as const;
+export const TILE_DESIGNS = ["jarajara", "riichi", "riichi-black"] as const;
 
 /** A design's name. */
 export type TileDesignName = (typeof TILE_DESIGNS)[number];
@@ -41,6 +41,8 @@ export function jarajaraDesign(): TileDesign {
  */
 export async function loadTileDesign(name: TileDesignName | string): Promise<TileDesign | null> {
   if (name === "jarajara") return jarajaraDesign();
+  if (name === "riichi") return (await import("./designs/riichi.ts")).RIICHI;
+  if (name === "riichi-black") return (await import("./designs/riichi-black.ts")).RIICHI_BLACK;
   return null;
 }
 

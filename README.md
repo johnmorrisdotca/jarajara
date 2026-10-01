@@ -178,7 +178,7 @@ Or `import "@johnmorrisdotca/jarajara/element/define"` in a bundle; `@johnmorris
 
 | Element | What it is |
 | --- | --- |
-| `<jarajara-tile code="F">` | One tile, face up or down, any design and back, turned by a tap with `flip`; `size` `small` / `medium` / `large` or a `width`; `marked`; `spin()` |
+| `<jarajara-tile code="F">` | One tile, face up or down, any design and back, turned by a tap with `flip` (and `sound`); `size` `small` / `medium` / `large` or a `width`; `marked`; `spin()` |
 | `<jarajara-rack tiles="…">` | Tiles lined up in front of you: `hide()`, `show()`, `toggle(tiles?)`, `sort(order?)`, `group("suit" \| "kind")`, `ungroup()`, `unsort()`, `mixUp(seed?)`, `take(tile)`, `add(tile, at?)`, `replace()`, `lift()`, `lower()`, `mark()`, `unmark()`, `spin()`; a tap raises a tile with `pick` |
 | `<jarajara-layout size="15">` | A game of Awase to play on a stacked layout: free tiles, pick two to take, hint, shuffle, undo, a timer, limits on hints and shuffles, matching tiles ringed, and the same layout lined up sorted by x, y and z |
 | `<jarajara-table players="3">` | Awase at a table of two to four, with computers in the seats that are not people's |
@@ -191,6 +191,47 @@ Tiles in a rack are named by their place as written (`0`, `3`) when a method wan
 `<jarajara-layout>` attributes: `size`, `level` (`easy`, `medium`, `hard`), `seed`, `cells` (a position of your own), `show-free`, `show-matching`, `hints` and `shuffles` (a number, `off` or `unlimited`), `undo="off"`, `timer`, `controls`, `view="lined"` with `sort="z y x"` (any of `x`, `y`, `z`, a `-` before one for the other way round), `static`, `cloth`, `design`, `lang`. `restore(moves)` plays a kept game back on the deal.
 
 A table, a rack, a layout, a group, a set and a viewer all take `cloth`: `green`, `blue`, `red`, `black` or `wood`, the family's five, which a page can follow from the demo header's `family-cloth` event.
+
+## Designs
+
+Jarajara's own tiles are the default and cost nothing extra. A second design is FluffyStuff's riichi tiles (public
+domain, CC0), regular and black, with their own backs and the red fives; they draw no flowers or seasons, so those stay
+Jarajara's own within them. Each is fetched the first time it is asked for, so a page that stays with the default never
+loads them.
+
+```html
+<jarajara-tile code="F" design="riichi"></jarajara-tile>
+<jarajara-layout size="9" design="riichi-black" red-fives></jarajara-layout>
+<jarajara-rack tiles="123m055p" design="riichi" red-fives></jarajara-rack>
+```
+
+```ts
+import { loadTileDesign, tileSvg, layoutSvg } from "@johnmorrisdotca/jarajara/faces";
+
+const design = await loadTileDesign("riichi");     // or "riichi-black"; "jarajara" is always at hand
+tileSvg("e", { design, red: true });                // the red five of characters
+layoutSvg(9, cells, { design, redFives: true });   // the first five of each suit, in slot order, is red
+```
+
+`TILE_DESIGNS` lists them. A design's own back is named like the design (`back="riichi"`), and an element given a
+design and no `back` shows that design's own. Where the drawings come from and under what licence is in
+[docs/credits.md](docs/credits.md).
+
+## Sounds
+
+```ts
+import { createTileSounds } from "@johnmorrisdotca/jarajara/tile-sounds";
+
+const sounds = createTileSounds();            // nothing fetched, no audio context, until the first sound
+sounds.play("shuffle");                       // pick, place, flip, pair, shuffle, win
+sounds.play("place", { count: 13, delay: 900 });
+```
+
+Tile clacks cut from Kenney's Casino Audio (CC0), loaded the first time one is played; where they cannot be loaded or
+decoded, a short click made in the browser stands in, and a platform with no audio is silent without an error. Every
+element takes `sound` and is silent without it: a tile turned, tiles set down, picked up and shuffled in a rack, a tile
+chosen, a pair taken, a shuffle and a cleared layout, a pair at a table. The recordings are `@johnmorrisdotca/jarajara/sounds`,
+about 50 kB as text.
 
 ## Looking tiles up
 
@@ -229,6 +270,9 @@ The [API reference](https://johnmorrisdotca.github.io/jarajara/api.html) lists e
 | `@johnmorrisdotca/jarajara/awase` | `generateAwase(size, level, seed)`, `checkAwase(size, givens, answer)`, `freshAwaseSeed(rule)`, `bonusRuleOfSeed`, `clearRate` |
 | `@johnmorrisdotca/jarajara/table` | `startTable`, `readTable`, `tablePairs`, `playAtTable`, `takeAtTable`, `undoAtTable`, `computerPair`, `encodeTable`, `decodeTable`, `seatName`, `SEAT_WINDS` |
 | `@johnmorrisdotca/jarajara/faces` | `tileSvg`, `tileFaceSvg`, `tileFaceSymbols`, `faceWords`, `layoutSvg`, `layoutBox`, `tileAt`, the backs (`tileBackSvg`, `tileBackFace`, `TILE_BACKS`), designs (`jarajaraDesign`, `loadTileDesign`, `TILE_DESIGNS`, `redFiveIndexes`), cloths (`JARAJARA_CLOTHS`, `CLOTHS`, `isCloth`, `clothVars`), and the colours `TILE_INK`, `TILE_BODY`, `TILE_MARKS` |
+| `@johnmorrisdotca/jarajara/tile-sounds` | `createTileSounds`, `TILE_SOUND_KINDS`, `soundTimes` |
+| `@johnmorrisdotca/jarajara/sounds` | `TILE_SOUND_DATA`, the recordings as base64 AAC |
+| `@johnmorrisdotca/jarajara/designs/riichi`, `/designs/riichi-black` | `RIICHI`, `RIICHI_BLACK`: the riichi tiles as drawings, about 118 kB each |
 | `@johnmorrisdotca/jarajara/element` | the element classes (`JarajaraTile`, `JarajaraRack`, `JarajaraLayout`, `JarajaraTable`, `JarajaraGroup`, `JarajaraSet`, `JarajaraViewer`), `hintPair`, `rackPlaces`, `rackWidth`, `ELEMENT_SIZES` |
 | `@johnmorrisdotca/jarajara/element/define` | defines the seven tags on the page, for its effect |
 
@@ -262,6 +306,11 @@ src/
 ├── faces.ts          each face as SVG text, one tile on its own, and their colours
 ├── backs.ts          the backs of the tiles as SVG
 ├── designs.ts        the designs a tile may be drawn in, and the red fives
+├── designs/
+│   ├── riichi.ts         the regular riichi tiles as drawings (FluffyStuff, CC0)
+│   └── riichi-black.ts   the black riichi tiles as drawings (FluffyStuff, CC0)
+├── sounds.ts         the tile sounds as base64 AAC, made from sounds/
+├── tile-sounds.ts    the "/tile-sounds" entry: playing them
 ├── design.types.ts   the type of a set of drawn tiles
 ├── cloth.ts          the family's five cloths
 ├── draw.ts           a whole layout drawn as one SVG, stacked far to near
@@ -277,6 +326,7 @@ src/
     ├── rackLayout.ts     where tiles lie in a rack
     ├── layoutElement.ts  <jarajara-layout>
     ├── tableElement.ts   <jarajara-table>
+    ├── tileSounds.ts     the sounds: played from the recordings, or made in the browser
     └── viewerElements.ts <jarajara-viewer>, <jarajara-group> and <jarajara-set>
 ```
 
@@ -306,4 +356,5 @@ pnpm test:demo      # build it and run the browser tests of the elements and the
 ## Licence
 
 MIT, © John Morris. The tile faces are drawn for this package and are under
-the same licence.
+the same licence. The riichi designs are FluffyStuff's (public domain) and the sounds Kenney's
+(CC0): see [docs/credits.md](docs/credits.md).

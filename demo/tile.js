@@ -1,14 +1,14 @@
 // The one-tile panel: <jarajara-tile> in any size, back and design, named by its letter.
 import { MAHJONG_FACES, tileName } from "./dist/index.js";
-import { TILE_BACKS } from "./dist/faces-entry.js";
+import { TILE_BACKS, TILE_DESIGNS } from "./dist/faces-entry.js";
 
 export function initTile(ctx) {
   const tile = document.getElementById("one-tile");
   const pick = document.getElementById("tile-pick");
   const design = document.getElementById("tile-design");
   const back = document.getElementById("tile-back");
-  const designs = ["jarajara", ...(globalThis.JARAJARA_EXTRA_DESIGNS ?? [])];
-  const state = { code: "B", design: "jarajara", back: "", size: "large" };
+  const designs = [...TILE_DESIGNS];
+  const state = { code: "B", design: "jarajara", back: "", size: "large", red: false };
 
   const fill = () => {
     pick.replaceChildren(
@@ -33,11 +33,12 @@ export function initTile(ctx) {
   const show = () => {
     tile.setAttribute("code", state.code);
     tile.setAttribute("size", state.size);
+    tile.toggleAttribute("red", state.red);
     if (state.design === "jarajara") tile.removeAttribute("design");
     else tile.setAttribute("design", state.design);
     if (state.back === "") tile.removeAttribute("back");
     else tile.setAttribute("back", state.back);
-    const attrs = [`code="${state.code}"`, state.design === "jarajara" ? "" : `design="${state.design}"`, state.back === "" ? "" : `back="${state.back}"`, `size="${state.size}"`, "flip"].filter(Boolean);
+    const attrs = [`code="${state.code}"`, state.red ? "red" : "", state.design === "jarajara" ? "" : `design="${state.design}"`, state.back === "" ? "" : `back="${state.back}"`, `size="${state.size}"`, "flip"].filter(Boolean);
     ctx.show("tile-code", `<script type="module" src="…/dist/element-define.js"></script>\n<jarajara-tile ${attrs.join(" ")}></jarajara-tile>`);
     fill();
   };
@@ -60,6 +61,12 @@ export function initTile(ctx) {
       show();
     });
   }
+  document.getElementById("tile-red").addEventListener("click", () => {
+    state.red = !state.red;
+    document.getElementById("tile-red").setAttribute("aria-pressed", String(state.red));
+    show();
+  });
   ctx.onLang(fill);
+  ctx.soundy([tile]);
   show();
 }

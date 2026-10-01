@@ -28,8 +28,6 @@ const body = readFileSync("demo/body.html", "utf8")
   .replace("__UNREVIEWED__", familyUnreviewed({ id }))
   .replace("__USES__", uses.map((line) => `<li><code>${escape(line)}</code></li>`).join("\n            "))
   .replace("__CHALLENGE_ROW__", "")
-  .replace("__TILE_EXTRAS__", "")
-  .replace("__MORE_PANELS__", "")
   .trimEnd();
 
 const page = `<!doctype html>

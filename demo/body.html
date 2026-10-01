@@ -14,6 +14,8 @@
           <label><span data-say="hints"></span> <select id="hints" class="fam-field" data-testid="hints"></select></label>
           <label><span data-say="shuffles"></span> <select id="shuffles" class="fam-field" data-testid="shuffles"></select></label>
           <label><span data-say="undoWord"></span> <select id="undo-allowed" class="fam-field" data-testid="undo-allowed"></select></label>
+          <label><span data-say="designWord"></span> <select id="game-design" class="fam-field" data-testid="game-design"></select></label>
+          <button type="button" class="fam-button" id="sound-toggle" data-testid="sound-toggle" data-say="soundWord" aria-pressed="false"></button>
         </div>
         __CHALLENGE_ROW__
         <p class="how" data-say="howTo"></p>
@@ -37,7 +39,8 @@
               <button type="button" data-tile-size="medium" data-testid="tile-medium" data-say="sizeMedium"></button>
               <button type="button" data-tile-size="large" data-testid="tile-large" data-say="sizeLarge"></button>
             </span>
-            __TILE_EXTRAS__
+            <button type="button" class="fam-button" id="tile-red" data-testid="tile-red" data-say="redFive" aria-pressed="false"></button>
+            <button type="button" class="fam-button" id="tile-sound" data-testid="tile-sound" data-say="soundWord" aria-pressed="false"></button>
           </div>
           <div class="tile-stage" data-testid="tile-stage"><jarajara-tile id="one-tile" data-testid="one-tile" code="east" size="large" flip></jarajara-tile></div>
           <pre class="snippet" id="tile-code" data-testid="tile-code" tabindex="0"></pre>
@@ -150,7 +153,32 @@
           <jarajara-table id="table-demo" data-testid="table-demo" players="2" size="8" cloth="green" delay="500"></jarajara-table>
           <pre class="snippet" id="table-code" data-testid="table-code" tabindex="0"></pre>
         </section>
-        __MORE_PANELS__
+        <section class="wide" aria-labelledby="designs-title" id="designs">
+          <h2 id="designs-title" data-say="designsTitle"></h2>
+          <p data-say="designsNote"></p>
+          <div class="fam-row setup">
+            <span class="fam-seg" role="group" data-say-label="designWord" id="design-picks" data-testid="design-picks"></span>
+            <button type="button" class="fam-button" id="design-red" data-testid="design-red" data-say="redFives" aria-pressed="false"></button>
+          </div>
+          <div class="design-grid">
+            <jarajara-set id="design-set" data-testid="design-set" size="small" captions="off" cloth="green"></jarajara-set>
+            <jarajara-layout id="design-layout" data-testid="design-layout" size="8" static cloth="green"></jarajara-layout>
+          </div>
+          <pre class="snippet" id="design-code" data-testid="design-code" tabindex="0"></pre>
+        </section>
+        <section class="wide" aria-labelledby="sounds-title" id="sounds">
+          <h2 id="sounds-title" data-say="soundsTitle"></h2>
+          <p data-say="soundsNote"></p>
+          <div class="fam-actions" id="sound-kinds" data-testid="sound-kinds"></div>
+          <pre class="snippet" tabindex="0">import { createTileSounds } from "@johnmorrisdotca/jarajara/tile-sounds";
+
+const sounds = createTileSounds();
+sounds.play("shuffle");
+sounds.play("place", { count: 13, delay: 900 });
+sounds.setMuted(true);
+
+&lt;jarajara-layout sound&gt;   // or any element: off until asked</pre>
+        </section>
         <section class="wide using" aria-labelledby="more-title">
           <h2 id="more-title" data-say="moreTitle"></h2>
           <p data-say="moreText"></p>

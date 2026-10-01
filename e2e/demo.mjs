@@ -66,3 +66,25 @@ export async function box(page, selector) {
 export function sideways(page) {
   return page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
 }
+
+/** What a page owes a phone: no sideways scroll, nothing poking out, every target a fingertip wide, and no complaint from the console. */
+export async function fits(page, errors) {
+  const found = await page.evaluate(() => {
+    const all = (s) => [...document.querySelectorAll(s)];
+    const box = (e) => e.getBoundingClientRect();
+    return {
+      pageWidth: document.documentElement.scrollWidth,
+      windowWidth: window.innerWidth,
+      small: all("main button, main input, main select, nav a, footer .family a")
+        .filter((e) => box(e).width > 0 && !e.hidden && (box(e).height < 43.5 || box(e).width < 43.5))
+        .map((e) => `${e.dataset.testid ?? e.textContent}: ${Math.round(box(e).width)}x${Math.round(box(e).height)}`),
+      wide: all("main *")
+        .filter((e) => box(e).width > 0 && box(e).right > window.innerWidth + 0.5 && !e.closest("pre"))
+        .map((e) => `${e.tagName} ${e.className}`),
+    };
+  });
+  expect(found.pageWidth, "the page is no wider than the window").toBe(found.windowWidth);
+  expect(found.wide, "nothing pokes out sideways").toEqual([]);
+  expect(found.small, "every target is at least 44px").toEqual([]);
+  expect(errors, "the page complained of nothing").toEqual([]);
+}

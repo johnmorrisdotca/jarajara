@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.2.0 — 2026-10-01
+
+A second design, and sounds.
+
+- **The riichi designs**: FluffyStuff's riichi mahjong tiles (public domain, CC0, confirmed at the source and recorded
+  in `docs/credits.md`), regular and black, with their own backs and red fives. `design="riichi"` and `"riichi-black"` on
+  every element, `loadTileDesign(name)` and the `design` option of `tileSvg` and `layoutSvg`. They have no flowers or
+  seasons, so those are Jarajara's own within them. Each design is its own entry (`/designs/riichi`,
+  `/designs/riichi-black`, about 118 kB of drawings, made smaller with svgo) and is fetched the first time it is asked
+  for: the default design costs nothing extra.
+- **Red fives**: `red-fives` on the layout, the rack, the group and the set draws the first five of each suit red in a
+  design that has them (the same tile all game); `red` on a tile; `redFiveIndexes` and the `redFives` option.
+- **Backs follow designs**: a design's own back is named like the design, and an element given a design and no `back`
+  shows it.
+- **Sounds**: tile clacks from Kenney's Casino Audio (CC0) for picking, placing, turning, a pair taken, a shuffle and a
+  win, as `createTileSounds` in `@johnmorrisdotca/jarajara/tile-sounds`, with the recordings as `/sounds`. Off until asked:
+  nothing is fetched until the first sound plays, and every element takes `sound`.
+- The demo has a Designs panel, a Sounds panel, a Sound switch and a design chooser for the game.
+
 ## 1.1.0 — 2026-10-01
 
 Elements, viewers and backs: the tiles on any page, with the things done with tiles in front of you.
