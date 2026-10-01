@@ -1,5 +1,5 @@
 import { isFaceCode } from "../tiles.ts";
-import { blockHtml, blockVars, BLOCK_STYLE, BOX_UNITS, codeOf, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, playSound, say, spinElement, tileDrawing, tileLabel, TILE_ASPECT, widthOf, type SpinOptions } from "./elementKit.ts";
+import { blockHtml, blockVars, BLOCK_STYLE, BOX_UNITS, codeOf, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, playSound, reflectMethod, say, spinElement, tileDrawing, tileLabel, TILE_ASPECT, widthOf, type SpinOptions } from "./elementKit.ts";
 
 /**
  * ONE TILE ON ANY PAGE: `<jarajara-tile code="F">`, in any design and with any back, face up or face down, turned over
@@ -144,3 +144,4 @@ const TILE_STYLE = `
 ${BLOCK_STYLE}
 ${MARKER_STYLE}
 `;
+reflectMethod(JarajaraTile, "flip");

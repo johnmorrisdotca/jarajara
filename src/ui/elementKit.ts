@@ -64,6 +64,27 @@ export function widthOf(element: Element): string {
   return `var(--jarajara-tile-width, ${ELEMENT_SIZES.medium}px)`;
 }
 
+/**
+ * LET A FRAMEWORK SET AN ATTRIBUTE THAT IS ALSO A METHOD. React, Vue and Svelte set a property, not an attribute, on a
+ * custom element that has one of the name (`<jarajara-tile flip>` is `tile.flip = true`), and `flip` is a method too, so
+ * the assignment would replace the method and leave the attribute unset. This makes the name an accessor: reading it
+ * still gives the method, so `tile.flip()` goes on working, and writing it sets the attribute (`true` or `""` turns it
+ * on, `false`, `null` and `undefined` take it away, any other value is the attribute's text).
+ */
+export function reflectMethod(element: { prototype: object }, name: string): void {
+  const method = (element.prototype as Record<string, unknown>)[name];
+  Object.defineProperty(element.prototype, name, {
+    configurable: true,
+    get() {
+      return method;
+    },
+    set(this: Element, value: unknown) {
+      if (value === false || value === null || value === undefined) this.removeAttribute(name);
+      else this.setAttribute(name, value === true ? "" : String(value));
+    },
+  });
+}
+
 /** Whether the person has asked their device for less motion. */
 export function lessMotion(): boolean {
   return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;

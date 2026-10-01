@@ -13,7 +13,7 @@ import { tileName } from "../names.ts";
 import { groupWords, type TileLanguage } from "../names.ts";
 import { bonusRuleOf, isFaceCode, pairPoints } from "../tiles.ts";
 import type { AwaseLevel, MahjongBonusRule, MahjongLayout } from "../types.ts";
-import { boxOf, CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, playSound, say, wearCloth, FRAME_MARGIN, FRAME_STYLE } from "./elementKit.ts";
+import { boxOf, CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, playSound, reflectMethod, say, wearCloth, FRAME_MARGIN, FRAME_STYLE } from "./elementKit.ts";
 
 /** How many of a thing a game allows: a number, or no limit at all. */
 export type Allowance = number | null;
@@ -110,14 +110,20 @@ export class JarajaraLayout extends ElementBase {
   #seconds: number | null = null;
   #ticker: ReturnType<typeof setInterval> | null = null;
 
-  /** The seed of the deal being played. */
+  /** The seed of the deal being played. Setting it sets the `seed` attribute, which deals again from it. */
   get seed(): number {
     return this.#seed;
   }
+  set seed(seed: number | string) {
+    this.setAttribute("seed", String(seed));
+  }
 
-  /** The tiles as they lie, one letter a slot, `.` where one has been taken. */
+  /** The tiles as they lie, one letter a slot, `.` where one has been taken. Setting it sets the `cells` attribute, a position of your own. */
   get cells(): string {
     return this.#run?.cells ?? this.#givens;
+  }
+  set cells(cells: string) {
+    this.setAttribute("cells", cells);
   }
 
   /** The moves played so far, written as `encodeMoves` writes them. */
@@ -334,10 +340,13 @@ export class JarajaraLayout extends ElementBase {
     this.setAttribute("view", "lined");
   }
 
-  /** The view now: `none`, `horizontal`, `vertical` or `both`. */
+  /** The view now: `none`, `horizontal`, `vertical` or `both`. Setting it sets the `mirror` attribute. */
   get mirror(): TileMirror {
     const asked = this.getAttribute("mirror");
     return isTileMirror(asked) ? asked : "none";
+  }
+  set mirror(view: TileMirror | string) {
+    this.setAttribute("mirror", view);
   }
 
   /** Turn the board to the next view (none, left to right, top to bottom, both), as the Flip button does. Only the picture changes. */
@@ -633,3 +642,4 @@ ${FRAME_STYLE}
 .controls button:disabled { opacity: .5; cursor: default; }
 ${CLOTH_STYLE}
 `;
+reflectMethod(JarajaraLayout, "undo");

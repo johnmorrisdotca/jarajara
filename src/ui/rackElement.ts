@@ -2,7 +2,7 @@ import type { TileSoundKind } from "./tileSounds.ts";
 import { arrangeIndexes, arrangeTiles, groupStarts, mixTiles, TILE_ORDERS, type TileGrouping, type TileOrder } from "../arrange.ts";
 import { readTiles, tileName } from "../names.ts";
 import { redFiveIndexes } from "../designs.ts";
-import { blockHtml, blockVars, BLOCK_STYLE, BOX_UNITS, CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, playSound, say, spinElement, tileDrawing, tileLabel, widthOf, wearCloth, type SpinOptions } from "./elementKit.ts";
+import { blockHtml, blockVars, BLOCK_STYLE, BOX_UNITS, CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, playSound, reflectMethod, say, spinElement, tileDrawing, tileLabel, widthOf, wearCloth, type SpinOptions } from "./elementKit.ts";
 import { RACK_LIFT, rackPlaces, rackWidth, TILE_TALL, type RackPlace } from "./rackLayout.ts";
 
 /** How a rack's tiles are turned face down or face up. */
@@ -82,18 +82,21 @@ export class JarajaraRack extends ElementBase {
   #told: string | null = null;
   #focus: number | null = null;
 
-  /** The tiles as dealt, as letters. Setting them lays the rack out afresh. */
+  /** The tiles as dealt, as letters. Setting them, to a list of letters or to any text the attribute takes, lays the rack out afresh. */
   get tiles(): string[] {
     return readTiles(this.getAttribute("tiles"));
   }
-  set tiles(tiles: readonly string[]) {
-    this.setAttribute("tiles", tiles.join(""));
+  set tiles(tiles: string | readonly string[]) {
+    this.setAttribute("tiles", typeof tiles === "string" ? tiles : tiles.join(""));
   }
 
-  /** The letters of the tiles picked up. */
+  /** The letters of the tiles picked up. Setting it sets the `lifted` attribute, which names their places in `tiles`, from 0, as `"0 3"` or `[0, 3]`. */
   get lifted(): string[] {
     const tiles = this.tiles;
     return numbersIn(this.getAttribute("lifted")).flatMap((at) => (tiles[at] === undefined ? [] : [tiles[at]!]));
+  }
+  set lifted(places: string | readonly number[]) {
+    this.setAttribute("lifted", typeof places === "string" ? places : places.join(" "));
   }
 
   /** The tiles as they lie now, left to right: sorted if the rack is. */
@@ -621,3 +624,5 @@ ${BLOCK_STYLE}
 ${MARKER_STYLE}
 ${CLOTH_STYLE}
 `;
+reflectMethod(JarajaraRack, "group");
+reflectMethod(JarajaraRack, "mark");

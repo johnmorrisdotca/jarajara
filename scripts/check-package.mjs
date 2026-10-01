@@ -96,5 +96,15 @@ console.log(names.join(" "));
 console.log(`ok   import:  ${run(process.execPath, ["esm.mjs"], project).trim()}`);
 console.log(`ok   require: ${run(process.execPath, ["cjs.cjs"], project).trim()}`);
 
+// 5. The command line, as installed: the file the bin points at runs, and plays a deal the package made.
+const installedBin = join(project, "node_modules", ...pkg.name.split("/"), pkg.bin.jarajara);
+console.log(`ok   command line: ${run(process.execPath, [installedBin, "--version"], project).trim()}`);
+const played = run(process.execPath, [installedBin, "check", deal.solution, "--layout", "15", "--givens", deal.givens], project).trim();
+if (!played.startsWith("Cleared:")) {
+  console.error(`FAIL the installed command line says ${played}`);
+  process.exit(1);
+}
+console.log(`ok   command line: ${played}`);
+
 rmSync(scratch, { recursive: true, force: true });
 console.log("the package installs and runs as published, on", process.platform, process.version);
