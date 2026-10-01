@@ -1,0 +1,88 @@
+{
+  "name": "@johnmorrisdotca/jarajara",
+  "version": "1.0.0",
+  "description": "Jarajara, mahjong tiles for JavaScript and TypeScript: the 144-tile set in 42 faces drawn as SVG, the stacked layouts tile games are played on, which tiles are free, matching, dealing and shuffling, a game written as text, and Awase, the matching solitaire, alone or at a table for two to four with a computer player. Seeded, every deal clearable. Zero dependencies.",
+  "keywords": [
+    "mahjong",
+    "mahjong-tiles",
+    "mahjong-solitaire",
+    "shanghai",
+    "tile-matching",
+    "solitaire",
+    "puzzle",
+    "svg",
+    "tiles",
+    "game",
+    "seeded-random",
+    "typescript",
+    "javascript",
+    "zero-dependencies",
+    "browser",
+    "node",
+    "itsutsu"
+  ],
+  "homepage": "https://github.com/johnmorrisdotca/jarajara#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/johnmorrisdotca/jarajara.git"
+  },
+  "bugs": {
+    "url": "https://github.com/johnmorrisdotca/jarajara/issues"
+  },
+  "author": "John Morris",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./awase": {
+      "types": "./dist/awase-entry.d.ts",
+      "import": "./dist/awase-entry.js",
+      "default": "./dist/awase-entry.js"
+    },
+    "./table": {
+      "types": "./dist/table-entry.d.ts",
+      "import": "./dist/table-entry.js",
+      "default": "./dist/table-entry.js"
+    },
+    "./faces": {
+      "types": "./dist/faces-entry.d.ts",
+      "import": "./dist/faces-entry.js",
+      "default": "./dist/faces-entry.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.check.json",
+    "test": "vitest run",
+    "test:package": "pnpm build && node scripts/check-package.mjs",
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "prepublishOnly": "pnpm check && pnpm build",
+    "site": "pnpm build && node scripts/site.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^5.0.0"
+  },
+  "packageManager": "pnpm@10.11.0"
+}

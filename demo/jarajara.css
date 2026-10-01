@@ -1,0 +1,15 @@
+/* Jarajara's own look, after family.css: the cloth the layout lies on, and the lines under it. */
+.setup { margin-top: 10px; }
+.table { margin: 12px auto 0; background: radial-gradient(120% 90% at 50% 20%, var(--felt) 0%, var(--felt-deep) 100%); border-radius: var(--radius); padding: 14px; }
+#board { display: block; width: 100%; margin: 0 auto; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+#board svg { display: block; width: 100%; height: auto; }
+#board [data-free="true"] { cursor: pointer; }
+#board [data-free="false"] { cursor: not-allowed; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+.how { margin: 10px 0 0; color: var(--muted); font-size: .85rem; }
+.status { margin: 12px 0 0; font-weight: 600; text-align: center; min-height: 1.4em; }
+.status[data-solved="true"] { color: var(--good); }
+.note { margin: 4px 0 0; text-align: center; color: var(--accent); min-height: 2.8em; font-weight: 600; }
+.uses { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.more .uses { grid-template-columns: 1fr; }
+.uses code { font-family: var(--mono); font-size: .85rem; overflow-wrap: anywhere; }
