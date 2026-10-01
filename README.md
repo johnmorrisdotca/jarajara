@@ -160,6 +160,39 @@ light objects on any table; the table under them is the page's.
 Every function is pure: it returns new values and never changes what it was
 given.
 
+## Architecture
+
+The rules are plain functions over strings, with no DOM; the drawing is a
+separate entry, so a server that only checks a game never loads it.
+
+```text
+src/
+├── index.ts          the main entry: the set, layouts, board, dealing and moves
+├── awase-entry.ts    the "/awase" entry: the solitaire's deal and check
+├── table-entry.ts    the "/table" entry: Awase for two to four, and the computer
+├── faces-entry.ts    the "/faces" entry: the tiles and layouts drawn as SVG
+├── tiles.ts          the 144 tiles in 42 faces, matching, and what a pair scores
+├── layouts.ts        the five stacked layouts, Tiny to the Turtle
+├── board.ts          which tiles are free, the pairs that can be taken, taking one
+├── deal.ts           laying pairs in reverse so a deal can always be cleared; shuffling
+├── moves.ts          a game written as text, and played back on a deal
+├── awase.ts          a deal of Awase from a seed, at three levels
+├── check.ts          whether a finished game clears its deal
+├── table.ts          the rules at a table: turns, scores, shuffles and the end
+├── computer.ts       the computer's choice of pair at the table
+├── faces.ts          each face as SVG text, one tile on its own, and their colours
+├── draw.ts           a whole layout drawn as one SVG, stacked far to near
+├── random.ts         the seeded random numbers every deal is made from
+├── types.ts          the types of the set, layouts, moves and Awase
+├── table.types.ts    the types of a table
+└── version.ts        the package's version
+```
+
+Tests sit beside the code they test (`*.test.ts`). `site.fixture.json` holds
+every deal and table game itsutsu.com made before the move, played again on
+every build. `demo/` is the playable page, and `scripts/` builds it and checks
+the package as npm packs it.
+
 ## The name
 
 *Jarajara* (ジャラジャラ) is the sound of mahjong tiles being shuffled, the
