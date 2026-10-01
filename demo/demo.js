@@ -7,6 +7,7 @@ import { layoutBox, layoutSvg } from "./dist/faces-entry.js";
 // The page's own words, in the two languages it speaks. Set as text, never as HTML.
 const WORDS = {
   en: {
+    pageApi: "API reference",
     pitch: "Mahjong tiles for JavaScript and TypeScript. Below is Awase, the matching solitaire: take the tiles away two at a time, two that match and that are both free, until the layout is clear.",
     name: "Jarajara (ジャラジャラ) is the rattle of mahjong tiles being shuffled.",
     nameLink: "About the name",
@@ -31,6 +32,7 @@ const WORDS = {
     foot: "Every deal is laid in reverse, so every deal can be cleared. Your game stays on this device.",
   },
   ja: {
+    pageApi: "API（英語）",
     pitch: "JavaScriptとTypeScriptのための麻雀牌です。下は「合わせ」、牌を二枚ずつ取り除く一人遊びです。同じ牌で、どちらも空いている二枚を取り、すべての牌がなくなれば完成です。",
     name: "「ジャラジャラ」は、麻雀牌を混ぜるときの音です。",
     nameLink: "名前について（英語）",

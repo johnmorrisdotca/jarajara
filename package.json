@@ -1,6 +1,6 @@
 {
   "name": "@johnmorrisdotca/jarajara",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Jarajara, mahjong tiles for JavaScript and TypeScript: the 144-tile set in 42 faces drawn as SVG, the stacked layouts tile games are played on, which tiles are free, matching, dealing and shuffling, a game written as text, and Awase, the matching solitaire, alone or at a table for two to four with a computer player. Seeded, every deal clearable. Zero dependencies.",
   "keywords": [
     "mahjong",

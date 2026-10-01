@@ -10,7 +10,7 @@ The 144-tile set in 42 faces, drawn as SVG; the stacked layouts tile games are p
   <img alt="No dependencies" src="https://img.shields.io/badge/dependencies-0-2f5d4a">
 </p>
 
-<p align="center"><a href="https://johnmorrisdotca.github.io/jarajara/"><strong>Play Awase →</strong></a></p>
+<p align="center"><a href="https://johnmorrisdotca.github.io/jarajara/"><strong>Play Awase →</strong></a> · <a href="https://johnmorrisdotca.github.io/jarajara/api.html">API reference</a></p>
 
 <p align="center">
   <img src="docs/desktop.jpg" alt="The Turtle, a layout of 144 mahjong tiles stacked five layers high on a green cloth, a few pairs already taken" width="620">
@@ -150,6 +150,8 @@ light objects on any table; the table under them is the page's.
 
 ## API
 
+The [API reference](https://johnmorrisdotca.github.io/jarajara/api.html) lists every export of every entry point with its signature and its doc comment. It is made from the source by `pnpm site`, so it cannot fall behind the code.
+
 | Import | What it holds |
 | --- | --- |
 | `@johnmorrisdotca/jarajara` | the set (`MAHJONG_FACES`, `faceOf`, `tilesMatch`, `matchClass`, `bonusRuleOf`, `setPairs`, `pairPoints`), the layouts (`MAHJONG_LAYOUTS`, `layoutFor`, `layoutExtent`), the board (`geometryOf`, `isFree`, `freeSlots`, `freePairs`, `blockedBy`, `canTake`, `takePair`, `tilesLeft`, `isCleared`), dealing (`layPairs`, `pairsLeft`, `shuffleTiles`), games as text (`encodeMoves`, `decodeMoves`, `playSolve`, `dealFits`), `seededRandom` and `shuffled` |
@@ -190,7 +192,7 @@ src/
 
 Tests sit beside the code they test (`*.test.ts`). `site.fixture.json` holds
 every deal and table game itsutsu.com made before the move, played again on
-every build. `demo/` is the playable page, and `scripts/` builds it and checks
+every build. `demo/` is the playable page, and `scripts/` builds it and its API reference page and checks
 the package as npm packs it.
 
 ## The name
