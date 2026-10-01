@@ -2,22 +2,22 @@
         <h2 id="play-title" class="fam-sr" data-say="playTitle"></h2>
         <div class="fam-row setup">
           <span class="fam-label" data-say="layout"></span>
-          <div class="fam-seg" role="group" data-say-label="layout" id="layouts" data-testid="layouts"></div>
+          <div class="fam-seg" role="group" data-say-label="layout" id="layouts" data-testid="layouts" data-help-en="Choose the arrangement the tiles are piled in. Each layout is a different shape." data-help-ja="牌の積み方（配置）を選びます。配置ごとに形が違います。" data-help-after></div>
         </div>
-        <div class="fam-row setup">
+        <div class="fam-row setup" data-help-en="Level sets how hard the game is. Light the free tiles brightens the tiles you can take, and Ring the matches rings tiles that match." data-help-ja="「難しさ」でゲームの難易度を選びます。「取れる牌を明るく」で取れる牌が明るくなり、「同じ牌を囲む」で同じ牌が囲まれます。">
           <span class="fam-label" data-say="level"></span>
           <div class="fam-seg" role="group" data-say-label="level" id="levels" data-testid="levels"></div>
           <button type="button" class="fam-button" id="show-free" data-testid="show-free" data-say="showFree" aria-pressed="false"></button>
           <button type="button" class="fam-button" id="show-matching" data-testid="show-matching" data-say="showMatching" aria-pressed="false"></button>
         </div>
-        <div class="fam-row setup">
+        <div class="fam-row setup" data-help-en="Limits for this game: how many hints, shuffles and undos you get, and the design of the tiles. Sound turns tile sounds on or off." data-help-ja="このゲームの制限です（ヒント、混ぜる回数、戻す回数）。牌の絵柄も選べます。「音」で牌の音のオンとオフを切り替えます。">
           <label><span data-say="hints"></span> <select id="hints" class="fam-field" data-testid="hints"></select></label>
           <label><span data-say="shuffles"></span> <select id="shuffles" class="fam-field" data-testid="shuffles"></select></label>
           <label><span data-say="undoWord"></span> <select id="undo-allowed" class="fam-field" data-testid="undo-allowed"></select></label>
           <label><span data-say="designWord"></span> <select id="game-design" class="fam-field" data-testid="game-design"></select></label>
           <button type="button" class="fam-button" id="sound-toggle" data-testid="sound-toggle" data-say="soundWord" aria-pressed="false"></button>
         </div>
-        <div class="fam-row setup">
+        <div class="fam-row setup" data-help-en="Challenge adds a rule to the game. Today&#x27;s game plays the challenge of the day." data-help-ja="「チャレンジ」はゲームにルールをひとつ加えます。「今日の一局」は、その日のチャレンジで遊びます。">
           <span class="fam-label" data-say="challengeWord"></span>
           <div class="fam-seg" role="group" data-say-label="challengeWord" id="challenge-picks" data-testid="challenge-picks"></div>
           <button type="button" class="fam-button" id="daily" data-testid="daily" data-say="daily"></button>
@@ -33,12 +33,12 @@
         <section aria-labelledby="tile-title" id="tile-panel">
           <h2 id="tile-title" data-say="tileTitle"></h2>
           <p data-say="tileNote"></p>
-          <div class="fam-row setup">
+          <div class="fam-row setup" data-help-en="Choose which tile to show, the design of its face, and the back it turns to." data-help-ja="表示する牌、表の絵柄、裏の絵柄を選びます。">
             <label><span data-say="pickTile"></span> <select id="tile-pick" class="fam-field" data-testid="tile-pick"></select></label>
             <label><span data-say="designWord"></span> <select id="tile-design" class="fam-field" data-testid="tile-design"></select></label>
             <label><span data-say="backWord"></span> <select id="tile-back" class="fam-field" data-testid="tile-back"></select></label>
           </div>
-          <div class="fam-row setup">
+          <div class="fam-row setup" data-help-en="Size is how big the tile is drawn. Red five makes the fives red. Sound plays a tile sound when it turns over." data-help-ja="「大きさ」は牌を描く大きさです。「赤五」で五を赤にします。「音」で、牌を裏返すときの音を出します。">
             <span class="fam-seg" role="group" data-say-label="sizeWord">
               <button type="button" data-tile-size="small" data-testid="tile-small" data-say="sizeSmall"></button>
               <button type="button" data-tile-size="medium" data-testid="tile-medium" data-say="sizeMedium"></button>
@@ -53,8 +53,8 @@
         <section aria-labelledby="backs-title" id="backs">
           <h2 id="backs-title" data-say="backsTitle"></h2>
           <p data-say="backsNote"></p>
-          <div class="back-picks" id="back-picks" data-testid="back-picks"></div>
-          <div class="fam-row setup">
+          <div class="back-picks" id="back-picks" data-testid="back-picks" data-help-en="Choose a tile back. The picture and the code below show it." data-help-ja="牌の裏を選びます。下の絵とコードに反映されます。" data-help-after></div>
+          <div class="fam-row setup" data-help-en="Colour is a colour of your own for the chosen back, and Use this colour applies it. Mark writes a short mark in the middle." data-help-ja="「色」は選んだ裏に付ける好きな色で、「この色を使う」で適用します。「文字」は、中央に入れる短い文字です。">
             <label><span data-say="backColour"></span> <input type="color" id="back-colour" class="fam-field colour" data-testid="back-colour" /></label>
             <button type="button" class="fam-button" id="back-own" data-testid="back-own" data-say="backOwnColour"></button>
             <label><span data-say="backMark"></span> <input id="back-mark" class="fam-field" data-testid="back-mark" maxlength="8" autocomplete="off" /></label>
@@ -69,13 +69,13 @@
           <p data-say="rackNote"></p>
           <div class="hand-stage"><jarajara-rack id="rack" data-testid="rack" capacity="14" pick></jarajara-rack></div>
           <div class="hand-controls">
-            <div class="fam-row hand-row" role="group" data-say-label="rowTurn"><span class="fam-label" data-say="rowTurn"></span><div class="hand-buttons">
+            <div class="fam-row hand-row" role="group" data-say-label="rowTurn" data-help-en="Turn the whole rack face down or face up, one tile at a time if you like, or turn only the raised tiles." data-help-ja="牌全体を伏せたり表にしたりします（1枚ずつも選べます）。持ち上げた牌だけを裏返すこともできます。"><span class="fam-label" data-say="rowTurn"></span><div class="hand-buttons">
               <button type="button" class="fam-button" id="rack-hide" data-testid="rack-hide" data-say="hide"></button>
               <button type="button" class="fam-button" id="rack-show" data-testid="rack-show" data-say="show"></button>
               <button type="button" class="fam-button" id="rack-hide-slow" data-testid="rack-hide-slow" data-say="hideSlow"></button>
               <button type="button" class="fam-button" id="rack-toggle" data-testid="rack-toggle" data-say="turnRaised"></button>
             </div></div>
-            <div class="fam-row hand-row" role="group" data-say-label="rowOrder"><span class="fam-label" data-say="rowOrder"></span><div class="hand-buttons">
+            <div class="fam-row hand-row" role="group" data-say-label="rowOrder" data-help-en="Sort the rack, group it by suit or by kind, close the groups, put it back as dealt, or mix it up." data-help-ja="牌を整列します。種類やスートごとにまとめる、まとめを閉じる、配られた順に戻す、混ぜることもできます。"><span class="fam-label" data-say="rowOrder"></span><div class="hand-buttons">
               <button type="button" class="fam-button" id="rack-sort" data-testid="rack-sort" data-say="sortWord"></button>
               <button type="button" class="fam-button" id="rack-group-suit" data-testid="rack-group-suit" data-say="groupSuit"></button>
               <button type="button" class="fam-button" id="rack-group-kind" data-testid="rack-group-kind" data-say="groupKind"></button>
@@ -83,12 +83,12 @@
               <button type="button" class="fam-button" id="rack-unsort" data-testid="rack-unsort" data-say="unsort"></button>
               <button type="button" class="fam-button" id="rack-mix" data-testid="rack-mix" data-say="mix"></button>
             </div></div>
-            <div class="fam-row hand-row" role="group" data-say-label="rowChange"><span class="fam-label" data-say="rowChange"></span><div class="hand-buttons">
+            <div class="fam-row hand-row" role="group" data-say-label="rowChange" data-help-en="Take the raised tiles out, put a new tile in, or deal a new hand." data-help-ja="持ち上げた牌を取り出す、新しい牌を入れる、新しく配り直す、のどれかを選びます。"><span class="fam-label" data-say="rowChange"></span><div class="hand-buttons">
               <button type="button" class="fam-button" id="rack-take" data-testid="rack-take" data-say="takeRaised"></button>
               <button type="button" class="fam-button" id="rack-add" data-testid="rack-add" data-say="addTile"></button>
               <button type="button" class="fam-button" id="rack-new" data-testid="rack-new" data-say="newHand"></button>
             </div></div>
-            <div class="fam-row hand-row" role="group" data-say-label="rowMark"><span class="fam-label" data-say="rowMark"></span><div class="hand-buttons">
+            <div class="fam-row hand-row" role="group" data-say-label="rowMark" data-help-en="Mark the raised tiles, clear the marks, or spin a tile." data-help-ja="持ち上げた牌に印をつけたり、印を消したり、牌を回したりします。"><span class="fam-label" data-say="rowMark"></span><div class="hand-buttons">
               <button type="button" class="fam-button" id="rack-mark" data-testid="rack-mark" data-say="markRaised"></button>
               <button type="button" class="fam-button" id="rack-unmark" data-testid="rack-unmark" data-say="unmark"></button>
               <button type="button" class="fam-button" id="rack-spin" data-testid="rack-spin" data-say="spin"></button>
@@ -100,11 +100,11 @@
         <section class="wide" aria-labelledby="viewer-title" id="viewer-panel">
           <h2 id="viewer-title" data-say="viewerTitle"></h2>
           <p data-say="viewerNote"></p>
-          <div class="fam-row setup" id="viewer-chips" data-testid="viewer-chips"></div>
+          <div class="fam-row setup" id="viewer-chips" data-testid="viewer-chips" data-help-en="Tap a tile to look it up in the viewer." data-help-ja="牌をタップすると、ビューアーで調べられます。" data-help-after></div>
           <div class="viewer-grid">
             <div class="viewer-box"><jarajara-viewer id="viewer" data-testid="viewer" query="east" editable></jarajara-viewer></div>
             <div class="viewer-box">
-              <div class="fam-row setup">
+              <div class="fam-row setup" data-help-en="Group chooses which group of the set is shown: a suit, the winds, the dragons, the flowers or the seasons. Face down hides them so you can learn them by tapping." data-help-ja="「グループ」で、表示するグループ（スート、風牌、三元牌、花牌、季節牌）を選びます。「伏せて、押して覚える」は牌を伏せ、押して覚えます。">
                 <label><span data-say="groupWord"></span> <select id="group-pick" class="fam-field" data-testid="group-pick"></select></label>
                 <button type="button" class="fam-button" id="group-hidden" data-testid="group-hidden" data-say="hiddenWord" aria-pressed="false"></button>
               </div>
@@ -116,7 +116,7 @@
         <section class="wide" aria-labelledby="set-title" id="set-panel">
           <h2 id="set-title" data-say="setTitle"></h2>
           <p data-say="setNote"></p>
-          <div class="fam-row setup">
+          <div class="fam-row setup" data-help-en="Show all 42 faces, or all 144 tiles. A hand is a list of tiles to count against the set." data-help-ja="42種類の牌、または144枚すべてを表示します。「手牌」は、セットと照らして数える牌の並びです。">
             <span class="fam-seg" role="group" data-say-label="setMode">
               <button type="button" data-set-mode="faces" data-testid="set-faces" data-say="modeFaces"></button>
               <button type="button" data-set-mode="tiles" data-testid="set-tiles" data-say="modeTiles"></button>
@@ -130,7 +130,7 @@
         <section class="wide" aria-labelledby="layouts-title" id="layouts-panel">
           <h2 id="layouts-title" data-say="layoutsTitle"></h2>
           <p data-say="layoutsNote"></p>
-          <div class="fam-row setup">
+          <div class="fam-row setup" data-help-en="Layout picks which layout to look at, and the buttons sort its tiles: by layer, across, down or top first." data-help-ja="見る配置を選びます。ボタンで牌の整列（層ごと、横、縦、上から）を切り替えます。">
             <label><span data-say="layout"></span> <select id="inspect-size" class="fam-field" data-testid="inspect-size"></select></label>
             <span class="fam-seg" role="group" data-say-label="sortWord">
               <button type="button" data-sort="z y x" data-testid="sort-zyx" data-say="sortLayer"></button>
@@ -151,7 +151,7 @@
         <section class="wide" aria-labelledby="table-title" id="table-panel">
           <h2 id="table-title" data-say="tableTitle"></h2>
           <p data-say="tableNote"></p>
-          <div class="fam-row setup">
+          <div class="fam-row setup" data-help-en="Players is how many sit at the table. New deal deals again." data-help-ja="「人数」は卓につく人数です。「新しく配る」で配り直します。">
             <label><span data-say="playersWord"></span> <select id="table-players" class="fam-field" data-testid="table-players"></select></label>
             <button type="button" class="fam-button" id="table-deal" data-testid="table-deal" data-say="newDeal"></button>
           </div>
@@ -167,7 +167,7 @@
         <section class="wide" aria-labelledby="designs-title" id="designs">
           <h2 id="designs-title" data-say="designsTitle"></h2>
           <p data-say="designsNote"></p>
-          <div class="fam-row setup">
+          <div class="fam-row setup" data-help-en="Choose a design for the tiles, and whether the fives are red. The set and the layout below follow." data-help-ja="牌の絵柄と、五を赤にするかどうかを選びます。下のセットと配置が変わります。">
             <span class="fam-seg" role="group" data-say-label="designWord" id="design-picks" data-testid="design-picks"></span>
             <button type="button" class="fam-button" id="design-red" data-testid="design-red" data-say="redFives" aria-pressed="false"></button>
           </div>
@@ -180,7 +180,7 @@
         <section class="wide" aria-labelledby="sounds-title" id="sounds">
           <h2 id="sounds-title" data-say="soundsTitle"></h2>
           <p data-say="soundsNote"></p>
-          <div class="fam-actions" id="sound-kinds" data-testid="sound-kinds"></div>
+          <div class="fam-actions" id="sound-kinds" data-testid="sound-kinds" data-help-en="Tap a sound to hear it." data-help-ja="音をタップすると聞けます。" data-help-after></div>
           <pre class="snippet" tabindex="0">import { createTileSounds } from "@johnmorrisdotca/jarajara/tile-sounds";
 
 const sounds = createTileSounds();
