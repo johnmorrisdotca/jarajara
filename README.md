@@ -13,8 +13,8 @@ The 144-tile set in 42 faces, drawn as SVG, with backs and cloths; custom elemen
 <p align="center"><a href="https://johnmorrisdotca.github.io/jarajara/"><strong>Play Awase →</strong></a> · <a href="https://johnmorrisdotca.github.io/jarajara/api.html">API reference</a></p>
 
 <p align="center">
-  <img src="docs/desktop.jpg" alt="The Turtle, a layout of 144 mahjong tiles stacked five layers high on a green cloth, a few pairs already taken" width="620">
-  <img src="docs/phone.jpg" alt="Awase on Fuji on a phone in dark mode, the free tiles lit and the blocked ones washed darker, 88 tiles left" width="200">
+  <img src="docs/desktop.jpg" alt="Awase on the Turtle, a layout of 144 mahjong tiles stacked five layers high on a green cloth with six pairs already taken, under the demo's choices of challenge, design, hints and shuffles: 132 tiles left, 12 pairs to take, and the New deal, Undo, Hint and Shuffle buttons" width="620">
+  <img src="docs/phone.jpg" alt="Awase on Fuji on a phone in dark mode, in Japanese: the free tiles lit and the blocked ones washed grey, 84 tiles left and 11 pairs to take" width="200">
 </p>
 
 Jarajara is the tiles; the games are played on them. The first is **Awase**
