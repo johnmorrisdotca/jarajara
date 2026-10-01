@@ -1,7 +1,7 @@
 // Builds the static demo for GitHub Pages into ./site: the page, written here from the family's
 // shared header and footer, with the family's stylesheet, Jarajara's own, the page's script and the
 // compiled library beside it.
-import { cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 
 import { API_CSS, apiPage } from "./api.mjs";
 import { FAMILY_SCRIPT, familyFooter, familyHead, familyHeader, familyUnreviewed } from "./family-template.mjs";
@@ -14,10 +14,23 @@ const uses = [
   `generateAwase(15, "medium", 12345)  // the Turtle, 144 tiles, clearable`,
   `freePairs(geometry, cells, "group")  // what may be taken now`,
   `checkAwase(15, givens, answer)  // { ok: true }`,
-  `layoutSvg(15, cells, { showFree: true })  // the layout, drawn`,
+  `layoutSvg(15, cells, { showFree: true, cloth: "green" })  // the layout, drawn`,
   `tileSvg("F")  // one tile: the red dragon`,
+  `tileBackSvg("bamboo")  // its back`,
+  `findFace("three circles")  // a tile by its name; readTiles("123m456p11z") for a hand`,
+  `sortSlots(layout, ["x", "y", "z"])  // a layout's slots, by where they lie`,
+  `<script type="module" src=".../element-define.js">  then <jarajara-tile>, <jarajara-rack>, <jarajara-layout> ...`,
 ];
 const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/** The page's body: the panels, with the lines of use filled in, and what a release adds in its own place. */
+const body = readFileSync("demo/body.html", "utf8")
+  .replace("__UNREVIEWED__", familyUnreviewed({ id }))
+  .replace("__USES__", uses.map((line) => `<li><code>${escape(line)}</code></li>`).join("\n            "))
+  .replace("__CHALLENGE_ROW__", "")
+  .replace("__TILE_EXTRAS__", "")
+  .replace("__MORE_PANELS__", "")
+  .trimEnd();
 
 const page = `<!doctype html>
 <html lang="en">
@@ -25,7 +38,7 @@ const page = `<!doctype html>
     ${familyHead({
       id,
       title: "Jarajara · mahjong tiles, and Awase to play",
-      description: "Play Awase, the mahjong matching solitaire, on the Turtle, Castle, Fuji or Torii, at three levels, every deal clearable. Jarajara is the open-source mahjong tile library it is built on, in English and Japanese.",
+      description: "Play Awase, the mahjong matching solitaire, and see the tiles, racks, layouts and tables Jarajara draws on any page. Jarajara is the open-source mahjong tile library it is built on, in English and Japanese.",
       ogTitle: "Jarajara mahjong tiles",
       ogDescription: "Take the tiles away two at a time, two that match and that are both free, until the layout is clear.",
     })}
@@ -36,46 +49,18 @@ const page = `<!doctype html>
   <body>
     <main>
       ${familyHeader({ id, links: [{ href: "api.html", say: "pageApi" }] })}
-      <div class="setup fam-row">
-        <span class="fam-label" data-say="layout"></span>
-        <div class="fam-seg" role="group" data-say-label="layout" id="layouts"></div>
-      </div>
-      <div class="setup fam-row">
-        <span class="fam-label" data-say="level"></span>
-        <div class="fam-seg" role="group" data-say-label="level" id="levels"></div>
-      </div>
-      <p class="how" data-say="howTo"></p>
-      <div class="table">
-        <div id="board"></div>
-      </div>
-      <div class="actions">
-        <button type="button" class="fam-button" id="new" data-say="newDeal"></button>
-        <button type="button" class="fam-button" id="undo" data-say="undo"></button>
-        <button type="button" class="fam-button" id="hint" data-say="hint"></button>
-        <button type="button" class="fam-button" id="show-free" data-say="showFree"></button>
-        <button type="button" class="fam-button" id="shuffle" data-say="shuffle" data-primary="true" hidden></button>
-      </div>
-      <p class="status" id="status" aria-live="polite"></p>
-      <p class="note" id="note" aria-live="polite"></p>
-      ${familyUnreviewed({ id })}
-      <section class="more" aria-labelledby="more-title">
-        <h2 id="more-title" data-say="moreTitle"></h2>
-        <p data-say="moreText"></p>
-        <ul class="uses">
-          ${uses.map((line) => `<li><code>${escape(line)}</code></li>`).join("\n          ")}
-        </ul>
-      </section>
+${body}
       ${familyFooter({ id })}
     </main>
     <script>${FAMILY_SCRIPT}</script>
-    <script type="module" src="demo.js"></script>
+    <script type="module" src="page.js"></script>
   </body>
 </html>
 `;
 
 rmSync("site", { recursive: true, force: true });
 mkdirSync("site", { recursive: true });
-cpSync("demo", "site", { recursive: true });
+for (const file of readdirSync("demo").filter((name) => /\.(css|js)$/.test(name))) cpSync(`demo/${file}`, `site/${file}`);
 cpSync("dist", "site/dist", { recursive: true });
 writeFileSync("site/index.html", page);
 // The API reference, made from the source: every export of every entry point.

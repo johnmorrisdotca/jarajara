@@ -1,0 +1,161 @@
+      <section class="choose" aria-labelledby="play-title" id="play">
+        <h2 id="play-title" class="fam-sr" data-say="playTitle"></h2>
+        <div class="fam-row setup">
+          <span class="fam-label" data-say="layout"></span>
+          <div class="fam-seg" role="group" data-say-label="layout" id="layouts" data-testid="layouts"></div>
+        </div>
+        <div class="fam-row setup">
+          <span class="fam-label" data-say="level"></span>
+          <div class="fam-seg" role="group" data-say-label="level" id="levels" data-testid="levels"></div>
+          <button type="button" class="fam-button" id="show-free" data-testid="show-free" data-say="showFree" aria-pressed="false"></button>
+          <button type="button" class="fam-button" id="show-matching" data-testid="show-matching" data-say="showMatching" aria-pressed="false"></button>
+        </div>
+        <div class="fam-row setup">
+          <label><span data-say="hints"></span> <select id="hints" class="fam-field" data-testid="hints"></select></label>
+          <label><span data-say="shuffles"></span> <select id="shuffles" class="fam-field" data-testid="shuffles"></select></label>
+          <label><span data-say="undoWord"></span> <select id="undo-allowed" class="fam-field" data-testid="undo-allowed"></select></label>
+        </div>
+        __CHALLENGE_ROW__
+        <p class="how" data-say="howTo"></p>
+      </section>
+      <div class="table-stage">
+        <jarajara-layout id="game" data-testid="game" size="15" controls timer cloth="green"></jarajara-layout>
+      </div>
+      __UNREVIEWED__
+      <div class="under">
+        <section aria-labelledby="tile-title" id="tile-panel">
+          <h2 id="tile-title" data-say="tileTitle"></h2>
+          <p data-say="tileNote"></p>
+          <div class="fam-row setup">
+            <label><span data-say="pickTile"></span> <select id="tile-pick" class="fam-field" data-testid="tile-pick"></select></label>
+            <label><span data-say="designWord"></span> <select id="tile-design" class="fam-field" data-testid="tile-design"></select></label>
+            <label><span data-say="backWord"></span> <select id="tile-back" class="fam-field" data-testid="tile-back"></select></label>
+          </div>
+          <div class="fam-row setup">
+            <span class="fam-seg" role="group" data-say-label="sizeWord">
+              <button type="button" data-tile-size="small" data-testid="tile-small" data-say="sizeSmall"></button>
+              <button type="button" data-tile-size="medium" data-testid="tile-medium" data-say="sizeMedium"></button>
+              <button type="button" data-tile-size="large" data-testid="tile-large" data-say="sizeLarge"></button>
+            </span>
+            __TILE_EXTRAS__
+          </div>
+          <div class="tile-stage" data-testid="tile-stage"><jarajara-tile id="one-tile" data-testid="one-tile" code="east" size="large" flip></jarajara-tile></div>
+          <pre class="snippet" id="tile-code" data-testid="tile-code" tabindex="0"></pre>
+        </section>
+        <section aria-labelledby="rack-title" id="rack-panel">
+          <h2 id="rack-title" data-say="rackTitle"></h2>
+          <p data-say="rackNote"></p>
+          <div class="hand-stage"><jarajara-rack id="rack" data-testid="rack" capacity="14" pick></jarajara-rack></div>
+          <div class="hand-controls">
+            <div class="fam-row hand-row" role="group" data-say-label="rowTurn"><span class="fam-label" data-say="rowTurn"></span><div class="hand-buttons">
+              <button type="button" class="fam-button" id="rack-hide" data-testid="rack-hide" data-say="hide"></button>
+              <button type="button" class="fam-button" id="rack-show" data-testid="rack-show" data-say="show"></button>
+              <button type="button" class="fam-button" id="rack-hide-slow" data-testid="rack-hide-slow" data-say="hideSlow"></button>
+              <button type="button" class="fam-button" id="rack-toggle" data-testid="rack-toggle" data-say="turnRaised"></button>
+            </div></div>
+            <div class="fam-row hand-row" role="group" data-say-label="rowOrder"><span class="fam-label" data-say="rowOrder"></span><div class="hand-buttons">
+              <button type="button" class="fam-button" id="rack-sort" data-testid="rack-sort" data-say="sortWord"></button>
+              <button type="button" class="fam-button" id="rack-group-suit" data-testid="rack-group-suit" data-say="groupSuit"></button>
+              <button type="button" class="fam-button" id="rack-group-kind" data-testid="rack-group-kind" data-say="groupKind"></button>
+              <button type="button" class="fam-button" id="rack-ungroup" data-testid="rack-ungroup" data-say="ungroup"></button>
+              <button type="button" class="fam-button" id="rack-unsort" data-testid="rack-unsort" data-say="unsort"></button>
+              <button type="button" class="fam-button" id="rack-mix" data-testid="rack-mix" data-say="mix"></button>
+            </div></div>
+            <div class="fam-row hand-row" role="group" data-say-label="rowChange"><span class="fam-label" data-say="rowChange"></span><div class="hand-buttons">
+              <button type="button" class="fam-button" id="rack-take" data-testid="rack-take" data-say="takeRaised"></button>
+              <button type="button" class="fam-button" id="rack-add" data-testid="rack-add" data-say="addTile"></button>
+              <button type="button" class="fam-button" id="rack-new" data-testid="rack-new" data-say="newHand"></button>
+            </div></div>
+            <div class="fam-row hand-row" role="group" data-say-label="rowMark"><span class="fam-label" data-say="rowMark"></span><div class="hand-buttons">
+              <button type="button" class="fam-button" id="rack-mark" data-testid="rack-mark" data-say="markRaised"></button>
+              <button type="button" class="fam-button" id="rack-unmark" data-testid="rack-unmark" data-say="unmark"></button>
+              <button type="button" class="fam-button" id="rack-spin" data-testid="rack-spin" data-say="spin"></button>
+            </div></div>
+          </div>
+          <p class="note-line" id="rack-note" data-testid="rack-note" aria-live="polite"></p>
+          <pre class="snippet" id="rack-code" data-testid="rack-code" tabindex="0"></pre>
+        </section>
+        <section class="wide" aria-labelledby="viewer-title" id="viewer-panel">
+          <h2 id="viewer-title" data-say="viewerTitle"></h2>
+          <p data-say="viewerNote"></p>
+          <div class="fam-row setup" id="viewer-chips" data-testid="viewer-chips"></div>
+          <div class="viewer-grid">
+            <div class="viewer-box"><jarajara-viewer id="viewer" data-testid="viewer" query="east" editable></jarajara-viewer></div>
+            <div class="viewer-box">
+              <div class="fam-row setup">
+                <label><span data-say="groupWord"></span> <select id="group-pick" class="fam-field" data-testid="group-pick"></select></label>
+                <button type="button" class="fam-button" id="group-hidden" data-testid="group-hidden" data-say="hiddenWord" aria-pressed="false"></button>
+              </div>
+              <jarajara-group id="group" data-testid="group" group="winds" size="medium"></jarajara-group>
+            </div>
+          </div>
+          <pre class="snippet" id="viewer-code" data-testid="viewer-code" tabindex="0"></pre>
+        </section>
+        <section class="wide" aria-labelledby="set-title" id="set-panel">
+          <h2 id="set-title" data-say="setTitle"></h2>
+          <p data-say="setNote"></p>
+          <div class="fam-row setup">
+            <span class="fam-seg" role="group" data-say-label="setMode">
+              <button type="button" data-set-mode="faces" data-testid="set-faces" data-say="modeFaces"></button>
+              <button type="button" data-set-mode="tiles" data-testid="set-tiles" data-say="modeTiles"></button>
+            </span>
+            <label><span data-say="setHand"></span> <input id="set-hand" class="fam-field" data-mono="true" data-testid="set-hand" autocomplete="off" autocapitalize="off" spellcheck="false" data-say-placeholder="setHandHint" /></label>
+          </div>
+          <p class="note-line" id="set-count" data-testid="set-count" aria-live="polite"></p>
+          <jarajara-set id="set" data-testid="set" size="small" cloth="green"></jarajara-set>
+          <pre class="snippet" id="set-code" data-testid="set-code" tabindex="0"></pre>
+        </section>
+        <section aria-labelledby="backs-title" id="backs">
+          <h2 id="backs-title" data-say="backsTitle"></h2>
+          <p data-say="backsNote"></p>
+          <div class="back-picks" id="back-picks" data-testid="back-picks"></div>
+          <div class="fam-row setup">
+            <label><span data-say="backColour"></span> <input type="color" id="back-colour" class="fam-field colour" data-testid="back-colour" /></label>
+            <button type="button" class="fam-button" id="back-own" data-testid="back-own" data-say="backOwnColour"></button>
+            <label><span data-say="backMark"></span> <input id="back-mark" class="fam-field" data-testid="back-mark" maxlength="8" autocomplete="off" /></label>
+          </div>
+          <div class="back-out">
+            <div class="back-show" id="back-show" data-testid="back-show"></div>
+            <pre class="snippet" id="back-code" data-testid="back-code" tabindex="0"></pre>
+          </div>
+        </section>
+        <section aria-labelledby="layouts-title" id="layouts-panel">
+          <h2 id="layouts-title" data-say="layoutsTitle"></h2>
+          <p data-say="layoutsNote"></p>
+          <div class="fam-row setup">
+            <label><span data-say="layout"></span> <select id="inspect-size" class="fam-field" data-testid="inspect-size"></select></label>
+            <span class="fam-seg" role="group" data-say-label="sortWord">
+              <button type="button" data-sort="z y x" data-testid="sort-zyx" data-say="sortLayer"></button>
+              <button type="button" data-sort="x y z" data-testid="sort-xyz" data-say="sortAcross"></button>
+              <button type="button" data-sort="y x z" data-testid="sort-yxz" data-say="sortDown"></button>
+              <button type="button" data-sort="-z x y" data-testid="sort-top" data-say="sortTop"></button>
+            </span>
+          </div>
+          <p class="note-line" id="inspect-note" data-testid="inspect-note" aria-live="polite"></p>
+          <div class="inspect-stage"><jarajara-layout id="inspect" data-testid="inspect" size="8" view="lined" sort="z y x" static cloth="green"></jarajara-layout></div>
+          <pre class="snippet" id="inspect-code" data-testid="inspect-code" tabindex="0"></pre>
+        </section>
+        <section class="wide" aria-labelledby="gallery-title" id="gallery-panel">
+          <h2 id="gallery-title" data-say="galleryTitle"></h2>
+          <p data-say="galleryNote"></p>
+          <div class="gallery" id="gallery" data-testid="gallery"></div>
+        </section>
+        <section class="wide" aria-labelledby="table-title" id="table-panel">
+          <h2 id="table-title" data-say="tableTitle"></h2>
+          <p data-say="tableNote"></p>
+          <div class="fam-row setup">
+            <label><span data-say="playersWord"></span> <select id="table-players" class="fam-field" data-testid="table-players"></select></label>
+            <button type="button" class="fam-button" id="table-deal" data-testid="table-deal" data-say="newDeal"></button>
+          </div>
+          <jarajara-table id="table-demo" data-testid="table-demo" players="2" size="8" cloth="green" delay="500"></jarajara-table>
+          <pre class="snippet" id="table-code" data-testid="table-code" tabindex="0"></pre>
+        </section>
+        __MORE_PANELS__
+        <section class="wide using" aria-labelledby="more-title">
+          <h2 id="more-title" data-say="moreTitle"></h2>
+          <p data-say="moreText"></p>
+          <ul class="uses">
+            __USES__
+          </ul>
+        </section>
+      </div>

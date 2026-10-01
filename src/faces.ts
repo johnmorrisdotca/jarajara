@@ -1,5 +1,9 @@
+import type { TileDesign } from "./design.types.ts";
+import { faceWords } from "./names.ts";
 import { faceOf, MAHJONG_FACES } from "./tiles.ts";
 import type { MahjongFace } from "./types.ts";
+
+export { faceWords };
 
 /**
  * THE FACES OF THE TILES, as SVG text: a Japanese-style set in the plainest
@@ -153,19 +157,86 @@ function drawing(face: MahjongFace): string {
 /**
  * One face's drawing, in the tile's own 30 by 40, with no tile under it: the
  * inside of a `<symbol>` or a `<g>`, for a board that draws its own tiles.
- * Null for a letter that is no face.
+ * Null for a letter that is no face. With a `design`, that design's drawing of
+ * the face (fitted to the 30 by 40), or Jarajara's own where it has none.
  */
-export function tileFaceSvg(code: string): string | null {
+export function tileFaceSvg(code: string, design?: TileDesign, red = false): string | null {
   const face = faceOf(code);
-  return face === null ? null : drawing(face);
+  if (face === null) return null;
+  if (design === undefined) return drawing(face);
+  const own = (red ? design.red?.[code] : undefined) ?? design.faces[code];
+  if (own !== undefined) return fitted(design, own);
+  return `${design.plate ?? ""}${drawing(face)}`;
 }
+
+/** A drawing made in a design's box, fitted to the tile's 30 by 40. */
+function fitted(design: TileDesign, inner: string): string {
+  const [w, h] = design.box;
+  if (w === TILE_SIZE.width && h === TILE_SIZE.height) return inner;
+  return `<g transform="scale(${round(TILE_SIZE.width / w)} ${round(TILE_SIZE.height / h)})">${inner}</g>`;
+}
+
+/** The tile's own plate in a design, fitted to the tile's 30 by 40; null for a design that draws the plain rounded rectangle. */
+export function tileBodySvg(design: TileDesign | undefined): string | null {
+  return design === undefined || design.body === null ? null : fitted(design, design.body);
+}
+
+/** The back of a tile in a design, plate and pattern, fitted to the tile's 30 by 40. */
+export function tileBackDrawing(design: TileDesign): string {
+  return fitted(design, design.back);
+}
+
+/** The colours of a tile's rim and thickness: a design's, or Jarajara's own ivory and bone. */
+export function tileColours(design?: TileDesign): { face: string; rim: string; side: string; sideEdge: string } {
+  return design?.colours ?? TILE_BODY;
+}
+
+/** How a set of symbols is made. */
+export type TileSymbolOptions = {
+  /** A design's drawings instead of Jarajara's own. */
+  design?: TileDesign;
+  /** Only these faces' symbols, for a board that holds few of them. Unless said, all 42. */
+  faces?: Iterable<string>;
+  /** Also a symbol of each red five, `<prefix>-e-red`, for a design that has them. */
+  red?: boolean;
+};
 
 /**
  * Every face as a `<symbol>` in one `<defs>`, ids `<prefix>-<code>`, so a board
- * of 144 tiles draws 42 pictures and places each with a `<use>`.
+ * of 144 tiles draws 42 pictures and places each with a `<use>`. A design with
+ * a plate of its own adds it as `<prefix>-body`, and its red fives are
+ * `<prefix>-<code>-red`.
  */
-export function tileFaceSymbols(prefix: string): string {
-  return `<defs>${MAHJONG_FACES.map((face) => `<symbol id="${prefix}-${face.code}" viewBox="0 0 ${TILE_SIZE.width} ${TILE_SIZE.height}">${drawing(face)}</symbol>`).join("")}</defs>`;
+export function tileFaceSymbols(prefix: string, options: TileSymbolOptions = {}): string {
+  const { design, red = false } = options;
+  const wanted = options.faces === undefined ? null : new Set(options.faces);
+  const box = `viewBox="0 0 ${TILE_SIZE.width} ${TILE_SIZE.height}"`;
+  const symbols: string[] = [];
+  const body = tileBodySvg(design);
+  if (body !== null) symbols.push(`<symbol id="${prefix}-body" ${box}>${body}</symbol>`);
+  for (const face of MAHJONG_FACES) {
+    if (wanted !== null && !wanted.has(face.code)) continue;
+    symbols.push(`<symbol id="${prefix}-${face.code}" ${box}>${tileFaceSvg(face.code, design)}</symbol>`);
+    if (red && design?.red?.[face.code] !== undefined) symbols.push(`<symbol id="${prefix}-${face.code}-red" ${box}>${tileFaceSvg(face.code, design, true)}</symbol>`);
+  }
+  return `<defs>${symbols.join("")}</defs>`;
+}
+
+/** How a tile on its own is drawn. */
+export type TileSvgOptions = {
+  /** A design's drawing instead of Jarajara's own. */
+  design?: TileDesign;
+  /** The red five of a design that has one, for a five. */
+  red?: boolean;
+  /** What a screen reader says. Unless said, the tile's name in English. An empty string makes the picture decoration. */
+  title?: string;
+};
+
+/** The `<svg>` opening a tile's picture: its box with room for the sliver of its side, and its name. */
+function tileOpen(face: MahjongFace, title: string | undefined): string {
+  const said = title ?? faceWords(face);
+  const named = said === "" ? ` aria-hidden="true"` : ` role="img" aria-label="${said}"`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 32 42"${named} data-face="${face.code}">`;
 }
 
 /**
@@ -174,31 +245,16 @@ export function tileFaceSymbols(prefix: string): string {
  * caller's, through CSS; the picture keeps its 3 by 4. Null for a letter that
  * is no face.
  */
-export function tileSvg(code: string): string | null {
+export function tileSvg(code: string, options: TileSvgOptions = {}): string | null {
   const face = faceOf(code);
   if (face === null) return null;
+  const { design, red = false } = options;
+  const colours = tileColours(design);
+  const body = tileBodySvg(design);
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 32 42" role="img" aria-label="${faceWords(face)}" data-face="${face.code}">` +
-    `<rect x="-0.5" y="-0.5" width="31" height="41" rx="3" fill="${TILE_BODY.side}"/>` +
-    `<rect x="0" y="0" width="30" height="40" rx="3" fill="${TILE_BODY.face}" stroke="${TILE_BODY.rim}" stroke-width="0.8"/>` +
-    `${drawing(face)}</svg>`
+    tileOpen(face, options.title) +
+    `<rect x="-0.5" y="-0.5" width="31" height="41" rx="3" fill="${colours.side}"/>` +
+    (body === null ? `<rect x="0" y="0" width="30" height="40" rx="3" fill="${colours.face}" stroke="${colours.rim}" stroke-width="0.8"/>` : body) +
+    `${tileFaceSvg(code, design, red)}</svg>`
   );
-}
-
-/** What a face is called, in English: "3 of characters", "east wind", "red dragon", "plum (flower)". */
-export function faceWords(face: MahjongFace): string {
-  switch (face.suit) {
-    case "characters":
-    case "circles":
-    case "bamboo":
-      return `${face.rank} of ${face.suit}`;
-    case "winds":
-      return `${["east", "south", "west", "north"][face.rank - 1]} wind`;
-    case "dragons":
-      return `${["red", "green", "white"][face.rank - 1]} dragon`;
-    case "flowers":
-      return `${["plum", "orchid", "chrysanthemum", "bamboo"][face.rank - 1]} (flower)`;
-    case "seasons":
-      return `${["spring", "summer", "autumn", "winter"][face.rank - 1]} (season)`;
-  }
 }

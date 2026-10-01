@@ -9,6 +9,8 @@ export * from "./layouts.ts";
 export * from "./board.ts";
 export * from "./deal.ts";
 export * from "./moves.ts";
+export * from "./names.ts";
+export * from "./arrange.ts";
 export type * from "./types.ts";
 export { seededRandom, shuffled } from "./random.ts";
 export type { Random } from "./random.ts";

@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.1.0 — 2026-10-01
+
+Elements, viewers and backs: the tiles on any page, with the things done with tiles in front of you.
+
+- **Seven custom elements**, defined by `@johnmorrisdotca/jarajara/element/define` (classes alone in `/element`):
+  `<jarajara-tile>` (one tile, face up or down, turned by a tap, any size), `<jarajara-rack>` (tiles lined up: turn
+  all or some over, sort, group by suit or kind, mix, take one out, put one in, mark, raise with a tap, spin),
+  `<jarajara-layout>` (a game of Awase: free tiles, pairs, hint, shuffle, undo, a timer, limits on hints and shuffles,
+  matching tiles ringed, and the layout lined up sorted by x, y and z), `<jarajara-table>` (Awase for two to four with
+  computers), and the viewers `<jarajara-viewer>`, `<jarajara-group>` and `<jarajara-set>`.
+- **Looking tiles up**: `findFace` finds a tile by its code, a name in English or Japanese or hand notation (`3p`,
+  `7z`); `readTiles` and `writeNotation` read and write whole hands; `tileName`, `TILE_GROUPS`, `groupFaces` and
+  `setInventory` name and count the set.
+- **Arranging**: `arrangeTiles` (suit, rank, kind, code), `groupTiles`, `mixTiles`, and `sortSlots` to put a layout's
+  slots in order by x, y and z.
+- **Backs**: `tileBackSvg` draws five backs (jade, bamboo, blue, red, ink), recoloured or marked with a few letters.
+- **Cloths**: the family's five (green, blue, red, black, wood) as a `cloth` setting on every element and on `layoutSvg`,
+  and `clothVars`.
+- `layoutSvg` also takes `matching`, `marked`, `hideBlocked`, `design`, `redFives` and `symbols: false`.
+- The demo is a page of panels with browser tests in three browsers (`pnpm test:demo`).
+- No existing deal changes: the deals and games itsutsu.com made are made again, exactly, on every build.
+
+
 ## 1.0.1 — 2026-10-01
 
 Nothing that was exported has changed.

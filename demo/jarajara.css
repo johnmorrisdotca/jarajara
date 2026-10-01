@@ -1,15 +1,76 @@
-/* Jarajara's own look, after family.css: the cloth the layout lies on, and the lines under it. */
-.setup { margin-top: 10px; }
-.table { margin: 12px auto 0; background: radial-gradient(120% 90% at 50% 20%, var(--felt) 0%, var(--felt-deep) 100%); border-radius: var(--radius); padding: 14px; }
-#board { display: block; width: 100%; margin: 0 auto; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
-#board svg { display: block; width: 100%; height: auto; }
-#board [data-free="true"] { cursor: pointer; }
-#board [data-free="false"] { cursor: not-allowed; }
-.actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
-.how { margin: 10px 0 0; color: var(--muted); font-size: .85rem; }
-.status { margin: 12px 0 0; font-weight: 600; text-align: center; min-height: 1.4em; }
-.status[data-solved="true"] { color: var(--good); }
-.note { margin: 4px 0 0; text-align: center; color: var(--accent); min-height: 2.8em; font-weight: 600; }
+/* Jarajara's own look, after family.css: the cloth the layout lies on, the panels under it, and what each shows. */
+:root { --intro-room: 11rem; --intro-room-wide: 5.5rem; }
+.choose { display: grid; gap: 12px; margin-bottom: 16px; }
+.setup label { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: .9rem; }
+.how { margin: 0; color: var(--muted); font-size: .85rem; }
+.table-stage { margin: 12px auto 0; }
+#game { border-radius: var(--radius); padding: 14px; }
+#game:not([data-cloth]) { background: radial-gradient(120% 90% at 50% 20%, var(--felt) 0%, var(--felt-deep) 100%); color: var(--felt-ink); }
+/* A select drawn by the page, so that it is 44px to the touch in every browser. */
+select.fam-field { -webkit-appearance: none; appearance: none; padding-right: 28px; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 15px) 55%, calc(100% - 10px) 55%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; min-height: 44px; }
+.setup input.fam-field { width: 12em; max-width: 100%; }
+
+/* The panels under the game. */
+.under { display: grid; gap: 16px; margin-top: 18px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .under { grid-template-columns: repeat(2, minmax(0, 1fr)); } .under .wide { grid-column: 1 / -1; } }
+.under section { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); padding: 14px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.under section > * { min-width: 0; max-width: 100%; }
+.under h2 { margin: 0; font-size: 1.05rem; }
+.under p { margin: 0; color: var(--muted); font-size: .9rem; }
+.under .fam-field { background: var(--page); }
+.note-line { min-height: 1.4em; }
+.snippet { margin: 0; background: var(--page); white-space: pre-wrap; overflow-wrap: anywhere; font-size: .8rem; min-height: 4.2rem; }
 .uses { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
-.more .uses { grid-template-columns: 1fr; }
 .uses code { font-family: var(--mono); font-size: .85rem; overflow-wrap: anywhere; }
+
+/* One tile. */
+.tile-stage { display: flex; align-items: center; justify-content: center; min-height: 130px; border-radius: 14px; background: radial-gradient(circle at 50% 40%, var(--felt), var(--felt-deep)); }
+
+/* The rack. */
+.hand-stage { background: radial-gradient(circle at 50% 40%, var(--felt), var(--felt-deep)); border-radius: 14px; padding: 16px 12px; min-height: 140px; display: flex; align-items: center; justify-content: center; }
+.hand-controls { display: grid; gap: 10px; margin-top: 4px; }
+.hand-row { padding-top: 10px; border-top: 1px solid var(--rule); display: grid; grid-template-columns: 6.5rem 1fr; align-items: start; gap: 8px 12px; }
+.hand-row:first-child { padding-top: 0; border-top: 0; }
+.hand-row .fam-label { padding-top: 14px; min-width: 0; }
+.hand-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+@media (max-width: 520px) { .hand-row { grid-template-columns: 1fr; } .hand-row .fam-label { padding-top: 0; } }
+
+/* The viewers. */
+.viewer-grid { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .viewer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.viewer-box { display: grid; gap: 10px; align-content: start; padding: 12px; border-radius: 14px; background: radial-gradient(circle at 50% 40%, var(--felt), var(--felt-deep)); color: var(--felt-ink); min-width: 0; }
+.viewer-box .setup label { color: var(--felt-ink); }
+.viewer-box .fam-field { background: var(--page); color: var(--ink); }
+.viewer-box .fam-button { background: rgba(0,0,0,.28); color: var(--felt-ink); border-color: transparent; box-shadow: inset 0 0 0 1px rgba(255,255,255,.35); }
+.viewer-box .fam-button[aria-pressed="true"] { background: var(--felt-ink); color: var(--felt-deep); box-shadow: none; }
+#set { padding: 12px; border-radius: 14px; }
+
+/* The backs. */
+.back-picks { display: flex; flex-wrap: wrap; gap: 8px; }
+.back-pick { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 14px 6px 6px; border: 1px solid var(--rule); border-radius: 14px; background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
+.back-swatch { display: block; width: 32px; }
+.back-swatch svg { display: block; width: 100%; height: auto; }
+.back-pick[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.setup input.colour { width: 56px; padding: 4px; }
+#back-mark { width: 9em; }
+.back-out { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.back-show { width: 96px; }
+.back-show svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,.3)); }
+@media (min-width: 700px) { .back-out { grid-template-columns: 96px minmax(0, 1fr); } }
+
+/* A layout looked over, and every layout. */
+.inspect-stage { border-radius: 14px; padding: 12px; background: radial-gradient(circle at 50% 40%, var(--felt), var(--felt-deep)); color: var(--felt-ink); min-height: 220px; }
+.gallery { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); }
+.gallery-card { display: grid; gap: 4px; justify-items: center; align-content: start; padding: 10px; border: 1px solid var(--rule); border-radius: 14px; background: var(--page); color: var(--ink); font: inherit; cursor: pointer; text-align: center; min-width: 0; }
+.gallery-card:hover { border-color: var(--ink); }
+.gallery-pic { display: block; width: 100%; padding: 8px; border-radius: 10px; background: radial-gradient(circle at 50% 40%, var(--felt), var(--felt-deep)); pointer-events: none; }
+.gallery-pic svg { display: block; width: 100%; height: auto; }
+.gallery-name { font-weight: 700; }
+.gallery-meta { font-size: .8rem; color: var(--muted); }
+
+/* The table. */
+#table-demo { padding: 14px; border-radius: var(--radius); }
+
+/* A board never taller than most of the window: a big layout is narrowed to fit, not scrolled past. */
+#game, #table-demo { max-width: 860px; margin-inline: auto; display: block; }
+#inspect { max-width: 100%; }

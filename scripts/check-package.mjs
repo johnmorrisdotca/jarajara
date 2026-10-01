@@ -70,7 +70,8 @@ writeFileSync(
   `${entries.map((entry, i) => `import * as m${i} from ${JSON.stringify(entry)};`).join("\n")}
 const all = [${entries.map((_, i) => `m${i}`).join(", ")}];
 const names = ${JSON.stringify(entries)};
-all.forEach((m, i) => { if (Object.keys(m).length === 0) throw new Error(names[i] + " exports nothing"); });
+// An entry that only defines tags on a page (the /define one) exports nothing, and is imported for its effect.
+all.forEach((m, i) => { if (Object.keys(m).length === 0 && !names[i].endsWith("/define")) throw new Error(names[i] + " exports nothing"); });
 const { MAHJONG_FACES, VERSION } = m0;
 const { generateAwase, checkAwase } = await import(${JSON.stringify(`${pkg.name}/awase`)});
 const { tileSvg } = await import(${JSON.stringify(`${pkg.name}/faces`)});
@@ -85,7 +86,7 @@ console.log(names.join(" "));
 writeFileSync(
   join(project, "cjs.cjs"),
   `const names = ${JSON.stringify(entries)};
-for (const name of names) { const m = require(name); if (Object.keys(m).length === 0) throw new Error(name + " exports nothing"); }
+for (const name of names) { const m = require(name); if (Object.keys(m).length === 0 && !name.endsWith("/define")) throw new Error(name + " exports nothing"); }
 const { generateAwase, checkAwase } = require(${JSON.stringify(`${pkg.name}/awase`)});
 const deal = generateAwase(4, "easy", 1);
 if (!checkAwase(4, deal.givens, deal.solution).ok) throw new Error("a deal's answer does not clear it by require");
