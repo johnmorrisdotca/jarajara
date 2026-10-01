@@ -1,6 +1,7 @@
 import { freshAwaseSeed, generateAwase } from "../awase.ts";
 import { describeSlot, readSlotKeys, sortSlots } from "../arrange.ts";
-import { canTake, freePairs, geometryOf, isFree, tilesLeft } from "../board.ts";
+import { canTake, freePairs, geometryOf, isFree, matchesOf, tilesLeft } from "../board.ts";
+import { isTileMirror, TILE_MIRRORS, type TileMirror } from "../block.ts";
 import { isAwaseChallenge, PURGE_GROUPS, readRun, runHint, runMarked, runPairs, runShuffle, runStart, runTake, runTick, runUndo, startRun, type AwaseOptions, type AwaseRun } from "../challenge.ts";
 import type { TileDesign } from "../design.types.ts";
 import { redFiveIndexes } from "../designs.ts";
@@ -12,7 +13,7 @@ import { tileName } from "../names.ts";
 import { groupWords, type TileLanguage } from "../names.ts";
 import { bonusRuleOf, isFaceCode, pairPoints } from "../tiles.ts";
 import type { AwaseLevel, MahjongBonusRule, MahjongLayout } from "../types.ts";
-import { CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, playSound, say, wearCloth } from "./elementKit.ts";
+import { boxOf, CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, playSound, say, wearCloth, FRAME_MARGIN, FRAME_STYLE } from "./elementKit.ts";
 
 /** How many of a thing a game allows: a number, or no limit at all. */
 export type Allowance = number | null;
@@ -73,6 +74,10 @@ function clockOf(ms: number): string {
  *   controls       draws New deal, Undo, Hint and Shuffle buttons and the line that says how the game stands
  *   view           `stack` (unless said) draws the layout; `lined` draws its tiles lined up in a row, in the order `sort` gives, each with where it lies
  *   sort           how `lined` puts the slots in order: the keys `x`, `y` and `z`, `-` before one for the other way round: `"z y x"` (unless said), `"x"`, `"-z x"`
+ *   find           pointing at a tile (a mouse) or choosing one lights every tile that matches it: a free match (one to take with it now) in a solid ring, a held one in a dashed ring
+ *   mirror         the view: `none` (unless said), `horizontal`, `vertical` or `both`: the board seen from the other side. A view only: the rules, hints and saved games keep the layout's own sides
+ *   flippable      with `controls`, a Flip button that turns the view through the four
+ *   box            keeps the board in one steady box whatever the layout: a ratio as `3/2`, or `landscape`, `portrait`, `square`; the layout is scaled to fit it
  *   static         the tiles may be looked at but not played
  *   sound          a tile chosen, a pair taken, a shuffle and a cleared layout make their sounds
  *   design, red-fives, lang, cloth   as on the other elements
@@ -84,7 +89,7 @@ function clockOf(ms: number): string {
  */
 export class JarajaraLayout extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["size", "level", "seed", "cells", "show-free", "show-matching", "hints", "shuffles", "undo", "challenge", "timer", "controls", "view", "sort", "static", "design", "red-fives", "lang", "cloth", "sound"];
+    return ["size", "level", "seed", "cells", "show-free", "show-matching", "hints", "shuffles", "undo", "challenge", "timer", "controls", "view", "sort", "static", "design", "red-fives", "lang", "cloth", "sound", "find", "mirror", "flippable", "box"];
   }
 
   #root: ShadowRoot | null = null;
@@ -96,6 +101,8 @@ export class JarajaraLayout extends ElementBase {
   #dealtFrom: string | null = null;
   #run: AwaseRun | null = null;
   #chosen: number | null = null;
+  /** The tile a mouse is over, for Find. */
+  #hover: number | null = null;
   #hinted: number[] = [];
   #note = "";
   /** When the first pair was taken, for a game that counts up, and how long the game took once it was won. */
@@ -246,11 +253,15 @@ export class JarajaraLayout extends ElementBase {
     else this.dispatchEvent(new CustomEvent("jarajara-lost", { bubbles: true, composed: true, detail: { because: next.because } }));
   }
 
-  /** Light the pair a hint names, if hints are left and a pair can be taken. Answers the pair. */
+  /**
+   * Light the pair a hint names, if hints are left and a pair can be taken. With a tile chosen it looks for that tile's
+   * match first and lights it, leaving the chosen tile as it is; if that tile has no free match it says so and shows
+   * another pair. Answers the pair (the chosen tile first, for its match).
+   */
   hint(): [number, number] | null {
     const run = this.#run;
     if (run === null || isOn(this, "static") || run.over !== null) return null;
-    const hint = runHint(run);
+    const hint = runHint(run, this.#chosen);
     if (hint === null) {
       if (run.rules.hints !== null && run.hintsUsed >= run.rules.hints) {
         this.#note = say(languageOf(this), "noHints");
@@ -259,10 +270,16 @@ export class JarajaraLayout extends ElementBase {
       return null;
     }
     this.#run = hint.run;
-    this.#hinted = [...hint.pair];
-    this.#chosen = null;
-    this.#note = "";
-    this.dispatchEvent(new CustomEvent("jarajara-hint", { bubbles: true, composed: true, detail: { pair: hint.pair } }));
+    if (hint.found === "match") {
+      this.#hinted = [hint.pair[1]];
+      this.#note = "";
+    } else {
+      this.#hinted = [...hint.pair];
+      this.#chosen = null;
+      this.#note = hint.found === "other" ? say(languageOf(this), "noFreeMatch") : "";
+    }
+    playSound(this, "pick");
+    this.dispatchEvent(new CustomEvent("jarajara-hint", { bubbles: true, composed: true, detail: { pair: hint.pair, found: hint.found } }));
     this.#draw();
     return hint.pair;
   }
@@ -305,6 +322,7 @@ export class JarajaraLayout extends ElementBase {
       this.#seconds = null;
       this.#startClock();
     }
+    playSound(this, "place");
     this.dispatchEvent(new CustomEvent("jarajara-undo", { bubbles: true, composed: true, detail: { moves: this.moves } }));
     this.#draw();
     return true;
@@ -314,6 +332,20 @@ export class JarajaraLayout extends ElementBase {
   sortBy(keys: string): void {
     this.setAttribute("sort", keys);
     this.setAttribute("view", "lined");
+  }
+
+  /** The view now: `none`, `horizontal`, `vertical` or `both`. */
+  get mirror(): TileMirror {
+    const asked = this.getAttribute("mirror");
+    return isTileMirror(asked) ? asked : "none";
+  }
+
+  /** Turn the board to the next view (none, left to right, top to bottom, both), as the Flip button does. Only the picture changes. */
+  flipView(): TileMirror {
+    const next = TILE_MIRRORS[(TILE_MIRRORS.indexOf(this.mirror) + 1) % TILE_MIRRORS.length]!;
+    this.setAttribute("mirror", next);
+    playSound(this, "flip");
+    return next;
   }
 
   /** The game's clock goes on from the first pair: it counts the seconds, and a challenge's clock runs down. */
@@ -361,6 +393,9 @@ export class JarajaraLayout extends ElementBase {
     if (this.#root === null) {
       this.#root = this.attachShadow({ mode: "open" });
       this.#root.addEventListener("click", (event) => this.#clicked(event));
+      // Find, with a mouse: the tile pointed at lights its matches. A touch has no pointing, so it waits for a choice.
+      this.#root.addEventListener("pointerover", (event) => this.#pointed(event as PointerEvent));
+      this.#root.addEventListener("pointerleave", () => this.#point(null));
       this.newDeal();
       return;
     }
@@ -399,10 +434,13 @@ export class JarajaraLayout extends ElementBase {
     const button = path.find((one): one is HTMLElement => one instanceof HTMLElement && one.dataset.action !== undefined);
     if (button !== undefined) {
       const action = button.dataset.action;
-      if (action === "new") this.newDeal();
-      else if (action === "undo") this.undo();
+      if (action === "new") {
+        playSound(this, "shuffle");
+        this.newDeal();
+      } else if (action === "undo") this.undo();
       else if (action === "hint") this.hint();
       else if (action === "shuffle") this.shuffle();
+      else if (action === "flip") this.flipView();
       return;
     }
     const tile = path.find((one): one is Element => one instanceof Element && one.hasAttribute("data-slot"));
@@ -430,6 +468,19 @@ export class JarajaraLayout extends ElementBase {
     this.#note = say(language, "noMatch");
     this.#chosen = slot;
     this.#draw();
+  }
+
+  #pointed(event: PointerEvent): void {
+    if (event.pointerType !== "mouse" || !isOn(this, "find")) return;
+    const tile = event.composedPath().find((one): one is Element => one instanceof Element && one.hasAttribute("data-slot"));
+    this.#point(tile === undefined ? null : Number(tile.getAttribute("data-slot")));
+  }
+
+  /** The tile a mouse is over, and a redraw for Find if that changes what is lit. */
+  #point(slot: number | null): void {
+    if (slot === this.#hover) return;
+    this.#hover = slot;
+    if (this.#chosen === null && isOn(this, "find")) this.#draw();
   }
 
   #shake(slot: number): void {
@@ -491,20 +542,26 @@ export class JarajaraLayout extends ElementBase {
     const controls = isOn(this, "controls");
     const status = controls || isOn(this, "timer") || run.rules.challenge !== null;
     // The skeleton: the faces' symbols (a design's are big, so they are made once), the board and the controls.
-    const key = [design?.name ?? "", reds, controls, status, language].join("|");
+    const flippable = controls && isOn(this, "flippable");
+    const key = [design?.name ?? "", reds, controls, status, flippable, language].join("|");
     if (key !== this.#built) {
       this.#built = key;
       const symbols = design === null ? "" : tileFaceSymbols("jjl", { design, red: reds });
-      const buttons = controls ? `<div class="controls" part="controls">${["new", "undo", "hint", "shuffle"].map((action) => `<button type="button" part="button" data-action="${action}"></button>`).join("")}</div>` : "";
+      const buttons = controls ? `<div class="controls" part="controls">${["new", "undo", "hint", "shuffle", ...(flippable ? ["flip"] : [])].map((action) => `<button type="button" part="button" data-action="${action}"></button>`).join("")}</div>` : "";
       const lines = status ? `<div class="status" part="status" aria-live="polite"><span class="goal"></span><span class="clock" part="clock"></span><span class="line"></span><span class="note"></span></div>` : "";
-      root.innerHTML = `<style>${LAYOUT_STYLE}</style><svg class="defs" width="0" height="0" aria-hidden="true">${symbols}</svg><div class="board" part="board"></div>${lines}${buttons}`;
+      root.innerHTML = `<style>${LAYOUT_STYLE}</style><svg class="defs" width="0" height="0" aria-hidden="true">${symbols}</svg><div class="frame" part="frame"><div class="board" part="board"></div></div>${lines}${buttons}`;
     }
+    const target = isOn(this, "find") ? (this.#chosen ?? this.#hover) : null;
+    const found = target === null ? undefined : matchesOf(geometry, cells, rule, target);
     const matching = this.#chosen !== null && isOn(this, "show-matching") ? [...cells].flatMap((code, at) => (at !== this.#chosen && code !== "." && canTake(geometry, cells, rule, this.#chosen as number, at) ? [at] : [])) : [];
     const lined = this.getAttribute("view") === "lined";
     const board = root.querySelector(".board") as HTMLElement;
     board.dataset.view = lined ? "lined" : "stack";
+    const ratio = boxOf(this.getAttribute("box"));
+    board.style.aspectRatio = ratio === null ? "" : `var(--jarajara-box, ${ratio})`;
+    board.dataset.box = ratio === null ? "none" : "fixed";
     board.dataset.playable = String(playable);
-    board.innerHTML = design === null ? "" : lined ? this.#lined(layout, cells, design, reds, language) : (layoutSvg(this.#size, cells, { chosen: this.#chosen, hinted: this.#hinted, matching, marked: runMarked(run), showFree: isOn(this, "show-free"), hideBlocked: run.rules.hideBlocked && run.over === null, design, redFives, prefix: "jjl", symbols: false, redFrom: this.#epoch() }) ?? "");
+    board.innerHTML = design === null ? "" : lined ? this.#lined(layout, cells, design, reds, language) : (layoutSvg(this.#size, cells, { chosen: this.#chosen, hinted: this.#hinted, matching, marked: runMarked(run), showFree: isOn(this, "show-free"), hideBlocked: run.rules.hideBlocked && run.over === null, design, redFives, prefix: "jjl", symbols: false, redFrom: this.#epoch(), found, mirror: this.mirror, margin: FRAME_MARGIN }) ?? "");
     const hintsLeft = run.rules.hints === null ? null : Math.max(0, run.rules.hints - run.hintsUsed);
     const shufflesLeft = run.rules.shuffles === null ? null : Math.max(0, run.rules.shuffles - run.shuffles);
     const set = (selector: string, text: string) => {
@@ -522,6 +579,7 @@ export class JarajaraLayout extends ElementBase {
       button("undo", say(language, "undo"), isOn(this, "static") || run.history.length === 0 || !run.rules.undo || (run.over === "lost" && run.because === "time"));
       button("hint", `${say(language, "hint")}${hintsLeft === null ? "" : ` (${hintsLeft})`}`, !playable || pairs === 0 || hintsLeft === 0);
       button("shuffle", `${say(language, "shuffle")}${shufflesLeft === null ? "" : ` (${shufflesLeft})`}`, !playable || pairs > 0 || shufflesLeft === 0);
+      button("flip", say(language, "flip"), lined);
     }
     if (status) {
       set(".goal", this.#goalLine(language));
@@ -552,8 +610,7 @@ const LAYOUT_STYLE = `
 :host { display: block; max-width: 100%; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 :host([hidden]) { display: none; }
 .defs { position: absolute; width: 0; height: 0; overflow: hidden; }
-.board { width: 100%; margin: 0 auto; touch-action: manipulation; }
-.board svg { display: block; width: 100%; height: auto; }
+${FRAME_STYLE}
 .board [data-free="true"] { cursor: pointer; }
 .board [data-free="false"] { cursor: not-allowed; }
 .board[data-playable="false"] [data-slot] { cursor: default; }
@@ -562,13 +619,17 @@ const LAYOUT_STYLE = `
 .lined .tile { display: block; width: 44px; aspect-ratio: 32 / 42; }
 .lined .tile svg { display: block; width: 100%; height: 100%; }
 .lined .gone { display: block; width: 100%; height: 100%; border: 1px dashed currentColor; border-radius: 4px; opacity: .35; box-sizing: border-box; }
-.status { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; margin-top: 10px; min-height: 5.6em; align-content: start; font-weight: 600; }
-.status .goal { grid-column: 1; grid-row: 1; min-height: 1.4em; opacity: .9; }
-.status .line { text-align: center; grid-column: 1 / -1; min-height: 1.4em; }
-.status .clock { grid-column: 2; grid-row: 1; font-variant-numeric: tabular-nums; }
-.status .note { grid-column: 1 / -1; text-align: center; min-height: 1.4em; color: var(--jarajara-note, #b5452c); }
-.controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
-.controls button { font: inherit; padding: 8px 14px; min-height: 44px; border-radius: 8px; border: 1px solid rgba(0,0,0,.25); background: rgba(255,255,255,.9); color: #22231f; cursor: pointer; }
+.status { display: grid; grid-template-columns: 1fr auto; gap: 0 10px; margin-top: 8px; min-height: 2.7em; align-content: start; font-weight: 600; line-height: 1.35; }
+.status .line { grid-column: 1; grid-row: 1; text-align: center; min-height: 1.35em; }
+.status .clock { grid-column: 2; grid-row: 1; font-variant-numeric: tabular-nums; min-width: 3em; text-align: right; }
+/* The goal and a note share their line: a note covers the goal while it is there. */
+.status .goal, .status .note { grid-column: 1 / -1; grid-row: 2; text-align: center; min-height: 1.35em; }
+.status .goal { opacity: .9; }
+.status:has(.note:not(:empty)) .goal { visibility: hidden; }
+.status .note { color: var(--jarajara-note, #b5452c); }
+:host([data-cloth]) .status .note { color: var(--jarajara-note, #f6c3b3); }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 4px; }
+.controls button { font: inherit; padding: 8px 12px; min-height: 44px; border-radius: 8px; border: 1px solid rgba(0,0,0,.25); background: rgba(255,255,255,.9); color: #22231f; cursor: pointer; }
 .controls button:disabled { opacity: .5; cursor: default; }
 ${CLOTH_STYLE}
 `;

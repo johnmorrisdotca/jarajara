@@ -75,3 +75,9 @@ shuffles and undo given or taken away, matching tiles shown) are written for thi
 by ffalt, [https://github.com/ffalt/mah](https://github.com/ffalt/mah), a mahjong solitaire under the MIT licence
 (read 2026-10-01). No code and no layout of Mah's is used. The layouts here are Jarajara's own drawings of shapes anyone
 may draw.
+
+How a tile is drawn as a solid block (its thickness, the lift of each layer equal to it, a shadow that grows with height), why
+a layout is scaled into a box of one size, and the gallery of cards of one size are written from reading how **Mah**
+(MIT), **KMahjongg**'s tileset format, and **mahseum** draw and size theirs, and a reader's issue on danhquach/mahjongsolitaire
+(read 2026-10-01). What each does, and what was and was not taken, is in [LOOK.md](LOOK.md). KMahjongg is GPL and mahseum states no
+licence I could find, so both were looked at only; no code, art or number of theirs is used.

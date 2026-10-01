@@ -11,7 +11,7 @@ export { allowanceOf, hintPair, JarajaraLayout } from "./ui/layoutElement.ts";
 export type { Allowance } from "./ui/layoutElement.ts";
 export { JarajaraTable } from "./ui/tableElement.ts";
 export { JarajaraGroup, JarajaraSet, JarajaraViewer } from "./ui/viewerElements.ts";
-export { ELEMENT_SIZES, followLanguage, languageOf } from "./ui/elementKit.ts";
+export { ELEMENT_SIZES, followLanguage, languageOf, MOST_SOUNDING, setPageSounds } from "./ui/elementKit.ts";
 export type { SpinOptions } from "./ui/elementKit.ts";
 export { rackPlaces, rackWidth } from "./ui/rackLayout.ts";
 export type { RackLayoutOptions, RackPlace } from "./ui/rackLayout.ts";

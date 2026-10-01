@@ -188,6 +188,6 @@ test("the demo's rack panel works its buttons", async ({ page }) => {
   await expect(page.locator(at("rack"))).toHaveAttribute("group", "suit");
   await tap(page, at("rack-new"));
   await expect(page.locator(at("rack"))).not.toHaveAttribute("group", /./);
-  await expect(page.locator(at("rack-code"))).toContainText("<jarajara-rack");
+  await expect(page.locator(at("rack-code"))).toContainText("rack.deal(");
   expect(errors).toEqual([]);
 });

@@ -116,3 +116,67 @@ export function tilesLeft(cells: MahjongCells): number {
 export function isCleared(cells: MahjongCells): boolean {
   return tilesLeft(cells) === 0;
 }
+
+/** Which tile Find would show for a slot: the ones that could be taken with it now, and the ones that match but are held. */
+export type MatchesOf = {
+  /** The slots that match the tile and could be taken with it now: both are free. Empty when the tile itself is held. */
+  free: number[];
+  /** The other slots that match it: held by a tile on top or on both sides (or, when the tile itself is held, every match). */
+  blocked: number[];
+};
+
+/**
+ * EVERY TILE THAT MATCHES A SLOT'S, under the bonus rule in play, told apart by whether it could be taken with it now.
+ * A tile's own slot is never in either list, and an empty slot has no matches. Pure: it reads the tiles as they lie.
+ */
+export function matchesOf(geometry: MahjongGeometry, cells: MahjongCells, rule: MahjongBonusRule, slot: number): MatchesOf {
+  const none: MatchesOf = { free: [], blocked: [] };
+  if (!Number.isInteger(slot) || slot < 0 || slot >= cells.length || cells[slot] === EMPTY_SLOT) return none;
+  const wanted = matchClass(cells[slot]!, rule);
+  const takeable = isFree(geometry, cells, slot);
+  const result: MatchesOf = { free: [], blocked: [] };
+  for (let other = 0; other < cells.length; other += 1) {
+    if (other === slot || cells[other] === EMPTY_SLOT || matchClass(cells[other]!, rule) !== wanted) continue;
+    if (takeable && isFree(geometry, cells, other)) result.free.push(other);
+    else result.blocked.push(other);
+  }
+  return result;
+}
+
+/** What a hint found: a pair with the chosen tile in it (`match`), another pair because the chosen tile has no free match (`other`), a pair when no tile was chosen (`any`), or no pair at all (`none`). */
+export type HintKind = "match" | "other" | "any" | "none";
+
+/** A hint: the pair to show (the chosen tile first, for a `match`) and what kind of answer it is. */
+export type Hint = { pair: [number, number] | null; found: HintKind };
+
+/**
+ * A HINT, WHICH LOOKS FIRST FOR THE CHOSEN TILE'S MATCH. With a free tile chosen, the answer is a free tile that matches
+ * it, as a pair with the chosen tile first (`found: "match"`), the one that leaves the stacks lowest after it; if it has
+ * none, any free pair, said so (`"other"`), so a page can say "no free match for that tile" before it shows another. With
+ * nothing chosen (or a chosen tile that is not free) it is any free pair as ever (`"any"`): the one lifting the layers
+ * highest, so a hint never digs a tile deeper than it must. With no pair at all, `pair` is null and `found` is `"none"`.
+ */
+export function hintFor(geometry: MahjongGeometry, cells: MahjongCells, rule: MahjongBonusRule, chosen?: number | null): Hint {
+  const slots = geometry.layout.slots;
+  const height = (a: number, b: number) => slots[a]!.z + slots[b]!.z;
+  const best = (pairs: [number, number][]): [number, number] | null => {
+    let top: [number, number] | null = null;
+    let up = -1;
+    for (const pair of pairs) {
+      if (height(pair[0], pair[1]) > up) {
+        top = pair;
+        up = height(pair[0], pair[1]);
+      }
+    }
+    return top;
+  };
+  const pairs = freePairs(geometry, cells, rule);
+  if (pairs.length === 0) return { pair: null, found: "none" };
+  if (chosen !== undefined && chosen !== null && isFree(geometry, cells, chosen)) {
+    const own = pairs.filter(([a, b]) => a === chosen || b === chosen).map(([a, b]): [number, number] => (a === chosen ? [a, b] : [b, a]));
+    const pair = best(own);
+    if (pair !== null) return { pair, found: "match" };
+    return { pair: best(pairs), found: "other" };
+  }
+  return { pair: best(pairs), found: "any" };
+}

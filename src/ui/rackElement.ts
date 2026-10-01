@@ -2,7 +2,7 @@ import type { TileSoundKind } from "./tileSounds.ts";
 import { arrangeIndexes, arrangeTiles, groupStarts, mixTiles, TILE_ORDERS, type TileGrouping, type TileOrder } from "../arrange.ts";
 import { readTiles, tileName } from "../names.ts";
 import { redFiveIndexes } from "../designs.ts";
-import { CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, playSound, say, spinElement, tileDrawing, tileLabel, widthOf, wearCloth, type SpinOptions } from "./elementKit.ts";
+import { blockHtml, blockVars, BLOCK_STYLE, BOX_UNITS, CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, playSound, say, spinElement, tileDrawing, tileLabel, widthOf, wearCloth, type SpinOptions } from "./elementKit.ts";
 import { RACK_LIFT, rackPlaces, rackWidth, TILE_TALL, type RackPlace } from "./rackLayout.ts";
 
 /** How a rack's tiles are turned face down or face up. */
@@ -172,7 +172,7 @@ export class JarajaraRack extends ElementBase {
         this.removeAttribute("turned");
       } else if (turned.size === 0) this.removeAttribute("turned");
       else this.setAttribute("turned", writeNumbers(turned));
-    }, options, false, "flip");
+    }, options, false, { kind: "flip", count: named.length });
   }
 
   /** Put the tiles in order, sliding to their places: `suit` (unless said), `rank`, `kind` or `code`. */
@@ -190,7 +190,7 @@ export class JarajaraRack extends ElementBase {
 
   /** Close the gaps up again; the tiles stay in the order they were put in. */
   ungroup(): Promise<void> {
-    return this.#change(() => this.removeAttribute("group"), {});
+    return this.#change(() => this.removeAttribute("group"), {}, false, "place");
   }
 
   /** Lay the tiles out in the order they were dealt, with no gaps. */
@@ -198,7 +198,7 @@ export class JarajaraRack extends ElementBase {
     return this.#change(() => {
       this.removeAttribute("order");
       this.removeAttribute("group");
-    }, {});
+    }, {}, false, "place");
   }
 
   /** Mix the tiles up: the same tiles in another order, each sliding to its new place. Where `seed` is given, the same mix every time. */
@@ -300,52 +300,67 @@ export class JarajaraRack extends ElementBase {
   /** Pick the tiles named up, raised above the row; every tile where none is named. */
   lift(tiles?: TileRef): void {
     const named = tiles === undefined ? this.tiles.map((_, at) => at) : this.#indexes(tiles);
-    this.#set("lifted", (now) => new Set([...now, ...named]));
+    if (this.#set("lifted", (now) => new Set([...now, ...named]))) playSound(this, "pick");
   }
 
   /** Put the tiles named down again, or every tile. */
   lower(tiles?: TileRef): void {
     if (tiles === undefined) {
-      this.#set("lifted", () => new Set());
+      if (this.#set("lifted", () => new Set())) playSound(this, "place");
       return;
     }
     const named = new Set(this.#indexes(tiles));
-    this.#set("lifted", (now) => new Set([...now].filter((at) => !named.has(at))));
+    if (this.#set("lifted", (now) => new Set([...now].filter((at) => !named.has(at))))) playSound(this, "place");
   }
 
   /** Pick each tile named up if it lies down and put it down if it is up. */
   liftToggle(tiles: TileRef): void {
     const named = this.#indexes(tiles);
-    this.#set("lifted", (now) => {
+    let raised = false;
+    const changed = this.#set("lifted", (now) => {
       const next = new Set(now);
       for (const at of named) {
         if (next.has(at)) next.delete(at);
-        else next.add(at);
+        else {
+          next.add(at);
+          raised = true;
+        }
       }
       return next;
     });
+    if (changed) playSound(this, raised ? "pick" : "place");
   }
 
   /** Mark the tiles named, with a dot on the corner that shows face up and face down alike, to follow them as they move. */
   mark(tiles: TileRef): void {
     const named = this.#indexes(tiles);
-    this.#set("marked", (now) => new Set([...now, ...named]));
+    if (this.#set("marked", (now) => new Set([...now, ...named]))) playSound(this, "pick");
   }
 
   /** Take the marks off the tiles named, or off every tile. */
   unmark(tiles?: TileRef): void {
     if (tiles === undefined) {
-      this.#set("marked", () => new Set());
+      if (this.#set("marked", () => new Set())) playSound(this, "place");
       return;
     }
     const named = new Set(this.#indexes(tiles));
-    this.#set("marked", (now) => new Set([...now].filter((at) => !named.has(at))));
+    if (this.#set("marked", (now) => new Set([...now].filter((at) => !named.has(at))))) playSound(this, "place");
   }
 
-  #set(name: "lifted" | "marked", next: (now: Set<number>) => Set<number>): void {
-    const now = next(new Set(numbersIn(this.getAttribute(name))));
+  /** Deal a new hand: the tiles written as `tiles` (codes, names or hand notation), none turned, raised, marked or in order. The tiles are shuffled in, with a sound. */
+  deal(tiles: string): void {
+    this.setAttribute("tiles", tiles);
+    for (const name of ["face-down", "turned", "lifted", "marked", "order", "group"]) this.removeAttribute(name);
+    playSound(this, "shuffle");
+  }
+
+  /** Change a set of places kept in an attribute. Answers whether it changed. */
+  #set(name: "lifted" | "marked", next: (now: Set<number>) => Set<number>): boolean {
+    const before = numbersIn(this.getAttribute(name));
+    const now = next(new Set(before));
     if (now.size === 0) this.removeAttribute(name);
     else this.setAttribute(name, writeNumbers(now));
+    return writeNumbers(new Set(before)) !== writeNumbers(now);
   }
 
   /**
@@ -359,6 +374,7 @@ export class JarajaraRack extends ElementBase {
       const spinning = this.#slotOf(at)?.querySelector<HTMLElement>(".spin");
       return spinning === null || spinning === undefined ? [] : [spinning];
     });
+    if (spins.length > 0) playSound(this, "flip", { count: spins.length, gap: 70 });
     return Promise.all(spins.map((one, at) => spinElement(one, options, at * 70))).then(() => undefined);
   }
 
@@ -367,7 +383,7 @@ export class JarajaraRack extends ElementBase {
   }
 
   /** Make a change to the attributes as one change that is drawn and told once, and settles when the tiles have stopped moving. */
-  #change(apply: () => void, options: RackTurnOptions, always = false, sound: TileSoundKind | null = null): Promise<void> {
+  #change(apply: () => void, options: RackTurnOptions, always = false, sound: TileSoundKind | { kind: TileSoundKind; count: number } | null = null): Promise<void> {
     const before = this.#signature();
     this.#stagger = options.oneByOne === true ? Math.max(0, options.gap ?? 90) : 0;
     this.#moving = !lessMotion();
@@ -381,13 +397,19 @@ export class JarajaraRack extends ElementBase {
       if (this.#batched && this.#root !== null) this.#draw();
       // A change that changed nothing settles at once, and makes no sound.
       const changed = always || before !== this.#signature();
-      if (changed && sound !== null) playSound(this, sound, sound === "flip" ? { count: this.tiles.length, gap: this.#stagger || 25 } : {});
+      if (changed && sound !== null) {
+        const kind = typeof sound === "string" ? sound : sound.kind;
+        const count = typeof sound === "string" ? this.tiles.length : sound.count;
+        // Tiles turning make one click each, in step with each turning (a turn one by one keeps its own gap); the rest are a few clicks as the tiles settle.
+        playSound(this, kind, kind === "flip" ? { count, gap: this.#stagger || 25 } : kind === "place" || kind === "pick" ? { count: Math.min(count, 4), gap: 60 } : {});
+      }
       if (!changed) this.#finish();
     });
   }
 
   #signature(): string {
-    return ["tiles", "order", "group", "face-down", "turned", "lifted", "marked"].map((name) => this.getAttribute(name) ?? "").join("|");
+    // A switch such as `face-down` is an attribute with no value, so presence has to be told from absence: "" is not "not there".
+    return ["tiles", "order", "group", "face-down", "turned", "lifted", "marked"].map((name) => (this.hasAttribute(name) ? `=${this.getAttribute(name)}` : "-")).join("|");
   }
 
   #finish(): void {
@@ -415,9 +437,10 @@ export class JarajaraRack extends ElementBase {
         const at = Number(slot.dataset.index);
         const was = this.#state().lifted.has(at);
         this.#focus = at;
-        if (this.getAttribute("pick") === "one") this.#set("lifted", () => (was ? new Set() : new Set([at])));
-        else this.liftToggle(at);
-        playSound(this, was ? "place" : "pick");
+        if (this.getAttribute("pick") === "one") {
+          this.#set("lifted", () => (was ? new Set() : new Set([at])));
+          playSound(this, was ? "place" : "pick");
+        } else this.liftToggle(at);
         this.dispatchEvent(new CustomEvent("jarajara-pick", { bubbles: true, composed: true, detail: { index: at, code: this.tiles[at], lifted: !was } }));
       };
       this.#root.addEventListener("click", pick);
@@ -511,7 +534,7 @@ export class JarajaraRack extends ElementBase {
       const picks = this.hasAttribute("pick");
       const label = tileLabel(code, down, language);
       const said = marked ? say(language, "tileMarked", { tile: label }) : lifted ? say(language, "tileLifted", { tile: label }) : label;
-      return `<div class="slot" part="tile" data-id="${id}" data-index="${at}" data-place="${place}" data-down="${before}" data-lifted="${lifted}" aria-label="${said}"${picks ? ` role="button" tabindex="0" aria-pressed="${lifted}"` : ` role="img"`}><div class="spin"><div class="turn"><div class="side face">${face}</div><div class="side back">${back}</div></div>${markerHtml(marked)}</div></div>`;
+      return `<div class="slot" part="tile" style="${blockVars(this, design)}" data-id="${id}" data-index="${at}" data-place="${place}" data-down="${before}" data-lifted="${lifted}" aria-label="${said}"${picks ? ` role="button" tabindex="0" aria-pressed="${lifted}"` : ` role="img"`}><div class="spin"><div class="tile">${blockHtml(face, back)}</div>${markerHtml(marked)}</div></div>`;
     });
     const across = Math.round((widest + 0.1) * 1000) / 1000;
     root.innerHTML = `<style>${RACK_STYLE}</style><div class="rack" part="rack" style="--across:${across}">${slots.join("")}</div>`;
@@ -584,20 +607,17 @@ export class JarajaraRack extends ElementBase {
 const RACK_STYLE = `
 :host { display: block; width: calc(var(--jarajara-w, 48px) * var(--jarajara-across, 1)); max-width: 100%; margin-inline: auto; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; container-type: inline-size; box-sizing: content-box; }
 :host([hidden]) { display: none; }
-.rack { --tw: min(var(--jarajara-w, 48px), calc(100cqw / var(--across))); position: relative; width: 100%; height: calc(var(--tw) * (${TILE_TALL} + ${RACK_LIFT} + .08)); }
-.slot { position: absolute; left: calc(var(--tw) * (var(--x) + .05)); top: calc(var(--tw) * (var(--y) + ${RACK_LIFT} + .02)); width: var(--tw); aspect-ratio: 32 / 42; perspective: 800px; }
+.rack { --tw: min(var(--jarajara-w, 48px), calc(100cqw / var(--across))); position: relative; width: 100%; height: calc(var(--tw) * (${TILE_TALL} + 2 * ${RACK_LIFT} + .08)); }
+.slot { position: absolute; left: calc(var(--tw) * (var(--x) + .05)); top: calc(var(--tw) * (var(--y) + ${RACK_LIFT} + .02)); width: var(--tw); --u: calc(var(--tw) / ${BOX_UNITS}); aspect-ratio: ${BOX_UNITS} / 47; perspective: 900px; }
 .slot:focus-visible { outline: 3px solid var(--jarajara-focus, #b5452c); outline-offset: 2px; border-radius: 8%; }
 :host([pick]) .slot { cursor: pointer; }
 .spin { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
-.turn { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
+.tile { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
 .slot[data-down="true"] .turn { transform: rotateY(180deg); }
-.side { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-.back { transform: rotateY(180deg); }
-.side svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 1px 2px rgba(0,0,0,.28)); }
+${BLOCK_STYLE}
 .rack[data-moving="true"] .slot { transition: left ${MOVE_MS}ms cubic-bezier(.3,.7,.3,1), top ${MOVE_MS}ms cubic-bezier(.3,.7,.3,1); }
-.rack[data-moving="true"] .turn { transition: transform var(--jarajara-flip-ms, 450ms) cubic-bezier(.3,.7,.3,1) var(--delay, 0ms); }
 .slot[data-lifted="true"] { transition: top 160ms ease-out; }
-@media (prefers-reduced-motion: reduce) { .rack[data-moving="true"] .slot, .rack[data-moving="true"] .turn, .slot[data-lifted="true"] { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .rack[data-moving="true"] .slot, .turn, .slot[data-lifted="true"] { transition: none; } }
 ${MARKER_STYLE}
 ${CLOTH_STYLE}
 `;

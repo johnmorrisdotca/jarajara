@@ -6,6 +6,7 @@ import { AWASE_CHALLENGES, dailyAwase } from "./dist/awase-entry.js";
 const KEY = "jarajara.page";
 const LEVELS = ["easy", "medium", "hard"];
 const ALLOWANCES = ["unlimited", "3", "1", "off"];
+const VIEWS = ["none", "horizontal", "vertical", "both"];
 
 const read = () => {
   try {
@@ -28,25 +29,11 @@ function segment(host, values, label, chosen, choose) {
     ...values.map((value) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "fam-button";
       button.textContent = label(value);
       button.dataset.value = String(value);
       button.setAttribute("aria-pressed", String(value === chosen));
       button.addEventListener("click", () => choose(value));
       return button;
-    }),
-  );
-}
-
-/** A select filled with options, one chosen. */
-function options(select, values, label, chosen) {
-  select.replaceChildren(
-    ...values.map((value) => {
-      const option = document.createElement("option");
-      option.value = String(value);
-      option.textContent = label(value);
-      option.selected = String(value) === String(chosen);
-      return option;
     }),
   );
 }
@@ -61,6 +48,8 @@ export function initPlay(ctx) {
     level: LEVELS.includes(kept.level) ? kept.level : "easy",
     showFree: kept.showFree === true,
     showMatching: kept.showMatching === true,
+    find: kept.find === true,
+    view: VIEWS.includes(kept.view) ? kept.view : "none",
     hints: ALLOWANCES.includes(kept.hints) ? kept.hints : "unlimited",
     shuffles: ALLOWANCES.includes(kept.shuffles) ? kept.shuffles : "unlimited",
     undo: kept.undo === "off" ? "off" : "on",
@@ -74,6 +63,8 @@ export function initPlay(ctx) {
   const apply = () => {
     game.toggleAttribute("show-free", state.showFree);
     game.toggleAttribute("show-matching", state.showMatching);
+    game.toggleAttribute("find", state.find);
+    game.setAttribute("mirror", state.view);
     game.setAttribute("hints", state.hints);
     game.setAttribute("shuffles", state.shuffles);
     game.setAttribute("undo", state.undo);
@@ -101,30 +92,29 @@ export function initPlay(ctx) {
     });
     document.getElementById("challenge-note").textContent = state.challenge === "none" ? "" : ctx.word("challengeNotes")[state.challenge];
     const allowance = (value) => (value === "unlimited" ? ctx.word("unlimited") : value === "off" ? ctx.word("off") : value);
-    for (const [id, key] of [["hints", "hints"], ["shuffles", "shuffles"]]) {
-      const select = document.getElementById(id);
-      options(select, ALLOWANCES, allowance, state[key]);
-      select.onchange = () => {
-        state[key] = select.value;
+    for (const key of ["hints", "shuffles"]) {
+      segment(document.getElementById(key), ALLOWANCES, allowance, state[key], (value) => {
+        state[key] = value;
         apply();
-        save();
-      };
+        refresh();
+      });
     }
-    const designSelect = document.getElementById("game-design");
-    options(designSelect, ["jarajara", ...DESIGNS.filter((name) => name !== "jarajara")], (name) => name, state.design);
-    designSelect.onchange = () => {
-      state.design = designSelect.value;
+    segment(document.getElementById("game-design"), ["jarajara", ...DESIGNS.filter((name) => name !== "jarajara")], (name) => name, state.design, (name) => {
+      state.design = name;
       apply();
-      save();
-    };
-    const undo = document.getElementById("undo-allowed");
-    options(undo, ["on", "off"], (value) => (value === "on" ? ctx.word("on") : ctx.word("off")), state.undo);
-    undo.onchange = () => {
-      state.undo = undo.value;
+      refresh();
+    });
+    segment(document.getElementById("undo-allowed"), ["on", "off"], (value) => (value === "on" ? ctx.word("on") : ctx.word("off")), state.undo, (value) => {
+      state.undo = value;
       apply();
-      save();
-    };
-    for (const [id, key] of [["show-free", "showFree"], ["show-matching", "showMatching"]]) {
+      refresh();
+    });
+    segment(document.getElementById("game-view"), VIEWS, (name) => ctx.word("views")[name], state.view, (name) => {
+      state.view = name;
+      apply();
+      refresh();
+    });
+    for (const [id, key] of [["show-free", "showFree"], ["show-matching", "showMatching"], ["find", "find"]]) {
       document.getElementById(id).setAttribute("aria-pressed", String(state[key]));
     }
   };
@@ -133,7 +123,7 @@ export function initPlay(ctx) {
     save();
   };
 
-  for (const [id, key] of [["show-free", "showFree"], ["show-matching", "showMatching"]]) {
+  for (const [id, key] of [["show-free", "showFree"], ["show-matching", "showMatching"], ["find", "find"]]) {
     document.getElementById(id).addEventListener("click", () => {
       state[key] = !state[key];
       apply();

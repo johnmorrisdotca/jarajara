@@ -1,5 +1,5 @@
 import { isFaceCode } from "../tiles.ts";
-import { codeOf, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, playSound, say, spinElement, tileDrawing, tileLabel, TILE_ASPECT, widthOf, type SpinOptions } from "./elementKit.ts";
+import { blockHtml, blockVars, BLOCK_STYLE, BOX_UNITS, codeOf, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, playSound, say, spinElement, tileDrawing, tileLabel, TILE_ASPECT, widthOf, type SpinOptions } from "./elementKit.ts";
 
 /**
  * ONE TILE ON ANY PAGE: `<jarajara-tile code="F">`, in any design and with any back, face up or face down, turned over
@@ -60,7 +60,9 @@ export class JarajaraTile extends ElementBase {
   /** Spin the tile where it lies, as a flick sets one turning on a table: fast, then slowing to a stop as it was (`SpinOptions`). */
   spin(options: SpinOptions = {}): Promise<void> {
     const spinning = this.#root?.querySelector<HTMLElement>(".spin");
-    return spinning === null || spinning === undefined ? Promise.resolve() : spinElement(spinning, options);
+    if (spinning === null || spinning === undefined) return Promise.resolve();
+    playSound(this, "flip");
+    return spinElement(spinning, options);
   }
 
   connectedCallback(): void {
@@ -109,14 +111,15 @@ export class JarajaraTile extends ElementBase {
     // The side not shown is drawn only for the length of a turn, so the face of a tile lying face down is not in the page.
     const face = known && (!down || turning) ? tileDrawing(code, false, this, design, red) : "";
     const back = known && (down || turning) ? tileDrawing(code, true, this, design) : "";
-    root.innerHTML = `<style>${TILE_STYLE}</style><div class="spin"><div class="tile" part="tile" data-down="${down}"${turning ? ' data-turning="true"' : ""}><div class="side face" part="face">${face}</div><div class="side back" part="back">${back}</div></div>${markerHtml(marked)}</div>`;
+    root.innerHTML = `<style>${TILE_STYLE}</style><div class="spin"><div class="tile" part="tile" data-down="${down}" style="${known ? blockVars(this, design) : ""}">${blockHtml(face, back)}</div>${markerHtml(marked)}</div>`;
     this.style.setProperty("--jarajara-w", widthOf(this));
     if (turning) {
-      const inner = root.querySelector(".tile") as HTMLElement;
-      // Start from the side that was showing, then turn.
-      inner.dataset.down = String(!down);
-      void inner.offsetWidth;
-      inner.dataset.down = String(down);
+      const turn = root.querySelector(".turn") as HTMLElement;
+      // The block tips over on its edge: lifted as it passes upright, lowered as it settles, the thickness showing as it goes.
+      const from = down ? 0 : 180;
+      const to = down ? 180 : 0;
+      const lift = `calc(var(--u) * 7)`;
+      const animation = typeof turn.animate === "function" ? turn.animate([{ transform: `translateZ(0) rotateY(${from}deg)` }, { transform: `translateZ(${lift}) rotateY(${(from + to) / 2}deg)`, offset: 0.5 }, { transform: `translateZ(0) rotateY(${to}deg)` }], { duration: Number.parseFloat(getComputedStyle(this).getPropertyValue("--jarajara-flip-ms")) || 520, easing: "cubic-bezier(.4, .05, .3, 1)" }) : null;
       // Once turned, the side that went out of sight is taken out of the page; the timer is for a turn that never reports its end.
       let done = false;
       const settle = () => {
@@ -124,22 +127,20 @@ export class JarajaraTile extends ElementBase {
         done = true;
         this.#draw();
       };
-      inner.addEventListener("transitionend", settle, { once: true });
+      if (animation === null) settle();
+      else void animation.finished.then(settle, settle);
       setTimeout(settle, 1500);
     }
   }
 }
 
 const TILE_STYLE = `
-:host { display: inline-block; user-select: none; -webkit-user-select: none; width: var(--jarajara-w, 48px); aspect-ratio: ${TILE_ASPECT}; perspective: 800px; vertical-align: middle; -webkit-tap-highlight-color: transparent; }
+:host { display: inline-block; user-select: none; -webkit-user-select: none; --u: calc(var(--jarajara-w, 48px) / ${BOX_UNITS}); width: var(--jarajara-w, 48px); aspect-ratio: ${TILE_ASPECT}; perspective: 900px; vertical-align: middle; -webkit-tap-highlight-color: transparent; }
 :host([flip]) { cursor: pointer; }
 :host(:focus-visible) { outline: 3px solid var(--jarajara-focus, #b5452c); outline-offset: 3px; border-radius: 8%; }
 .spin { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
-.tile { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform var(--jarajara-flip-ms, 450ms) cubic-bezier(.3, .7, .3, 1); }
-.tile[data-down="true"] { transform: rotateY(180deg); }
-.side { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-.back { transform: rotateY(180deg); }
-.side svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 1px 2px rgba(0,0,0,.28)); }
-@media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
+.tile { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
+.tile[data-down="true"] .turn { transform: rotateY(180deg); }
+${BLOCK_STYLE}
 ${MARKER_STYLE}
 `;

@@ -16,8 +16,8 @@ export type TileDesign = {
   faces: Readonly<Record<string, string>>;
   /** The red fives, by the face's code (`e`, `n`, `w`: the fives of characters, circles and bamboo), for a design that has them. */
   red?: Readonly<Record<string, string>>;
-  /** The colours the tile's thickness and rim are drawn in where a board stacks tiles. */
-  colours: { face: string; rim: string; side: string; sideEdge: string };
+  /** The colours the tile's thickness and rim are drawn in where a board stacks tiles. `body` is the colour of the back plate under the ivory (a real tile's green): the thickness shows in it. */
+  colours: { face: string; rim: string; side: string; sideEdge: string; body?: string };
   /** What is drawn on the plate under a face the design has no drawing for, so Jarajara's own ink reads on it: a light panel on a dark tile. */
   plate?: string;
 };

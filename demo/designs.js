@@ -6,14 +6,16 @@ export function initDesigns(ctx) {
   const red = document.getElementById("design-red");
   const set = document.getElementById("design-set");
   const layout = document.getElementById("design-layout");
+  const rack = document.getElementById("design-rack");
   let chosen = "jarajara";
   let reds = false;
   const draw = () => {
-    for (const element of [set, layout]) {
+    for (const element of [set, layout, rack]) {
       if (chosen === "jarajara") element.removeAttribute("design");
       else element.setAttribute("design", chosen);
     }
     layout.toggleAttribute("red-fives", reds);
+    rack.toggleAttribute("red-fives", reds);
     set.toggleAttribute("red-fives", reds);
     set.setAttribute("mode", reds ? "tiles" : "faces");
     set.setAttribute("captions", "off");
@@ -40,5 +42,5 @@ export function initDesigns(ctx) {
     draw();
   });
   draw();
-  ctx.cloth([set, layout]);
+  ctx.cloth([layout]);
 }

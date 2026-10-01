@@ -21,8 +21,8 @@ export type RackLayoutOptions = {
   lift?: number;
 };
 
-/** What a tile is taller than wide, from the picture's 32 by 42. */
-export const TILE_TALL = 42 / 32;
+/** What a tile's box is taller than wide, from the picture's 37 by 47 (the face and its thickness). */
+export const TILE_TALL = 47 / 37;
 
 /** The most a raised tile stands above the row, which a rack always leaves room for. */
 export const RACK_LIFT = 0.22;

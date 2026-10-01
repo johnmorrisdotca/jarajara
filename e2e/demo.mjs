@@ -26,7 +26,8 @@ export async function open(page, query = "") {
   page.on("pageerror", (error) => errors.push(String(error)));
   page.on("console", (message) => message.type() === "error" && errors.push(message.text()));
   await serve(page);
-  await page.goto(`http://jarajara.test/${query}`);
+  // Every panel laid out (`?tabs=all`) unless the test is about the tabs, so a test can reach any control.
+  await page.goto(`http://jarajara.test/${query === "" ? "?tabs=all" : query.includes("tabs=") ? query : `${query}&tabs=all`}`);
   await page.waitForFunction(() => customElements.get("jarajara-layout") !== undefined && document.querySelector('[data-testid="game"] ') !== null);
   await expect(page.locator("#game .board svg").first()).toBeVisible();
   return errors;
@@ -79,7 +80,7 @@ export async function fits(page, errors) {
         .filter((e) => box(e).width > 0 && !e.hidden && (box(e).height < 43.5 || box(e).width < 43.5))
         .map((e) => `${e.dataset.testid ?? e.textContent}: ${Math.round(box(e).width)}x${Math.round(box(e).height)}`),
       wide: all("main *")
-        .filter((e) => box(e).width > 0 && box(e).right > window.innerWidth + 0.5 && !e.closest("pre"))
+        .filter((e) => box(e).width > 0 && box(e).right > window.innerWidth + 0.5 && !e.closest("pre") && !e.ownerSVGElement)
         .map((e) => `${e.tagName} ${e.className}`),
     };
   });

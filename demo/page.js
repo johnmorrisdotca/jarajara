@@ -63,7 +63,45 @@ ctx.show = (id, text) => {
   document.getElementById(id).textContent = text;
 };
 
+/** The tabs under the game: one panel at a time, by tap or arrow keys, and a link to anything inside a panel (`#rack-panel`) opens its tab. */
+function initTabs() {
+  const tabs = [...document.querySelectorAll('#tabs [role="tab"]')];
+  const panes = new Map(tabs.map((tab) => [tab.dataset.tab, document.getElementById(`pane-${tab.dataset.tab}`)]));
+  const select = (name, focus = false) => {
+    for (const tab of tabs) {
+      const on = tab.dataset.tab === name;
+      tab.setAttribute("aria-selected", String(on));
+      tab.tabIndex = on ? 0 : -1;
+      panes.get(tab.dataset.tab).hidden = !on;
+      if (on && focus) tab.focus();
+    }
+  };
+  tabs.forEach((tab, at) => {
+    tab.addEventListener("click", () => select(tab.dataset.tab));
+    tab.addEventListener("keydown", (event) => {
+      const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
+      if (step === 0) return;
+      event.preventDefault();
+      select(tabs[(at + step + tabs.length) % tabs.length].dataset.tab, true);
+    });
+  });
+  const open = (id) => {
+    const found = id === "" ? null : document.getElementById(id.replace(/^#/, ""));
+    const pane = found?.closest('[role="tabpanel"]');
+    if (pane !== null && pane !== undefined) select(pane.id.replace(/^pane-/, ""));
+  };
+  select("tiles");
+  open(location.hash);
+  // `?tabs=all` lays every panel out one under another, for a browser test or a printout.
+  if (new URLSearchParams(location.search).get("tabs") === "all") {
+    for (const pane of panes.values()) pane.hidden = false;
+    for (const tab of tabs) tab.setAttribute("aria-selected", "true");
+  }
+  window.addEventListener("hashchange", () => open(location.hash));
+}
+
 initPlay(ctx);
+initTabs();
 initTile(ctx);
 initRack(ctx);
 initViewers(ctx);

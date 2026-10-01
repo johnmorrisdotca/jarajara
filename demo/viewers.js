@@ -71,5 +71,4 @@ export function initViewers(ctx) {
     fill();
     refresh();
   });
-  ctx.cloth([set]);
 }

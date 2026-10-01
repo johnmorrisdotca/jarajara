@@ -16,7 +16,7 @@ const made: TileDesign = {
   back: `<rect width="300" height="400"/>`,
   faces: { a: `<circle id="one" r="50"/>`, e: `<circle id="five" r="50"/>` },
   red: { e: `<circle id="red-five" r="50"/>` },
-  colours: { face: "#eee", rim: "#999", side: "#123456", sideEdge: "#000" },
+  colours: { face: "#eee", rim: "#999", side: "#123456", sideEdge: "#000", body: "#123456" },
   plate: `<rect id="light-panel" width="30" height="40"/>`,
 };
 

@@ -15,10 +15,10 @@ export function initRack(ctx) {
   const press = (id, action) => document.getElementById(id).addEventListener("click", () => action());
 
   const code = (text) => ctx.show("rack-code", text);
-  const showHand = () => {
-    rack.setAttribute("tiles", HANDS[hand % HANDS.length]);
-    for (const name of ["face-down", "turned", "lifted", "marked", "order", "group"]) rack.removeAttribute(name);
-    code(`<jarajara-rack tiles="${HANDS[hand % HANDS.length]}" capacity="14" pick></jarajara-rack>`);
+  const showHand = (deal = false) => {
+    if (deal) rack.deal(HANDS[hand % HANDS.length]);
+    else rack.setAttribute("tiles", HANDS[hand % HANDS.length]);
+    code(deal ? `rack.deal("${HANDS[hand % HANDS.length]}");   // a new hand: nothing turned, raised, marked or sorted` : `<jarajara-rack tiles="${HANDS[hand % HANDS.length]}" capacity="14" pick></jarajara-rack>`);
     say("");
   };
 
@@ -82,7 +82,7 @@ export function initRack(ctx) {
   });
   press("rack-new", () => {
     hand += 1;
-    showHand();
+    showHand(true);
   });
   press("rack-mark", () => {
     if (raised() === "") return say(ctx.word("rackNone"));

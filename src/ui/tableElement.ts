@@ -6,7 +6,7 @@ import { layoutFor } from "../layouts.ts";
 import { AWASE_TABLE, isComputerSeat, playAtTable, readTable, seatName, SEAT_WINDS, startTable, tablePlayersAsked, tidySeatName } from "../table.ts";
 import type { AwaseTable, AwaseTableState } from "../table.types.ts";
 import type { AwaseLevel } from "../types.ts";
-import { CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, playSound, say, wearCloth } from "./elementKit.ts";
+import { boxOf, CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, playSound, say, wearCloth, FRAME_MARGIN, FRAME_STYLE } from "./elementKit.ts";
 
 const LEVELS: readonly AwaseLevel[] = ["easy", "medium", "hard"];
 
@@ -35,7 +35,7 @@ const LEVELS: readonly AwaseLevel[] = ["easy", "medium", "hard"];
  */
 export class JarajaraTable extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["players", "people", "names", "size", "level", "seed", "delay", "show-free", "design", "lang", "cloth", "sound"];
+    return ["players", "people", "names", "size", "level", "seed", "delay", "show-free", "design", "lang", "cloth", "sound", "mirror", "box"];
   }
 
   #root: ShadowRoot | null = null;
@@ -174,7 +174,7 @@ export class JarajaraTable extends ElementBase {
     const key = [design?.name ?? "", table.seats.length, language].join("|");
     if (key !== this.#built) {
       this.#built = key;
-      root.innerHTML = `<style>${TABLE_STYLE}</style><svg class="defs" width="0" height="0" aria-hidden="true">${design === null ? "" : tileFaceSymbols("jjt", { design })}</svg><ol class="seats" part="seats"></ol><div class="board" part="board"></div><p class="status" aria-live="polite"></p>`;
+      root.innerHTML = `<style>${TABLE_STYLE}</style><svg class="defs" width="0" height="0" aria-hidden="true">${design === null ? "" : tileFaceSymbols("jjt", { design })}</svg><ol class="seats" part="seats"></ol><div class="frame" part="frame"><div class="board" part="board"></div></div><p class="status" aria-live="polite"></p>`;
     }
     const seats = root.querySelector(".seats") as HTMLElement;
     seats.innerHTML = table.seats
@@ -186,7 +186,10 @@ export class JarajaraTable extends ElementBase {
     const board = root.querySelector(".board") as HTMLElement;
     const mine = !state.over && !isComputerSeat(table, state.turn);
     board.dataset.playable = String(mine);
-    board.innerHTML = design === null ? "" : (layoutSvg(table.size, state.cells, { chosen: this.#chosen, showFree: isOn(this, "show-free"), design, prefix: "jjt", symbols: false }) ?? "");
+    const ratio = boxOf(this.getAttribute("box"));
+    board.style.aspectRatio = ratio === null ? "" : `var(--jarajara-box, ${ratio})`;
+    board.dataset.box = ratio === null ? "none" : "fixed";
+    board.innerHTML = design === null ? "" : (layoutSvg(table.size, state.cells, { chosen: this.#chosen, showFree: isOn(this, "show-free"), design, prefix: "jjt", symbols: false, mirror: this.getAttribute("mirror") ?? "none", margin: FRAME_MARGIN }) ?? "");
     const status = root.querySelector(".status") as HTMLElement;
     const turnName = seatName(table.seats, state.turn);
     const text = state.over
@@ -211,8 +214,7 @@ const TABLE_STYLE = `
 .wind { font-size: 1.1rem; }
 .who { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .score { font-weight: 700; font-variant-numeric: tabular-nums; }
-.board { width: 100%; margin: 0 auto; touch-action: manipulation; }
-.board svg { display: block; width: 100%; height: auto; }
+${FRAME_STYLE}
 .board[data-playable="true"] [data-free="true"] { cursor: pointer; }
 .board[data-playable="false"] [data-slot] { cursor: default; }
 .status { margin: 10px 0 0; min-height: 2.8em; text-align: center; font-weight: 600; }

@@ -8,3 +8,5 @@ export * from "./backs.ts";
 export * from "./designs.ts";
 export * from "./cloth.ts";
 export type * from "./design.types.ts";
+export { blockColours, blockSvg, directionOf, faceEdgeSvg, isTileMirror, shadowSvg, TILE_MIRRORS } from "./block.ts";
+export type { BlockColours, BlockDirection, TileMirror } from "./block.ts";

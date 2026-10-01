@@ -11,7 +11,7 @@ describe("the backs", () => {
     const drawn = TILE_BACKS.map((name) => tileBackSvg(name)!);
     for (const svg of drawn) {
       expect(svg.startsWith("<svg")).toBe(true);
-      expect(svg).toContain(`viewBox="-1 -1 32 42"`);
+      expect(svg).toContain(`viewBox="-6 -1 37 47"`);
     }
     expect(new Set(drawn).size).toBe(5);
     expect(isBuiltInBack("jade")).toBe(true);

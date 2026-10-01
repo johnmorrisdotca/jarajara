@@ -1,51 +1,66 @@
-/* Jarajara's own look, after family.css: the cloth the layout lies on, the panels under it, and what each shows. */
-:root { --intro-room: 11rem; --intro-room-wide: 5.5rem; }
-.choose { display: grid; gap: 12px; margin-bottom: 16px; }
+/* Jarajara's own look, after family.css: the board on its cloth, the options under it as Suido and Tsunagi lay theirs, and the tabbed panels. */
+:root { --intro-room: 11rem; --intro-room-wide: 5.5rem; --pad: 14px; }
+.setup { margin: 0; }
 .setup label { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: .9rem; }
+.fam-label { min-width: 5.2rem; }
 .how { margin: 0; color: var(--muted); font-size: .85rem; }
-.table-stage { margin: 12px auto 0; }
-#game { border-radius: var(--radius); padding: 14px; }
+
+/* The game: one steady box, as wide as the window lets it be and still leave room for the controls under it. */
+.play { display: grid; gap: 14px; }
+#game { display: block; width: min(100%, 720px, calc((100dvh - 380px) * 1.6 + 90px)); min-width: min(100%, 320px); margin-inline: auto; border-radius: var(--radius); padding: 8px; }
 #game:not([data-cloth]) { background: radial-gradient(120% 90% at 50% 20%, var(--felt) 0%, var(--felt-deep) 100%); color: var(--felt-ink); }
+.opts { display: grid; gap: 8px 28px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 760px) { .opts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.opts .wide-row { grid-column: 1 / -1; }
+.opts .fam-row { align-content: flex-start; }
+.opts .fam-seg button { min-width: 44px; }
 /* A select drawn by the page, so that it is 44px to the touch in every browser. */
 select.fam-field { -webkit-appearance: none; appearance: none; padding-right: 28px; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 15px) 55%, calc(100% - 10px) 55%; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; min-height: 44px; }
 .setup input.fam-field { width: 12em; max-width: 100%; }
+#challenge-note { min-height: 2.6em; }
 
-/* The panels under the game. */
-.under { display: grid; gap: 16px; margin-top: 18px; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 900px) { .under { grid-template-columns: repeat(2, minmax(0, 1fr)); } .under .wide { grid-column: 1 / -1; } }
-.under section { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); padding: 14px; display: grid; gap: 12px; align-content: start; min-width: 0; }
-.under section > * { min-width: 0; max-width: 100%; }
-.under h2 { margin: 0; font-size: 1.05rem; }
-.under p { margin: 0; color: var(--muted); font-size: .9rem; }
-.under .fam-field { background: var(--page); }
-.note-line { min-height: 1.4em; }
+/* The panels under the game: one at a time, in tabs. */
+.more-panels { margin-top: 20px; }
+.more-panels .fam-tabs { flex-wrap: wrap; }
+.more-panels .fam-tabs button { flex: 1 1 auto; padding: 0 14px; white-space: nowrap; }
+.pane { gap: 18px; }
+.pane section { display: grid; gap: 10px; align-content: start; min-width: 0; }
+.pane section > * { min-width: 0; max-width: 100%; }
+.pane h2 { font-size: 1rem; }
+.pane .fam-field { background: var(--page); }
+.pair { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .pair { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.note-line { min-height: 1.4em; font-size: .9rem; color: var(--muted); }
 .snippet { margin: 0; background: var(--page); white-space: pre-wrap; overflow-wrap: anywhere; font-size: .8rem; min-height: 4.2rem; }
 .uses { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
 .uses code { font-family: var(--mono); font-size: .85rem; overflow-wrap: anywhere; }
 
-/* One tile. */
-.tile-stage { display: flex; align-items: center; justify-content: center; min-height: 130px; border-radius: 14px; background: radial-gradient(circle at 50% 40%, var(--felt), var(--felt-deep)); }
+/* Every place tiles lie on felt: the felt, and inside it one framed panel with one padding all round, so a tile is always the same distance from the frame. The elements draw the same frame inside themselves (--jarajara-pad). */
+.felt { border-radius: 14px; padding: 8px; color: var(--felt-ink); background: radial-gradient(120% 90% at 50% 20%, var(--felt) 0%, var(--felt-deep) 100%); min-width: 0; }
+.felt > .frame { box-sizing: border-box; border: 1.5px solid color-mix(in srgb, var(--felt-ink) 30%, transparent); border-radius: 10px; padding: var(--pad); background: rgba(0,0,0,.12); box-shadow: inset 0 2px 10px rgba(0,0,0,.22); display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; align-content: center; gap: 10px; min-width: 0; }
+.felt .setup label { color: var(--felt-ink); }
+.felt .fam-field { background: var(--page); color: var(--ink); }
+.felt .fam-button { background: rgba(0,0,0,.28); color: var(--felt-ink); border-color: transparent; box-shadow: inset 0 0 0 1px rgba(255,255,255,.35); }
+.felt .fam-button[aria-pressed="true"] { background: var(--felt-ink); color: var(--felt-deep); box-shadow: none; }
+jarajara-layout, jarajara-table { --jarajara-pad: var(--pad); }
 
-/* The rack. */
-.hand-stage { background: radial-gradient(circle at 50% 40%, var(--felt), var(--felt-deep)); border-radius: 14px; padding: 16px 12px; min-height: 140px; display: flex; align-items: center; justify-content: center; }
-.hand-controls { display: grid; gap: 10px; margin-top: 4px; }
+/* One tile. */
+.tile-frame { min-height: 170px; }
+.rack-frame { min-height: 150px; justify-items: stretch; }
+
+/* The rack: four rows of buttons, two by two on a desk. */
+.hand-controls { display: grid; gap: 10px; }
 .hand-row { padding-top: 10px; border-top: 1px solid var(--rule); display: grid; grid-template-columns: 6.5rem 1fr; align-items: start; gap: 8px 12px; }
 .hand-row:first-child { padding-top: 0; border-top: 0; }
 .hand-row .fam-label { padding-top: 14px; min-width: 0; }
 .hand-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
 @media (max-width: 520px) { .hand-row { grid-template-columns: 1fr; } .hand-row .fam-label { padding-top: 0; } }
-/* The rack's panel spans the page on a desk, so its four rows of buttons sit two by two rather than leaving the right half empty. */
 @media (min-width: 900px) { .hand-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; } .hand-row:nth-child(2) { padding-top: 0; border-top: 0; } }
 
 /* The viewers. */
 .viewer-grid { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
-@media (min-width: 900px) { .viewer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.viewer-box { display: grid; gap: 10px; align-content: start; padding: 12px; border-radius: 14px; background: radial-gradient(circle at 50% 40%, var(--felt), var(--felt-deep)); color: var(--felt-ink); min-width: 0; }
-.viewer-box .setup label { color: var(--felt-ink); }
-.viewer-box .fam-field { background: var(--page); color: var(--ink); }
-.viewer-box .fam-button { background: rgba(0,0,0,.28); color: var(--felt-ink); border-color: transparent; box-shadow: inset 0 0 0 1px rgba(255,255,255,.35); }
-.viewer-box .fam-button[aria-pressed="true"] { background: var(--felt-ink); color: var(--felt-deep); box-shadow: none; }
-#set { padding: 12px; border-radius: 14px; }
+.viewer-frame { justify-items: stretch; }
+.felt jarajara-viewer, .felt jarajara-group, .felt jarajara-set { color: var(--felt-ink); }
 
 /* The backs. */
 .back-picks { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -55,36 +70,31 @@ select.fam-field { -webkit-appearance: none; appearance: none; padding-right: 28
 .back-pick[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
 .setup input.colour { width: 56px; padding: 4px; }
 #back-mark { width: 9em; }
-.back-out { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); align-items: start; }
-.back-show { width: 96px; }
-.back-show svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,.3)); }
-@media (min-width: 700px) { .back-out { grid-template-columns: 96px minmax(0, 1fr); } }
+.back-out { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.back-show { width: 84px; }
+.back-show svg { display: block; width: 100%; height: auto; }
+@media (min-width: 700px) { .back-out { grid-template-columns: 160px minmax(0, 1fr); } }
+.back-felt .frame { min-height: 120px; }
 
-/* A layout looked over, and every layout. */
-.inspect-stage { border-radius: 14px; padding: 12px; background: radial-gradient(circle at 50% 40%, var(--felt), var(--felt-deep)); color: var(--felt-ink); min-height: 220px; }
-.gallery { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); }
-.gallery-card { display: grid; gap: 4px; justify-items: center; align-content: start; padding: 10px; border: 1px solid var(--rule); border-radius: 14px; background: var(--page); color: var(--ink); font: inherit; cursor: pointer; text-align: center; min-width: 0; }
+/* Every layout: cards all one size, each layout scaled into the same box and centred in it. */
+.gallery { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); }
+.gallery-card { display: grid; grid-template-rows: auto auto; gap: 2px; justify-items: center; align-content: start; padding: 6px; border: 1px solid var(--rule); border-radius: 12px; background: var(--page); color: var(--ink); font: inherit; cursor: pointer; text-align: center; min-width: 0; }
 .gallery-card:hover { border-color: var(--ink); }
-.gallery-pic { display: block; width: 100%; padding: 8px; border-radius: 10px; background: radial-gradient(circle at 50% 40%, var(--felt), var(--felt-deep)); pointer-events: none; }
-.gallery-pic svg { display: block; width: 100%; height: auto; }
-.gallery-name { font-weight: 700; }
-.gallery-meta { font-size: .8rem; color: var(--muted); }
-
-/* The table. */
-#table-demo { padding: 14px; border-radius: var(--radius); }
-
-/* A board never taller than most of the window: a big layout is narrowed to fit, not scrolled past. */
-#game, #table-demo { max-width: 860px; margin-inline: auto; display: block; }
+div.gallery-card { cursor: default; }
+.gallery-pic { display: block; width: 100%; aspect-ratio: 4 / 3; padding: 7px; box-sizing: border-box; border-radius: 9px; background: radial-gradient(120% 90% at 50% 20%, var(--felt) 0%, var(--felt-deep) 100%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--felt-ink) 30%, transparent); pointer-events: none; }
+.gallery-pic svg { display: block; width: 100%; height: 100%; }
+.gallery-name { font-weight: 700; font-size: .9rem; line-height: 1.25; }
+.gallery-meta { font-size: .75rem; color: var(--muted); line-height: 1.25; }
 #inspect { max-width: 100%; }
 
-/* The designs panel: the set and a layout side by side. */
+/* The table, the designs, the challenges. */
+#table-demo { max-width: 720px; margin-inline: auto; width: 100%; border-radius: var(--radius); padding: 8px; }
 .design-grid { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); align-items: start; }
 @media (min-width: 900px) { .design-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-#design-set, #design-layout { border-radius: 14px; padding: 12px; }
-
-/* The challenges. */
+#design-layout { border-radius: var(--radius); padding: 8px; }
+.design-left { display: grid; gap: 14px; align-content: start; min-width: 0; }
 .challenge-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; grid-template-columns: minmax(0, 1fr); }
 @media (min-width: 900px) { .challenge-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .challenge-list li { display: grid; gap: 2px; padding: 8px 12px; border: 1px solid var(--rule); border-radius: 12px; background: var(--page); }
 .challenge-list span { color: var(--muted); font-size: .88rem; }
-#challenge-note { min-height: 2.6em; }
+@media (max-width: 520px) { :root { --pad: 10px; } .fam-label { min-width: 100%; } .hand-row .fam-label { min-width: 0; } #game, #table-demo, #design-layout { padding: 6px; --jarajara-box: 4 / 3; } }

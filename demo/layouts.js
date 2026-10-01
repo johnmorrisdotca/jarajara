@@ -48,7 +48,7 @@ export function initLayouts(ctx) {
         card.dataset.size = String(layout.size);
         card.setAttribute("data-testid", `gallery-${layout.key}`);
         if (card.tagName === "BUTTON") card.type = "button";
-        card.innerHTML = `<span class="gallery-pic" aria-hidden="true">${layoutSvg(layout.size, deal.givens, { prefix: `g${layout.size}` })}</span><span class="gallery-name">${layoutName(layout)}</span><span class="gallery-meta">${layout.slots.length} ${ctx.word("tiles")} · ${layers} ${ctx.word("layers")}</span>`;
+        card.innerHTML = `<span class="gallery-pic" aria-hidden="true">${layoutSvg(layout.size, deal.givens, { prefix: `g${layout.size}`, margin: 2 })}</span><span class="gallery-name">${layoutName(layout)}</span><span class="gallery-meta">${layout.slots.length} ${ctx.word("tiles")} · ${layers} ${ctx.word("layers")}</span>`;
         if (layout.key !== "tiny") {
           card.addEventListener("click", () => {
             document.querySelector(`#layouts [data-value="${layout.size}"]`)?.click();

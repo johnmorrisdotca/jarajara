@@ -1,4 +1,4 @@
-import { canTake, freePairs, geometryOf, isCleared, tilesLeft } from "./board.ts";
+import { canTake, freePairs, geometryOf, hintFor, isCleared, tilesLeft, type HintKind } from "./board.ts";
 import { hashText, shuffleTiles } from "./deal.ts";
 import { ALL_LAYOUTS, layoutFor } from "./layouts.ts";
 import { AWASE_SAME_BLOCK } from "./awase.ts";
@@ -397,20 +397,15 @@ export function runUndo(run: AwaseRun, at: number): AwaseRun | null {
   };
 }
 
-/** Ask for a hint: the new game with it counted and the pair named, or null where none is left to use or no pair can be taken. */
-export function runHint(run: AwaseRun): { run: AwaseRun; pair: [number, number] } | null {
+/**
+ * Ask for a hint: the new game with it counted and the pair named, or null where none is left to use or no pair can be
+ * taken. Given the slot the player has chosen, it looks for that tile's match first (`hintFor`): `found` says whether
+ * the pair is that match (`match`), another pair because the chosen tile has none (`other`), or any pair (`any`).
+ */
+export function runHint(run: AwaseRun, chosen?: number | null): { run: AwaseRun; pair: [number, number]; found: Exclude<HintKind, "none"> } | null {
   if (run.over !== null || (run.rules.hints !== null && run.hintsUsed >= run.rules.hints)) return null;
-  const layout = layoutFor(run.size)!;
-  let best: [number, number] | null = null;
-  let height = -1;
-  for (const pair of runPairs(run)) {
-    const up = layout.slots[pair[0]]!.z + layout.slots[pair[1]]!.z;
-    if (up > height) {
-      best = pair;
-      height = up;
-    }
-  }
-  return best === null ? null : { run: { ...run, hintsUsed: run.hintsUsed + 1 }, pair: best };
+  const hint = hintFor(geometryOfRun(run), run.cells, ruleOfRun(run), chosen);
+  return hint.pair === null || hint.found === "none" ? null : { run: { ...run, hintsUsed: run.hintsUsed + 1 }, pair: hint.pair, found: hint.found };
 }
 
 /** The game as it stands, for a page to read: how the clock, the goal and the hunt are going, without working them out again. */

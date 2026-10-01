@@ -13,7 +13,7 @@ The 144-tile set in 42 faces, drawn as SVG, with backs and cloths; custom elemen
 <p align="center"><a href="https://johnmorrisdotca.github.io/jarajara/"><strong>Play Awase →</strong></a> · <a href="https://johnmorrisdotca.github.io/jarajara/api.html">API reference</a></p>
 
 <p align="center">
-  <img src="docs/desktop.jpg" alt="Awase on the Turtle, a layout of 144 mahjong tiles stacked five layers high on a green cloth with six pairs already taken, under the demo's choices of challenge, design, hints and shuffles: 132 tiles left, 12 pairs to take, and the New deal, Undo, Hint and Shuffle buttons" width="620">
+  <img src="docs/desktop.jpg" alt="Awase on the Turtle, a layout of 144 solid mahjong tiles stacked five layers high, centred in a frame on a green cloth with six pairs already taken: 132 tiles left, 12 pairs to take, the New deal, Undo, Hint, Shuffle and Flip buttons, and under it the layout, challenge, level, design, view, hints, shuffles, undo and aids options" width="620">
   <img src="docs/phone.jpg" alt="Awase on Fuji on a phone in dark mode, in Japanese: the free tiles lit and the blocked ones washed grey, 84 tiles left and 11 pairs to take" width="200">
 </p>
 
@@ -190,6 +190,20 @@ framework. Every tile in a layout is a `<g>` with `data-slot`, `data-face`
 and `data-free` for a page to listen on. The colours are fixed, since tiles are
 light objects on any table; the table under them is the page's.
 
+**A tile is a solid block**, not a card (the reasoning, and what the established mahjong solitaires do, is in
+[docs/LOOK.md](docs/LOOK.md)). An ivory face lies over a back plate with thickness showing on two sides: the near layer of
+the thickness is the ivory, the rest the back plate's own colour (a real tile's green unless the design or the back says
+another); the layers of a stack are lifted by exactly that thickness, in the direction it shows from, so a stack reads as a
+stack; and every tile casts a soft shadow that reaches further the higher it is. Round every face runs a seam that stands out from
+it and a raised-edge line inside it, so a row of tiles can be counted in every design, black ones included.
+`tileSvg("F", { flat: true })` is the old look (a sliver of side, 32 by 42) and `{ bare: true }` the face alone (30 by 40);
+`blockColours(design)` gives the colours, `TILE_DEPTH` the thickness.
+
+`layoutSvg` frames a layout on its **drawn extent** when given a `margin`: `layoutFrame(size, { mirror, margin })` is the box that
+holds every solid tile with its thickness and lift, so a page that centres the picture centres what the eye sees. Without
+a margin the viewBox is the old `layoutBox`. The soft shadow is left out of the box (it falls one way, and counting it would push
+the tiles off centre) and spills into the margin. The `box` attribute of the elements keeps one steady box whatever the layout.
+
 Backs, designs and cloths are drawn the same way:
 
 ```ts
@@ -201,8 +215,25 @@ layoutSvg(15, cells, { cloth: "wood", hideBlocked: true }); // a felt behind it;
 clothVars("blue");                                        // the felt as CSS custom properties
 ```
 
-`layoutSvg` also takes `matching` (slots ringed), `marked` (slots given a gold mark), `design`, `redFives`, and
-`symbols: false` for a page that draws a board again and again and keeps the faces' symbols once.
+`layoutSvg` also takes `matching` (slots ringed), `marked` (slots given a gold mark), `found` (what Find lights: a free match in a
+solid ring, a held one in a dashed ring, from `matchesOf`), `mirror` (`none`, `horizontal`, `vertical` or `both`: the board seen from the
+other side, thickness, lift and shadows following; a view only, so `data-slot`, what is free, hints and saved games are the layout's own),
+`margin`, `design`, `redFives`, and `symbols: false` for a page that draws a board again and again and keeps the faces' symbols once.
+
+### Hints and Find
+
+```ts
+import { geometryOf, hintFor, layoutFor, matchesOf } from "@johnmorrisdotca/jarajara";
+
+const geometry = geometryOf(layoutFor(15)!);
+hintFor(geometry, cells, "group");        // { pair, found: "any" }: any free pair, the one lifting the layers highest
+hintFor(geometry, cells, "group", chosen); // looks first for the chosen tile's match: found "match" (pair[0] is the chosen tile),
+                                          // "other" (it has no free match: another pair), "any", or "none" (no pair at all)
+matchesOf(geometry, cells, "group", slot); // { free, blocked }: every tile that matches it, told apart by whether it could be taken now
+```
+
+`runHint(run, chosen?)` is the same for a game with its limits. The existing `hintPair(layout, cells, rule)` of the element entry still gives
+the old answer.
 
 ## Elements
 
@@ -230,7 +261,9 @@ Or `import "@johnmorrisdotca/jarajara/element/define"` in a bundle; `@johnmorris
 
 Tiles in a rack are named by their place as written (`0`, `3`) when a method wants one tile, or by a letter or name (`"F"`, `"east"`) for every tile of that face. A rack keeps the room of its widest arrangement, so grouping, sorting and closing the groups never change its size, and `capacity` keeps it the size of that many tiles however many it holds. Every change is a bubbling event: `jarajara-rack`, `jarajara-pick`, `jarajara-take`, `jarajara-flip`, and for a layout `jarajara-take`, `jarajara-shuffle`, `jarajara-stuck`, `jarajara-clear`, `jarajara-hint`, `jarajara-undo`, `jarajara-deal`.
 
-`<jarajara-layout>` attributes: `size`, `level` (`easy`, `medium`, `hard`), `seed`, `cells` (a position of your own), `show-free`, `show-matching`, `hints` and `shuffles` (a number, `off` or `unlimited`), `undo="off"`, `challenge`, `timer`, `controls`, `view="lined"` with `sort="z y x"` (any of `x`, `y`, `z`, a `-` before one for the other way round), `static`, `cloth`, `design`, `lang`. `restore(moves)` plays a kept game back on the deal.
+`<jarajara-layout>` attributes: `size`, `level` (`easy`, `medium`, `hard`), `seed`, `cells` (a position of your own), `show-free`, `show-matching`, `find` (pointing at a tile with a mouse, or choosing one, lights every tile that matches it: a solid ring for one that could be taken with it now, a dashed ring for one that is held), `hints` and `shuffles` (a number, `off` or `unlimited`), `undo="off"`, `challenge`, `timer`, `controls` (with `flippable`, a Flip button too), `mirror` (`none`, `horizontal`, `vertical`, `both`: the board from the other side, a view only; `flipView()` goes to the next), `box` (`landscape`, `portrait`, `square` or `3/2`: one steady box whatever the layout, the layout scaled to fit and centred, and `--jarajara-box` for a page to set it), `view="lined"` with `sort="z y x"` (any of `x`, `y`, `z`, a `-` before one for the other way round), `static`, `cloth`, `design`, `lang`. `restore(moves)` plays a kept game back on the deal. A hint with a tile chosen lights that tile's match first, and says so (`jarajara-hint`'s `found`) when it has none.
+
+A board on a `cloth` sits in a frame inside the felt with one padding all round (`--jarajara-pad`). A tile turns as a block tipping over on its edge, its thickness showing, and sets down on its back; `rack.deal(tiles)` deals a new hand. Every action of a tile, a rack and a board makes its sound from the element's own method when the element has `sound` (turning, sorting, grouping, mixing, raising, lowering, marking, spinning, a hint, a pair, an undo, a shuffle, a win), never more than `MOST_SOUNDING` clicks at once; `setPageSounds` gives the page's own player, or a test's.
 
 A table, a rack, a layout, a group, a set and a viewer all take `cloth`: `green`, `blue`, `red`, `black` or `wood`, the family's five, which a page can follow from the demo header's `family-cloth` event.
 
@@ -271,8 +304,9 @@ sounds.play("place", { count: 13, delay: 900 });
 
 Tile clacks cut from Kenney's Casino Audio (CC0), loaded the first time one is played; where they cannot be loaded or
 decoded, a short click made in the browser stands in, and a platform with no audio is silent without an error. Every
-element takes `sound` and is silent without it: a tile turned, tiles set down, picked up and shuffled in a rack, a tile
-chosen, a pair taken, a shuffle and a cleared layout, a pair at a table. The recordings are `@johnmorrisdotca/jarajara/sounds`,
+element takes `sound` and is silent without it: every action of a tile and a rack (turned, spun, sorted, grouped, mixed, raised,
+lowered, marked, taken out, put in, dealt), and of a board a tile chosen, a hint, a pair taken, an undo, a shuffle and a cleared layout, a
+pair at a table. The recordings are `@johnmorrisdotca/jarajara/sounds`,
 about 50 kB as text.
 
 ## Looking tiles up
@@ -308,14 +342,14 @@ The [API reference](https://johnmorrisdotca.github.io/jarajara/api.html) lists e
 
 | Import | What it holds |
 | --- | --- |
-| `@johnmorrisdotca/jarajara` | the set (`MAHJONG_FACES`, `faceOf`, `tilesMatch`, `matchClass`, `bonusRuleOf`, `setPairs`, `pairPoints`), names and lookup (`faceWords`, `tileName`, `findFace`, `findFaces`, `readTiles`, `writeTiles`, `readNotation`, `writeNotation`, `TILE_GROUPS`, `groupFaces`, `setInventory`, `copiesOf`, `countTiles`), arranging (`arrangeTiles`, `arrangeIndexes`, `groupTiles`, `mixTiles`, `sortSlots`, `readSlotKeys`, `describeSlot`), the layouts (`MAHJONG_LAYOUTS`, `MORE_LAYOUTS`, `ALL_LAYOUTS`, `layoutFor`, `layoutExtent`), the board (`geometryOf`, `isFree`, `freeSlots`, `freePairs`, `blockedBy`, `canTake`, `takePair`, `tilesLeft`, `isCleared`), dealing (`layPairs`, `pairsLeft`, `shuffleTiles`), games as text (`encodeMoves`, `decodeMoves`, `playSolve`, `dealFits`), `seededRandom` and `shuffled` |
-| `@johnmorrisdotca/jarajara/awase` | `generateAwase(size, level, seed)`, `checkAwase(size, givens, answer)`, `freshAwaseSeed(rule)`, `bonusRuleOfSeed`, `clearRate`; options and challenges: `AWASE_CHALLENGES`, `awaseRules`, `startRun`, `runTake`, `runShuffle`, `runUndo`, `runHint`, `runStart`, `runTick`, `runRemaining`, `runPairs`, `runMarked`, `readRun`, `dailyAwase` |
+| `@johnmorrisdotca/jarajara` | the set (`MAHJONG_FACES`, `faceOf`, `tilesMatch`, `matchClass`, `bonusRuleOf`, `setPairs`, `pairPoints`), names and lookup (`faceWords`, `tileName`, `findFace`, `findFaces`, `readTiles`, `writeTiles`, `readNotation`, `writeNotation`, `TILE_GROUPS`, `groupFaces`, `setInventory`, `copiesOf`, `countTiles`), arranging (`arrangeTiles`, `arrangeIndexes`, `groupTiles`, `mixTiles`, `sortSlots`, `readSlotKeys`, `describeSlot`), the layouts (`MAHJONG_LAYOUTS`, `MORE_LAYOUTS`, `ALL_LAYOUTS`, `layoutFor`, `layoutExtent`), the board (`geometryOf`, `isFree`, `freeSlots`, `freePairs`, `blockedBy`, `canTake`, `takePair`, `tilesLeft`, `isCleared`, `hintFor`, `matchesOf`), dealing (`layPairs`, `pairsLeft`, `shuffleTiles`), games as text (`encodeMoves`, `decodeMoves`, `playSolve`, `dealFits`), `seededRandom` and `shuffled` |
+| `@johnmorrisdotca/jarajara/awase` | `generateAwase(size, level, seed)`, `checkAwase(size, givens, answer)`, `freshAwaseSeed(rule)`, `bonusRuleOfSeed`, `clearRate`; options and challenges: `AWASE_CHALLENGES`, `awaseRules`, `startRun`, `runTake`, `runShuffle`, `runUndo`, `runHint(run, chosen?)`, `runStart`, `runTick`, `runRemaining`, `runPairs`, `runMarked`, `readRun`, `dailyAwase` |
 | `@johnmorrisdotca/jarajara/table` | `startTable`, `readTable`, `tablePairs`, `playAtTable`, `takeAtTable`, `undoAtTable`, `computerPair`, `encodeTable`, `decodeTable`, `seatName`, `SEAT_WINDS` |
-| `@johnmorrisdotca/jarajara/faces` | `tileSvg`, `tileFaceSvg`, `tileFaceSymbols`, `faceWords`, `layoutSvg`, `layoutBox`, `tileAt`, the backs (`tileBackSvg`, `tileBackFace`, `TILE_BACKS`), designs (`jarajaraDesign`, `loadTileDesign`, `TILE_DESIGNS`, `redFiveIndexes`), cloths (`JARAJARA_CLOTHS`, `CLOTHS`, `isCloth`, `clothVars`), and the colours `TILE_INK`, `TILE_BODY`, `TILE_MARKS` |
+| `@johnmorrisdotca/jarajara/faces` | `tileSvg`, `tileFaceSvg`, `tileFaceSymbols`, `faceWords`, `layoutSvg`, `layoutBox`, `layoutFrame`, `tileAt`, `TILE_BOX`, the block (`blockColours`, `blockSvg`, `shadowSvg`, `faceEdgeSvg`, `TILE_DEPTH`, `TILE_MIRRORS`), the backs (`tileBackSvg`, `tileBackFace`, `backBase`, `TILE_BACKS`), designs (`jarajaraDesign`, `loadTileDesign`, `TILE_DESIGNS`, `redFiveIndexes`), cloths (`JARAJARA_CLOTHS`, `CLOTHS`, `isCloth`, `clothVars`), and the colours `TILE_INK`, `TILE_BODY`, `TILE_MARKS` |
 | `@johnmorrisdotca/jarajara/tile-sounds` | `createTileSounds`, `TILE_SOUND_KINDS`, `soundTimes` |
 | `@johnmorrisdotca/jarajara/sounds` | `TILE_SOUND_DATA`, the recordings as base64 AAC |
 | `@johnmorrisdotca/jarajara/designs/riichi`, `/designs/riichi-black` | `RIICHI`, `RIICHI_BLACK`: the riichi tiles as drawings, about 118 kB each |
-| `@johnmorrisdotca/jarajara/element` | the element classes (`JarajaraTile`, `JarajaraRack`, `JarajaraLayout`, `JarajaraTable`, `JarajaraGroup`, `JarajaraSet`, `JarajaraViewer`), `hintPair`, `rackPlaces`, `rackWidth`, `ELEMENT_SIZES` |
+| `@johnmorrisdotca/jarajara/element` | the element classes (`JarajaraTile`, `JarajaraRack`, `JarajaraLayout`, `JarajaraTable`, `JarajaraGroup`, `JarajaraSet`, `JarajaraViewer`), `hintPair`, `setPageSounds`, `MOST_SOUNDING`, `rackPlaces`, `rackWidth`, `ELEMENT_SIZES` |
 | `@johnmorrisdotca/jarajara/element/define` | defines the seven tags on the page, for its effect |
 
 Every function is pure: it returns new values and never changes what it was
@@ -357,6 +391,8 @@ src/
 ├── tile-sounds.ts    the "/tile-sounds" entry: playing them
 ├── design.types.ts   the type of a set of drawn tiles
 ├── cloth.ts          the family's five cloths
+├── block.ts          a tile as a solid block: its thickness, shadow, edge and the views that mirror a board
+├── colour.ts         reading, mixing and lightening colours for the drawings
 ├── draw.ts           a whole layout drawn as one SVG, stacked far to near
 ├── random.ts         the seeded random numbers every deal is made from
 ├── types.ts          the types of the set, layouts, moves and Awase

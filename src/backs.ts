@@ -1,5 +1,7 @@
 import type { TileDesign } from "./design.types.ts";
-import { tileBackDrawing, TILE_BODY, TILE_FONT } from "./faces.ts";
+import { blockColours, blockSvg, directionOf, type TileMirror } from "./block.ts";
+import { mixColours as mix, rgbOf as rgb } from "./colour.ts";
+import { tileBackDrawing, TILE_BODY, TILE_BOX, TILE_FONT } from "./faces.ts";
 
 /**
  * THE BACKS OF THE TILES, drawn as SVG in the tile's own 30 by 40: what a tile lying face down shows. Five are drawn
@@ -38,17 +40,6 @@ const LOOKS: Record<(typeof TILE_BACKS)[number], Look> = {
 /** Whether a name is one of the five backs drawn here. */
 export function isBuiltInBack(name: string): name is (typeof TILE_BACKS)[number] {
   return (TILE_BACKS as readonly string[]).includes(name);
-}
-
-function rgb(text: string): [number, number, number] | null {
-  const hex = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(text.trim());
-  if (hex === null) return null;
-  const full = hex[1]!.length === 3 ? [...hex[1]!].map((digit) => digit + digit).join("") : hex[1]!;
-  return [0, 2, 4].map((at) => parseInt(full.slice(at, at + 2), 16)) as [number, number, number];
-}
-
-function mix(from: [number, number, number], to: [number, number, number], share: number): string {
-  return `#${from.map((value, at) => Math.round(value + (to[at]! - value) * share).toString(16).padStart(2, "0")).join("")}`;
 }
 
 /** The colours of a back, with a colour of the caller's laid over it: a light line on a dark colour, a dark one on a light. */
@@ -112,18 +103,30 @@ export function tileBackFace(name: TileBackName = "jade", options: TileBackOptio
   return `<rect x="0" y="0" width="30" height="40" rx="3" fill="${look.base}" stroke="${rim}" stroke-width="0.8"/>${pattern(name, look)}${markOf(options.mark, look)}`;
 }
 
+/** The colour of a back's plate, which is also the colour of the tile's thickness seen from the back: a built-in back's own base (with the caller's `colour`), a design's body, or null for a name with no back here. */
+export function backBase(name: TileBackName = "jade", options: TileBackOptions = {}): string | null {
+  if (isBuiltInBack(name)) return lookOf(name, options.colour).base;
+  return options.design === undefined ? null : (options.design.colours.body ?? null);
+}
+
 /**
- * One tile's back on its own, as a whole `<svg>` in the same box as `tileSvg`: the back with a sliver of the tile's
- * side. Null for a name that is no back drawn here and no `design` to bring it.
+ * One tile's back on its own, as a whole `<svg>` in the same box as `tileSvg`: the back plate over a solid block, its
+ * thickness showing on two sides (the back plate's own colour, with the ivory layer beyond it). With `flat`, the old
+ * look (a sliver of side in 32 by 42) and with `bare` the back alone in 30 by 40, for a page that gives the tile its
+ * thickness itself. Null for a name that is no back drawn here and no `design` to bring it.
  */
-export function tileBackSvg(name: TileBackName = "jade", options: TileBackOptions = {}): string | null {
+export function tileBackSvg(name: TileBackName = "jade", options: TileBackOptions & { flat?: boolean; bare?: boolean; mirror?: TileMirror } = {}): string | null {
   if (!isBuiltInBack(name) && options.design === undefined) return null;
   const said = options.title ?? "tile, face down";
   const named = said === "" ? ` aria-hidden="true"` : ` role="img" aria-label="${said}"`;
-  const side = !isBuiltInBack(name) && options.design !== undefined ? options.design.colours.side : TILE_BODY.side;
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 32 42"${named} data-back="${name}">` +
-    `<rect x="-0.5" y="-0.5" width="31" height="41" rx="3" fill="${side}"/>` +
-    `${tileBackFace(name, options)}</svg>`
-  );
+  const open = (box: string, extra = "") => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${box}"${named}${extra} data-back="${name}">`;
+  if (options.flat === true) {
+    const side = !isBuiltInBack(name) && options.design !== undefined ? options.design.colours.side : TILE_BODY.side;
+    return open("-1 -1 32 42") + `<rect x="-0.5" y="-0.5" width="31" height="41" rx="3" fill="${side}"/>` + `${tileBackFace(name, options)}</svg>`;
+  }
+  if (options.bare === true) return open("0 0 30 40", ` overflow="visible"`) + `${tileBackFace(name, options)}</svg>`;
+  const direction = directionOf(options.mirror);
+  const colours = blockColours(options.design, backBase(name, options) ?? undefined);
+  const box = `${direction.x > 0 ? TILE_BOX.x : -1} ${direction.y > 0 ? TILE_BOX.y : TILE_BOX.x} ${TILE_BOX.width} ${TILE_BOX.height}`;
+  return open(box) + blockSvg(colours, direction, "back") + `${tileBackFace(name, options)}</svg>`;
 }

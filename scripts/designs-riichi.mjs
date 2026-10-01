@@ -35,8 +35,8 @@ const small = (svg, id) =>
 const inside = (svg) => svg.slice(svg.indexOf(">") + 1, svg.lastIndexOf("</svg>"));
 
 const STYLES = [
-  { folder: "Regular", file: "riichi", name: "riichi", constant: "RIICHI", words: "regular", colours: { face: "#f3efe9", rim: "#c8c1b4", side: "#d8d1c3", sideEdge: "#a39a89" }, plate: "" },
-  { folder: "Black", file: "riichi-black", name: "riichi-black", constant: "RIICHI_BLACK", words: "black", colours: { face: "#1c1c1c", rim: "#000000", side: "#2a2a2a", sideEdge: "#000000" }, plate: `<rect x="1.4" y="1.6" width="27.2" height="36.8" rx="2.4" fill="#f3efe9"/>` },
+  { folder: "Regular", file: "riichi", name: "riichi", constant: "RIICHI", words: "regular", colours: { face: "#f3efe9", rim: "#c8c1b4", side: "#d8d1c3", sideEdge: "#a39a89", body: "#3f8a69" }, plate: "" },
+  { folder: "Black", file: "riichi-black", name: "riichi-black", constant: "RIICHI_BLACK", words: "black", colours: { face: "#1c1c1c", rim: "#000000", side: "#2a2a2a", sideEdge: "#000000", body: "#141414" }, plate: `<rect x="1.4" y="1.6" width="27.2" height="36.8" rx="2.4" fill="#f3efe9"/>` },
 ];
 
 mkdirSync("src/designs", { recursive: true });

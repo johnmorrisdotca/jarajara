@@ -1,3 +1,4 @@
+import { blockColours, blockSvg, directionOf, faceEdgeSvg, TILE_DEPTH, type TileMirror } from "./block.ts";
 import type { TileDesign } from "./design.types.ts";
 import { faceWords } from "./names.ts";
 import { faceOf, MAHJONG_FACES } from "./tiles.ts";
@@ -34,8 +35,11 @@ export const TILE_INK = {
   season: "#c2711c",
 } as const;
 
-/** The tile itself: its ivory face, the rim round it, and the bone of its side. */
-export const TILE_BODY = { face: "#fffdf6", rim: "#b9ad96", side: "#d9c59b", sideEdge: "#a8926a" } as const;
+/** The tile itself: its ivory face, the rim round it, the bone of its side (the sliver a flat picture shows) and the green of the back plate its thickness is drawn in. */
+export const TILE_BODY = { face: "#fffdf6", rim: "#b9ad96", side: "#d9c59b", sideEdge: "#a8926a", body: "#3a8a68" } as const;
+
+/** The box a solid tile is drawn in, in the face's units: the face, its thickness down and to the left, and a margin for the outlines. */
+export const TILE_BOX = { x: -(TILE_DEPTH + 1), y: -1, width: 30 + TILE_DEPTH + 2, height: 40 + TILE_DEPTH + 2 } as const;
 
 /** The fonts the characters are drawn in, Japanese serif first; a page may load its own and name it here. */
 export const TILE_FONT = "'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif CJK JP', serif";
@@ -186,8 +190,8 @@ export function tileBackDrawing(design: TileDesign): string {
   return fitted(design, design.back);
 }
 
-/** The colours of a tile's rim and thickness: a design's, or Jarajara's own ivory and bone. */
-export function tileColours(design?: TileDesign): { face: string; rim: string; side: string; sideEdge: string } {
+/** The colours of a tile's rim and thickness: a design's, or Jarajara's own ivory and jade. */
+export function tileColours(design?: TileDesign): { face: string; rim: string; side: string; sideEdge: string; body?: string } {
   return design?.colours ?? TILE_BODY;
 }
 
@@ -230,20 +234,26 @@ export type TileSvgOptions = {
   red?: boolean;
   /** What a screen reader says. Unless said, the tile's name in English. An empty string makes the picture decoration. */
   title?: string;
+  /** The old look: the face with a sliver of its side, in the 32 by 42 box. Unless said, the tile is drawn solid. */
+  flat?: boolean;
+  /** Only the face, no thickness, in a box of exactly 30 by 40: for a page that gives the tile its thickness itself, as the turning elements do. */
+  bare?: boolean;
+  /** Which way the thickness shows. Unless said, below and to the left. */
+  mirror?: TileMirror;
 };
 
-/** The `<svg>` opening a tile's picture: its box with room for the sliver of its side, and its name. */
-function tileOpen(face: MahjongFace, title: string | undefined): string {
+/** The `<svg>` opening a tile's picture: its box with room for its thickness, and its name. */
+function tileOpen(face: MahjongFace, title: string | undefined, box: string, extra = ""): string {
   const said = title ?? faceWords(face);
   const named = said === "" ? ` aria-hidden="true"` : ` role="img" aria-label="${said}"`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 32 42"${named} data-face="${face.code}">`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${box}"${named}${extra} data-face="${face.code}">`;
 }
 
 /**
- * One tile on its own, as a whole `<svg>`: the face on its ivory, with a
- * sliver of its side, named for a screen reader. Its width and height are the
- * caller's, through CSS; the picture keeps its 3 by 4. Null for a letter that
- * is no face.
+ * One tile on its own, as a whole `<svg>`: a solid block, the face on its ivory over a back plate whose thickness shows
+ * on two sides, named for a screen reader. Its width and height are the caller's, through CSS; the picture keeps its
+ * box (`TILE_BOX`). With `flat`, the old look (a sliver of its side in 32 by 42), and with `bare` the face alone in
+ * 30 by 40. Null for a letter that is no face.
  */
 export function tileSvg(code: string, options: TileSvgOptions = {}): string | null {
   const face = faceOf(code);
@@ -251,10 +261,16 @@ export function tileSvg(code: string, options: TileSvgOptions = {}): string | nu
   const { design, red = false } = options;
   const colours = tileColours(design);
   const body = tileBodySvg(design);
-  return (
-    tileOpen(face, options.title) +
-    `<rect x="-0.5" y="-0.5" width="31" height="41" rx="3" fill="${colours.side}"/>` +
-    (body === null ? `<rect x="0" y="0" width="30" height="40" rx="3" fill="${colours.face}" stroke="${colours.rim}" stroke-width="0.8"/>` : body) +
-    `${tileFaceSvg(code, design, red)}</svg>`
-  );
+  const plate = body === null ? `<rect x="0" y="0" width="30" height="40" rx="3" fill="${colours.face}" stroke="${colours.rim}" stroke-width="0.8"/>` : body;
+  if (options.flat === true) {
+    return tileOpen(face, options.title, "-1 -1 32 42") + `<rect x="-0.5" y="-0.5" width="31" height="41" rx="3" fill="${colours.side}"/>` + plate + `${tileFaceSvg(code, design, red)}</svg>`;
+  }
+  const block = blockColours(design);
+  if (options.bare === true) {
+    return tileOpen(face, options.title, "0 0 30 40", ` overflow="visible"`) + (body === null ? `<rect x="0" y="0" width="30" height="40" rx="3" fill="${colours.face}"/>` : body) + faceEdgeSvg(block) + `${tileFaceSvg(code, design, red)}</svg>`;
+  }
+  const direction = directionOf(options.mirror);
+  const box = `${direction.x > 0 ? TILE_BOX.x : -1} ${direction.y > 0 ? TILE_BOX.y : TILE_BOX.x} ${TILE_BOX.width} ${TILE_BOX.height}`;
+  const solid = blockSvg(block, direction);
+  return tileOpen(face, options.title, box) + solid + (body === null ? `<rect x="0" y="0" width="30" height="40" rx="3" fill="${colours.face}"/>` : body) + faceEdgeSvg(block) + `${tileFaceSvg(code, design, red)}</svg>`;
 }

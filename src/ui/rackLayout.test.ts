@@ -32,7 +32,7 @@ describe("where tiles lie in a rack", () => {
   });
 
   it("knows a tile is taller than wide", () => {
-    expect(TILE_TALL).toBeCloseTo(1.3125, 4);
+    expect(TILE_TALL).toBeCloseTo(1.2703, 4);
   });
 
   it("is wider grouped than not, which is why a rack keeps the room of its widest", () => {

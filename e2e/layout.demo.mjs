@@ -171,7 +171,7 @@ test("a table of computers plays to the end, and a person's turn waits for a tap
 
 test("the demo's table panel, its gallery and its looked-over layout work", async ({ page }) => {
   const errors = await open(page);
-  await page.selectOption(at("table-players"), "3");
+  await tap(page, page.locator(at("table-players") + ' [data-value="3"]'));
   await expect(page.locator(at("table-demo"))).toHaveAttribute("players", "3");
   await expect(page.locator(at("table-demo") + " .seat")).toHaveCount(3);
   await tap(page, at("sort-xyz"));

@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.4.0 — 2026-10-01
+
+How the tiles look, how the board sits, and what the board does for the player. No deal, layout, rule or saved game
+changes (a test plays every deal itsutsu.com made again); the drawing's calls keep working, with options added.
+
+- **Tiles are solid blocks.** An ivory face over a back plate, its thickness showing on two sides (the ivory layer nearest the
+  face, the back plate's own colour beyond), each layer of a stack lifted by exactly that thickness, a soft shadow that reaches
+  further the higher the tile, and a seam and a raised-edge line round every face. `tileSvg` and `tileBackSvg` draw the block
+  (`flat: true` is the old sliver, `bare: true` the face alone); the new `blockColours`, `blockSvg`, `shadowSvg`,
+  `faceEdgeSvg`, `TILE_DEPTH`, `TILE_BOX` and `backBase` are in `/faces`. A tile's picture is now 37 by 47 (`TILE_BOX`,
+  `viewBox="-6 -1 37 47"`), not 32 by 42. Every design shows where each tile ends, riichi black and regular included: a design may
+  say its back plate's colour (`colours.body`).
+- **Turning a tile is a block tipping over on its edge.** `<jarajara-tile>` and `<jarajara-rack>` are real 3D blocks: a face and a
+  back a thickness apart with four edges between, lifted as they pass upright and set down on the back, which is the colour of the
+  back chosen. Reduced motion skips the turn.
+- **One steady frame, centred on what is drawn.** `layoutFrame(size, { mirror, margin })` is the box that holds a layout's solid
+  tiles, their thickness and their layer lift, and `layoutSvg(..., { margin })` draws on it. A board on a cloth sits in an inner
+  frame with one padding all round, scaled into a box that does not change with the layout (`box="landscape"`, `--jarajara-box`).
+- **Find.** `matchesOf(geometry, cells, rule, slot)` gives every tile that matches one, told apart by whether it could be taken
+  with it now. `find` on `<jarajara-layout>` lights them when a mouse points at a tile or one is chosen: a solid ring for a free
+  match, a dashed ring for a held one, in a colour that is neither the chosen ring's nor the hint's. `layoutSvg`'s `found` draws them.
+- **A hint looks first for the chosen tile's match.** `hintFor(geometry, cells, rule, chosen?)` answers `match`, `other` (the chosen
+  tile has none free: another pair), `any` or `none`; `runHint(run, chosen?)` and the element's `hint()` use it, and
+  `jarajara-hint` says which it found. `hintPair` is as it was.
+- **The board seen from the other side.** `mirror` (`none`, `horizontal`, `vertical`, `both`) on `layoutSvg` and the elements, and a Flip
+  button (`flippable`). A view only: slots, what is free, hints and replays are the layout's own, and the thickness, the lift and
+  the shadows follow the view. Quarter-turns and free rotation are not built; `docs/LOOK.md` says what they would take.
+- **Every action has its sound.** A rack's Face down and Face up were silent (an attribute with no value looked unchanged to the
+  rack, so it also told a caller its change was over at once); they and the rest of the rack's actions, the tile's spin and the board's
+  hint, undo and new deal now sound from the element's own method, with `sound` on, never more than `MOST_SOUNDING` clicks at once.
+  `rack.deal(tiles)` deals a new hand; `setPageSounds(player)` gives the page's own player.
+- **The demo is one screen, not nine.** The board is one fixed box that fits the window with its controls, the options are the family's
+  label-and-chips rows, the panels under it are tabs (Tiles, Rack, Viewers, Layouts, Table, Designs, Rules), and the gallery's
+  cards are one size with each layout scaled into the same thumbnail. The page is a fifth as tall.
+- `docs/LOOK.md` records what the established mahjong solitaires do (Mah, KMahjongg, mahseum and others) and what was taken from it.
+
 ## 1.3.0 — 2026-10-01
 
 More layouts, and challenges and options for Awase. No existing deal changes: sizes 4, 8, 9, 10 and 15 and every deal

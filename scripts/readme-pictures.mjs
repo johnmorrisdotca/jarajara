@@ -41,15 +41,15 @@ async function shot({ width, height, colorScheme, lang, size, pairs, showFree = 
     }
   }, pairs);
   await page.waitForTimeout(300);
-  // Scrolled to the table: its top at the top of the window, or (on a desk) its foot at the foot, so the layout chooser stays above it.
+  // Scrolled to the board: its top at the top of the window.
   if (scrollTo) await page.locator(scrollTo).evaluate((element, seeEnd) => window.scrollTo(0, seeEnd ? element.getBoundingClientRect().bottom + window.scrollY - window.innerHeight + 16 : element.getBoundingClientRect().top + window.scrollY - 16), seeEnd);
   await page.mouse.move(0, 0);
   await page.screenshot({ path, type: "jpeg", quality: QUALITY });
   await context.close();
 }
 
-// The Turtle (144 tiles), a few pairs taken, with the layout chooser above the whole table.
-await shot({ width: 1280, height: 1000, colorScheme: "light", lang: "en", size: 15, pairs: 6, path: join(docs, "desktop.jpg"), scrollTo: ".table-stage", seeEnd: true });
+// The Turtle (144 tiles), a few pairs taken, the board and the options under it.
+await shot({ width: 1280, height: 1000, colorScheme: "light", lang: "en", size: 15, pairs: 6, path: join(docs, "desktop.jpg"), scrollTo: "#game" });
 // Fuji on a phone, with the free tiles lit.
-await shot({ width: 390, height: 844, colorScheme: "dark", lang: "ja", size: 9, pairs: 8, showFree: true, path: join(docs, "phone.jpg"), scrollTo: ".table-stage" });
+await shot({ width: 390, height: 844, colorScheme: "dark", lang: "ja", size: 9, pairs: 8, showFree: true, path: join(docs, "phone.jpg"), scrollTo: "#game" });
 await browser.close();
