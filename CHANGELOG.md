@@ -6,6 +6,41 @@ All notable changes to this project are written here. The format follows
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-05
+
+Two mega layouts, for more than one set of tiles. No deal, layout, rule or saved game that existed changes (a test plays every deal
+itsutsu.com made again, and the day's game is chosen among the same layouts it was), and nothing that was exported changes.
+
+### Added
+
+- **The Wall 長城** (20 across, 288 tiles, 5 layers) and **the Palace 宮殿** (26 across, 576 tiles, 6 layers), in `MEGA_LAYOUTS` and so in
+  `ALL_LAYOUTS`. The Wall is a stretch of the Great Wall: a walkway along the top of a wall four tiles thick, a watchtower at each end
+  and a gate tower that rises in the middle. The Palace is a wall round a courtyard with a gate in it, a tower at each corner and one
+  either side of the gate, and the great hall in the middle climbing in six steps. Each is drawn from scratch, is the same seen from
+  the left as from the right, and is dealt from as many sets of 144 tiles as it needs: two and four.
+- **`setPairs(rule, random, sets)`**: the pairs of that many sets (one unless said, which is exactly what it was). Under the usual
+  rule a flower or a season is dealt once however many sets there are, so a deal still says which rule it was made under
+  (`bonusRuleOf`); the bonus tiles the further sets would have held are four more pairs of ordinary tiles each.
+- **`clearShare`** (in `@johnmorrisdotca/jarajara/awase`): how far a player taking any free pair at random gets, as a share of the
+  tiles. A deal of more than one set is ranked by it instead of by `clearRate`, since a random player almost never clears one (the
+  Wall about one game in fifty), and the share tells a forgiving deal from an unforgiving one in sixteen games.
+
+### Changed
+
+- **A deal's random play-outs are quick.** `clearRate` keeps the free tiles as they change and finds the pair taken by counting,
+  instead of listing every free pair afresh after each one: it makes exactly the choices it made, and a test holds it to the plain way
+  on every layout. A deal of the Turtle takes 5 ms (it took 60), the Wall 10 ms and the Palace 35 ms (it would have been over two
+  seconds), on a laptop; four times slower again on a phone's processor.
+- A table of computers works on the mega layouts: a turn of the Palace takes a few hundredths of a second.
+- The README, `docs/strings-ja.md`, the layout template, the demo's gallery and its tests know the two new layouts.
+
+### Not changed
+
+- `dailyAwase` never picks a mega layout, so the day's game is what it was.
+- The element draws every tile as a solid block, which is the cost of a 576-tile layout: a pair taken redraws in about 80 ms on a laptop
+  (about 340 ms with the processor slowed fourfold), and its tiles are about 13 pixels across on a 390-pixel page. A page showing the
+  Palace to a phone should give the board room to zoom and pan, as itsutsu.com does.
+
 ## [1.5.0] - 2026-10-01
 
 A command line, and a framework check. No deal, layout, rule or saved game changes (a test plays every deal itsutsu.com made
