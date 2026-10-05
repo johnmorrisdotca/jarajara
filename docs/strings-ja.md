@@ -126,3 +126,5 @@ The usage text (`--help`) is a block of prose of its own, in `usage`, and is lef
 | `bridge` | Bridge | 橋 |
 | `butterfly` | Butterfly | 蝶 |
 | `dragon` | Dragon | 龍 |
+| `wall` | Wall | 長城 |
+| `palace` | Palace | 宮殿 |

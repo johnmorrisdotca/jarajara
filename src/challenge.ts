@@ -458,7 +458,8 @@ export function runMoves(run: AwaseRun): readonly MahjongMove[] {
  */
 export function dailyAwase(date: string | Date): { date: string; size: number; level: AwaseLevel; seed: number; challenge: AwaseChallenge } {
   const day = typeof date === "string" ? date.slice(0, 10) : date.toISOString().slice(0, 10);
-  const layouts = ALL_LAYOUTS.filter((layout) => layout.key !== "tiny");
+  // The mega layouts (more than one set of tiles) are never the day's: the day's choice is what it was before they came.
+  const layouts = ALL_LAYOUTS.filter((layout) => layout.key !== "tiny" && layout.slots.length <= 144);
   const levels: readonly AwaseLevel[] = ["easy", "medium", "hard"];
   const pick = (words: string, count: number) => hashText(`daily:${words}:${day}`) % count;
   return {

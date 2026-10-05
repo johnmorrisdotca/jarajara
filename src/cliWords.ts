@@ -17,6 +17,8 @@ export const LAYOUT_NAMES_JA: Readonly<Record<string, string>> = {
   bridge: "橋",
   butterfly: "蝶",
   dragon: "龍",
+  wall: "長城",
+  palace: "宮殿",
 };
 
 /** The command line's words. */

@@ -85,23 +85,36 @@ export function bonusRuleOf(cells: string): MahjongBonusRule {
  * seasons, split at random under the usual rule, or four faces drawn twice
  * each under the Identical rule. `random` decides the splits; the order is the
  * set's, and the deal shuffles it.
+ *
+ * `sets` is how many sets a mega layout is dealt (2 for 288 tiles, 4 for 576), 1 unless said, and a deal of one set is
+ * exactly what it has always been. More sets are each set's pairs again, with one difference under the usual rule: a
+ * flower or a season is dealt once, since a deal that held one twice would be read as the Identical rule
+ * (`bonusRuleOf`). The bonus pairs a further set would have held are four more pairs of ordinary faces, drawn at
+ * random, so the tile count is the same.
  */
-export function setPairs(rule: MahjongBonusRule, random: () => number): [string, string][] {
+export function setPairs(rule: MahjongBonusRule, random: () => number, sets = 1): [string, string][] {
   const pairs: [string, string][] = [];
-  for (const face of MAHJONG_FACES) {
-    if (face.suit === "flowers" || face.suit === "seasons") continue;
-    pairs.push([face.code, face.code], [face.code, face.code]);
-  }
+  const ordinary = MAHJONG_FACES.filter((face) => face.suit !== "flowers" && face.suit !== "seasons");
   const bonus = MAHJONG_FACES.filter((face) => face.suit === "flowers" || face.suit === "seasons").map((face) => face.code);
-  const mixed = bonus.map((code) => ({ code, key: random() }));
-  if (rule === "group") {
-    for (const suit of ["flowers", "seasons"] as const) {
-      const group = mixed.filter((each) => faceOf(each.code)!.suit === suit).sort((a, b) => a.key - b.key);
-      pairs.push([group[0]!.code, group[1]!.code], [group[2]!.code, group[3]!.code]);
+  for (let set = 0; set < sets; set += 1) {
+    for (const face of ordinary) pairs.push([face.code, face.code], [face.code, face.code]);
+    if (set > 0 && rule === "group") {
+      for (let extra = 0; extra < 4; extra += 1) {
+        const face = ordinary[Math.floor(random() * ordinary.length)]!;
+        pairs.push([face.code, face.code]);
+      }
+      continue;
     }
-  } else {
-    const drawn = mixed.sort((a, b) => a.key - b.key).slice(0, 4);
-    for (const each of drawn) pairs.push([each.code, each.code]);
+    const mixed = bonus.map((code) => ({ code, key: random() }));
+    if (rule === "group") {
+      for (const suit of ["flowers", "seasons"] as const) {
+        const group = mixed.filter((each) => faceOf(each.code)!.suit === suit).sort((a, b) => a.key - b.key);
+        pairs.push([group[0]!.code, group[1]!.code], [group[2]!.code, group[3]!.code]);
+      }
+    } else {
+      const drawn = mixed.sort((a, b) => a.key - b.key).slice(0, 4);
+      for (const each of drawn) pairs.push([each.code, each.code]);
+    }
   }
   return pairs;
 }

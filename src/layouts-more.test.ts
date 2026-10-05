@@ -11,9 +11,9 @@ describe("the more layouts", () => {
   it("are six, each a new width and a new name, after the five that never change", () => {
     expect(MORE_LAYOUTS.map((layout) => layout.key)).toEqual(["pagoda", "fortress", "pyramid", "bridge", "butterfly", "dragon"]);
     expect(MAHJONG_LAYOUTS.map((layout) => layout.size)).toEqual([4, 8, 9, 10, 15]);
-    expect(ALL_LAYOUTS).toHaveLength(11);
-    expect(new Set(ALL_LAYOUTS.map((layout) => layout.size)).size).toBe(11);
-    expect(new Set(ALL_LAYOUTS.map((layout) => layout.key)).size).toBe(11);
+    expect(ALL_LAYOUTS).toHaveLength(13);
+    expect(new Set(ALL_LAYOUTS.map((layout) => layout.size)).size).toBe(13);
+    expect(new Set(ALL_LAYOUTS.map((layout) => layout.key)).size).toBe(13);
     for (const layout of MORE_LAYOUTS) expect(layoutFor(layout.size)).toBe(layout);
   });
 

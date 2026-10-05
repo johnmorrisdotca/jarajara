@@ -11,7 +11,7 @@ labels: enhancement
 
 **How many tiles.** The number has to be even, since tiles are taken in pairs.
 
-**Its width in tiles.** The width names a layout, so it has to be one no layout has. Widths 4 and 8 to 17 are taken; 5 to 7, and 18 or more, are free.
+**Its width in tiles.** The width names a layout, so it has to be one no layout has. Widths 4, 8 to 17, 20 and 26 are taken; 5 to 7, 18, 19, 21 to 25, and 27 or more, are free.
 
 **Where the shape comes from:** a traditional shape anyone may draw, or your own. Layouts here are our own drawings of shapes. Please do not send the art or the data of another game.
 

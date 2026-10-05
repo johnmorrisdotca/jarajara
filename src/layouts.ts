@@ -1,3 +1,4 @@
+import { MEGA_LAYOUTS } from "./layouts-mega.ts";
 import { MORE_LAYOUTS } from "./layouts-more.ts";
 import type { MahjongLayout, MahjongSlot } from "./types.ts";
 
@@ -135,7 +136,7 @@ export const MAHJONG_LAYOUTS: readonly MahjongLayout[] = [
  * Every layout there is: the five above, which itsutsu.com's kept games are made on and which never change, then Jarajara's
  * own more (`layouts-more.ts`), each of a width none of the others has.
  */
-export const ALL_LAYOUTS: readonly MahjongLayout[] = [...MAHJONG_LAYOUTS, ...MORE_LAYOUTS];
+export const ALL_LAYOUTS: readonly MahjongLayout[] = [...MAHJONG_LAYOUTS, ...MORE_LAYOUTS, ...MEGA_LAYOUTS];
 
 /** The layout a size names, or null for one there is not. */
 export function layoutFor(size: number): MahjongLayout | null {

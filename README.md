@@ -77,7 +77,7 @@ npx @johnmorrisdotca/jarajara deal --layout turtle --seed 12345
 ## Features
 
 - **The whole set.** 144 tiles in 42 faces, each written as one letter, so a layout is a string; names in English and Japanese; hands written in the notation riichi players use (`123m456p`).
-- **Eleven stacked layouts**, from the Turtle to a Dragon, each with the geometry of what lies on and beside every slot worked out once.
+- **Thirteen stacked layouts**, from a Dragon to a Palace of 576 tiles, each with the geometry of what lies on and beside every slot worked out once. The last two, the Wall (288 tiles) and the Palace (576), are dealt from two and four sets of tiles.
 - **Awase, always clearable.** A deal is laid in reverse from a seed, so every deal can be cleared, at three levels. A finished game is written as text and checked by playing it, with no search, so a server can trust it.
 - **Options, seven challenges and the day's game.** Hints, shuffles and undo given, limited or taken away; a clock and a goal laid over a deal; and `dailyAwase(date)`, the same game for everybody from the date alone.
 - **Awase at a table** of two to four, with a computer in any seat.
@@ -227,13 +227,27 @@ right. Only free tiles may be taken.
 | 15 | Turtle | 144 | 5 |
 | 16 | Butterfly | 112 | 4 |
 | 17 | Dragon | 142 | 4 |
+| 20 | Wall | 288 | 5 |
+| 26 | Palace | 576 | 6 |
 
 The Turtle is the layout the solitaire has been played on since it was first
 published. A layout's size is its width in tiles, and names it. Tiny is for
 tests, cleared in four pairs. `MAHJONG_LAYOUTS` holds the first five, which
-never change (itsutsu.com's kept games are made on them); the other six are
-Jarajara's own drawings of shapes anyone may draw, in `MORE_LAYOUTS`, and
-`ALL_LAYOUTS` holds them all. Every one is dealt and cleared by the same
+never change (itsutsu.com's kept games are made on them); the next six are
+Jarajara's own drawings of shapes anyone may draw, in `MORE_LAYOUTS`; and the
+last two are the mega layouts in `MEGA_LAYOUTS`, and `ALL_LAYOUTS` holds them all.
+
+The two mega layouts are laid with more than one set of tiles. The **Wall** 長城
+is a stretch of the Great Wall: four tiles thick with a walkway along the top, a
+watchtower at each end and a gate tower in the middle that rises in five layers,
+288 tiles, a double set. The **Palace** 宮殿 is a wall round a courtyard with a
+gate, towers at its corners and either side of the gate, and the great hall in
+the middle climbing in six steps, 576 tiles, a quadruple set. A deal of either is
+laid in reverse like any other, so every deal can be cleared, and is made in
+under a tenth of a second (the Palace) on a laptop. Under the usual rule a flower
+or a season is dealt once however many sets there are, so the eight bonus tiles
+of the further sets are four more pairs of ordinary tiles. A table of computers
+works on them, a turn taking a few hundredths of a second on the Palace. Every one is dealt and cleared by the same
 reverse dealing, and a test deals each at every level from several seeds and
 plays its own answer out.
 
@@ -582,6 +596,8 @@ $ jarajara layouts
 15  turtle     144 tiles, 5 layers
 16  butterfly  112 tiles, 4 layers
 17  dragon     142 tiles, 4 layers
+20  wall       288 tiles, 5 layers
+26  palace     576 tiles, 6 layers
 $ jarajara deal --layout 4 --seed 7
 Tiny, 8 tiles, medium, seed 7, usual rule
 
@@ -699,7 +715,7 @@ All of these are held by tests, and the ones with a name are exported.
 | Limit | Value | Where |
 | --- | --- | --- |
 | The set | 144 tiles in 42 faces | `MAHJONG_FACES`, `setInventory` |
-| Layouts | eleven, 8 to 144 tiles, widths 4 and 8 to 17 | `ALL_LAYOUTS`, `layoutFor` |
+| Layouts | thirteen, 8 to 576 tiles, widths 4, 8 to 17, 20 and 26 | `ALL_LAYOUTS`, `layoutFor` |
 | Levels | `easy`, `medium`, `hard` | `generateAwase` |
 | A seed | a whole number from 1 to 2,147,483,647 | `SEED_MOST`, `freshAwaseSeed` |
 | Seeds for the identical rule | 1,500,000,000 to 1,599,999,999 | `AWASE_SAME_BLOCK`, `bonusRuleOfSeed` |
@@ -756,6 +772,8 @@ src/
 ├── arrange.ts        sorting, grouping and mixing tiles; putting a layout's slots in order by x, y, z
 ├── layouts.ts        the five stacked layouts, Tiny to the Turtle, and every layout by size
 ├── layouts-more.ts   six more layouts, Jarajara's own: a pagoda, fortress, pyramid, bridge, butterfly and dragon
+├── layouts-mega.ts   two layouts for more than one set of tiles: the Wall (288) and the Palace (576)
+├── playout.ts        a deal played out at random, the fast way: how forgiving a deal is
 ├── board.ts          which tiles are free, the pairs that can be taken, taking one
 ├── deal.ts           laying pairs in reverse so a deal can always be cleared; shuffling
 ├── moves.ts          a game written as text, and played back on a deal

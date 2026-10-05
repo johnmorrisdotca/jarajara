@@ -25,9 +25,9 @@ const line = (page, selector, name = ".line") => page.locator(selector).evaluate
 test("every layout is offered and every one of them plays", async ({ page }) => {
   const errors = await open(page);
   const names = await page.locator("#layouts button").allTextContents();
-  expect(names).toEqual(["Torii", "Fuji", "Castle", "Turtle", "Pagoda", "Fortress", "Pyramid", "Bridge", "Butterfly", "Dragon"]);
-  await expect(page.locator(at("gallery") + " .gallery-card")).toHaveCount(11);
-  for (const [size, tiles] of [[11, 94], [12, 116], [13, 142], [14, 84], [16, 112], [17, 142]]) {
+  expect(names).toEqual(["Torii", "Fuji", "Castle", "Turtle", "Pagoda", "Fortress", "Pyramid", "Bridge", "Butterfly", "Dragon", "Wall", "Palace"]);
+  await expect(page.locator(at("gallery") + " .gallery-card")).toHaveCount(13);
+  for (const [size, tiles] of [[11, 94], [12, 116], [13, 142], [14, 84], [16, 112], [17, 142], [20, 288], [26, 576]]) {
     await tap(page, page.locator(`#layouts [data-value="${size}"]`));
     await expect(page.locator(at("game"))).toHaveAttribute("size", String(size));
     expect(await page.locator(at("game")).evaluate((el) => el.tilesLeft)).toBe(tiles);

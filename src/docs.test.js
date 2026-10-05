@@ -230,8 +230,8 @@ describe("the README's promises", () => {
     expect(setInventory()).toHaveLength(42);
     expect(setInventory().reduce((sum, { face }) => sum + copiesOf(face.code), 0)).toBe(144);
     const sizes = ALL_LAYOUTS.map((layout) => layout.size).sort((a, b) => a - b);
-    expect(limits).toContain(`eleven, ${Math.min(...ALL_LAYOUTS.map((l) => l.slots.length))} to ${Math.max(...ALL_LAYOUTS.map((l) => l.slots.length))} tiles, widths 4 and 8 to 17`);
-    expect(sizes).toEqual([4, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]);
+    expect(limits).toContain(`thirteen, ${Math.min(...ALL_LAYOUTS.map((l) => l.slots.length))} to ${Math.max(...ALL_LAYOUTS.map((l) => l.slots.length))} tiles, widths 4, 8 to 17, 20 and 26`);
+    expect(sizes).toEqual([4, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 20, 26]);
     expect(limits).toContain(`${AWASE_CHALLENGES.length === 7 ? "seven" : "?"}`);
     expect(readFileSync("src/ui/elementKit.ts", "utf8")).toContain("Math.min(600, width)");
     expect(readFileSync("src/ui/viewerElements.ts", "utf8")).toContain("Math.min(600, width)");
@@ -309,8 +309,8 @@ describe("the README's promises", () => {
   it("says in the layout template which widths are taken, as the layouts have them", () => {
     const sizes = ALL_LAYOUTS.map((layout) => layout.size).sort((a, b) => a - b);
     const template = readFileSync(".github/ISSUE_TEMPLATE/suggest-a-layout.md", "utf8");
-    expect(sizes).toEqual([4, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]);
-    expect(template).toContain("Widths 4 and 8 to 17 are taken; 5 to 7, and 18 or more, are free.");
+    expect(sizes).toEqual([4, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 20, 26]);
+    expect(template).toContain("Widths 4, 8 to 17, 20 and 26 are taken; 5 to 7, 18, 19, 21 to 25, and 27 or more, are free.");
   });
 
   it("keeps SECURITY.md and CODE_OF_CONDUCT.md equal to the family's master text, a copy of which is kept in scripts/community", () => {

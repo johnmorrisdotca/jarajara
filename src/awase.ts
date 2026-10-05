@@ -1,10 +1,11 @@
 import type { AwaseDeal, AwaseLevel } from "./types.ts";
 import { seededRandom, shuffled, type Random } from "./random.ts";
-import { freePairs, geometryOf, takePair, tilesLeft } from "./board.ts";
+import { geometryOf } from "./board.ts";
 import { hashText, layPairs, type Laid } from "./deal.ts";
 import { layoutFor } from "./layouts.ts";
 import type { MahjongBonusRule, MahjongGeometry } from "./types.ts";
 import { encodeMoves } from "./moves.ts";
+import { clearRate, clearShare } from "./playout.ts";
 import { setPairs } from "./tiles.ts";
 
 /**
@@ -23,7 +24,10 @@ import { setPairs } from "./tiles.ts";
  * one between. A ranking rather than a threshold, so every layout at every
  * level is made in the same few milliseconds, whatever its numbers are.
  */
+export { clearRate };
+
 const CANDIDATES = 5;
+const SET_SIZE = 144;
 const PLAYOUTS = 16;
 
 /**
@@ -55,26 +59,12 @@ export function freshAwaseSeed(rule: MahjongBonusRule, random: Random = Math.ran
   }
 }
 
-/** How often a player taking any free pair at random clears this deal, out of `times`. */
-export function clearRate(geometry: MahjongGeometry, cells: string, rule: MahjongBonusRule, random: Random, times: number): number {
-  let cleared = 0;
-  for (let game = 0; game < times; game += 1) {
-    let tiles = cells;
-    for (;;) {
-      const pairs = freePairs(geometry, tiles, rule);
-      if (pairs.length === 0) break;
-      const [a, b] = pairs[Math.floor(random() * pairs.length)]!;
-      tiles = takePair(tiles, a, b);
-    }
-    if (tilesLeft(tiles) === 0) cleared += 1;
-  }
-  return cleared / times;
-}
-
 /** One deal of a layout from its own stream: which pairs of the set, and where each lies. */
 function dealFrom(geometry: MahjongGeometry, rule: MahjongBonusRule, random: Random): Laid | null {
   const count = geometry.layout.slots.length;
-  const pairs = shuffled(setPairs(rule, random), random).slice(0, count / 2);
+  // A layout of more than 144 tiles is dealt from as many sets as it needs; up to 144 it is the one set it always was.
+  const sets = Math.ceil(count / SET_SIZE);
+  const pairs = shuffled(setPairs(rule, random, sets), random).slice(0, count / 2);
   return layPairs(geometry, geometry.layout.slots.map(() => true), pairs, random);
 }
 
@@ -88,7 +78,9 @@ export function generateAwase(size: number, level: AwaseLevel, seed: number): Aw
   for (let order = 0; order < CANDIDATES; order += 1) {
     const laid = dealFrom(geometry, rule, seededRandom(hashText(`mahjong:${seed}:${order}`) || 1));
     if (laid === null) continue;
-    deals.push({ laid, rate: clearRate(geometry, laid.cells, rule, seededRandom(hashText(`playout:${seed}:${order}`) || 1), PLAYOUTS), order });
+    // On more than one set of tiles a random player almost never clears the layout, so how far it gets ranks the deals instead.
+    const measure = layout.slots.length > SET_SIZE ? clearShare : clearRate;
+    deals.push({ laid, rate: measure(geometry, laid.cells, rule, seededRandom(hashText(`playout:${seed}:${order}`) || 1), PLAYOUTS), order });
   }
   if (deals.length === 0) throw new Error(`no deal of the ${layout.key} from seed ${seed}`);
   deals.sort((a, b) => b.rate - a.rate || a.order - b.order);
