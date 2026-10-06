@@ -76,24 +76,3 @@ The Release workflow (`.github/workflows/release.yml`) checks and builds the
 package, attaches the tarball to a GitHub release and publishes it to npm by
 trusted publishing, with provenance and no token. A version already on npm is
 not published again.
-
-## Particular to Jarajara
-
-Bug reports and ideas go in the [issues](https://github.com/johnmorrisdotca/jarajara/issues).
-
-### Commands and rules
-
-```sh
-pnpm check            # lint, types and tests
-pnpm test:package     # pack it as npm does, install it in an empty project, import every entry, run the command line
-pnpm test:cli         # build it and run the command line as a child process
-pnpm test:demo        # build the demo and play it in a real browser
-pnpm test:frameworks  # build a React, Vue, Svelte, Angular and plain page from the packed tarball, and play it in a browser
-pnpm docs:make        # rewrite docs/strings-ja.md after changing a word of the tags or the command line
-```
-
-A change to the rules is tested beside it, and must leave every deal and table
-game in `src/site.fixture.json` exactly as it was: people's kept games and
-fastest times on itsutsu.com are on those deals, found by their seeds. A change
-that alters one is a new version of the rules, never a fix. The same goes for the
-first five layouts (`MAHJONG_LAYOUTS`), which never change.

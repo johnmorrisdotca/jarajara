@@ -141,7 +141,7 @@ describe("the documents", () => {
     expect(pkg.files).toContain("bin");
     expect(existsSync("bin/jarajara.mjs")).toBe(true);
     const ci = readFileSync(".github/workflows/ci.yml", "utf8");
-    expect(ci).toContain("scripts/check-cli.mjs");
+    expect(ci).toContain("pnpm test:cli");
     expect(ci).toContain("node: [22, 24]");
     for (const system of ["ubuntu-latest", "macos-latest", "windows-latest"]) expect(ci).toContain(system);
     expect(readFileSync(".github/workflows/release.yml", "utf8")).toContain("scripts/check-cli.mjs");

@@ -19,6 +19,19 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - run: pnpm build
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium webkit
+      - name: The demo, played in Chromium and WebKit at a phone's width and a desk's
+        run: pnpm test:demo
   package:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -34,24 +47,10 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
+      - name: The package as npm packs it installs and imports, by ESM and by require
+        run: pnpm test:package
       - name: The command line, as a child process
-        run: node scripts/check-cli.mjs
-      - name: The package as npm packs it installs and imports, by ESM and by require, and its command line runs
-        run: node scripts/check-package.mjs
-  demo:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium webkit
-      - name: The elements and the page, tapped in Chromium and WebKit
-        run: pnpm test:demo
+        run: pnpm test:cli
   frameworks:
     runs-on: ubuntu-latest
     steps:
