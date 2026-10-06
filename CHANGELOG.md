@@ -6,8 +6,22 @@ All notable changes to this project are written here. The format follows
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-10-06
+
+Nothing that was exported has changed. The README is the family's one layout, in full, and the parts of it that would have made it too long for npm moved to pages under `docs/`.
+
+### Added
+
+- The README has a picture of the demo on a desk and on a phone, in light and dark, taken from the demo by `pnpm screenshots:readme` (the pictures are in `docs/images/` and are not in the package), a picture of each part of the demo (Awase, a challenge, one tile and the backs, a rack, the whole set, the layouts, a table, the designs), an Examples section of thirteen examples that run, and an Accessibility section.
+- `docs/ELEMENTS.md` (every attribute, method and event of the seven tags), `docs/DRAWING.md`, `docs/COMMAND-LINE.md` and `docs/ARCHITECTURE.md` hold what was in the README's Elements, Drawing, The command line and Architecture sections, word for word; the README keeps a summary of each and links the page. npm shows only the first 65,536 characters of a README and this one had reached 64,118 before the pictures and examples; it is 62,899 now.
+- `pnpm test:readme` type-checks and runs every TypeScript and JavaScript example in the README against the built package, as a job of its own in CI; `src/readme.test.js` holds the README to the family's standard (sections in order, languages on code fences, pictures with alt text and a caption, no marketing words, version pins, at most 64,000 characters) in `pnpm check`; `pnpm test:package` fails if a picture or anything under `docs/` is in the packed package.
+
 ### Changed
 
+- The credits for the sounds and the riichi designs are `CREDITS.md` at the top of the package, not `docs/credits.md`, so that they are still in the package when nothing from `docs/` is. The words of the credits are unchanged.
+- `docs/strings-ja.md` is no longer in the packed package, as in the rest of the family: it is read on GitHub, from the README's link.
+- The tests that held the README's tables to the code (`src/docs.test.js`, `src/architecture.test.js`) read the tag tables, the command line's output and the source tree from the pages they moved to.
+- `pnpm pictures` is `pnpm screenshots:readme`, and takes WebP pictures in light and dark under `docs/images/`; `docs/desktop.jpg` and `docs/phone.jpg` are gone.
 - Repository only: the package and everything it exports are unchanged. `CONTRIBUTING.md` is the family's one text with a section of its own for Jarajara, held to the master in johnmorrisdotca/.github by `src/family.test.js`; `ci.yml` and `pages.yml` are the family's one text (`pnpm check`, the demo, and the package on Linux, macOS and Windows), and any jobs of the package's own after them.
 
 ### Fixed

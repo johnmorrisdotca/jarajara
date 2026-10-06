@@ -1,6 +1,6 @@
 /**
  * THE SOUNDS OF A MAHJONG TABLE: a tile picked up, set down, turned over, a pair knocked together, the tiles shuffled,
- * a clatter for a win. The recordings are hard chips clicking (Kenney's Casino Audio, CC0; see docs/credits.md), the
+ * a clatter for a win. The recordings are hard chips clicking (Kenney's Casino Audio, CC0; see CREDITS.md), the
  * nearest thing the pack has to tiles, loaded the first time a sound is played and never before, so a page that stays
  * silent never fetches them. Where they cannot be loaded or decoded, a short click made in the browser stands in.
  * Nothing here throws: a platform with no audio, a context the browser holds still, or a failed decode is simply

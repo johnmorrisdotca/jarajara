@@ -9,7 +9,7 @@ const lines = [
   "/**",
   " * The tile sounds, recorded: a tile picked up, set down, turned over, a pair knocked,",
   " * the tiles shuffled and a clatter for a win, as base64 AAC (.m4a). From Kenney's Casino Audio",
-  " * pack, CC0; see docs/credits.md. Written by scripts/sounds.mjs from the files",
+  " * pack, CC0; see CREDITS.md. Written by scripts/sounds.mjs from the files",
   " * in ./sounds, never by hand. `createTileSounds` loads this module only when",
   " * a sound is first played, so a page that stays silent never downloads it.",
   " */",

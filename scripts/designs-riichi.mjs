@@ -1,5 +1,5 @@
 // Writes src/designs/riichi.ts and src/designs/riichi-black.ts, the two riichi designs, from FluffyStuff's riichi
-// mahjong tiles (public domain, CC0: see docs/credits.md). Run by hand, once:
+// mahjong tiles (public domain, CC0: see CREDITS.md). Run by hand, once:
 //
 //   node scripts/designs-riichi.mjs <a checkout of github.com/FluffyStuff/riichi-mahjong-tiles>
 //
@@ -51,7 +51,7 @@ for (const style of STYLES) {
     `src/designs/${style.file}.ts`,
     [
       "/**",
-      ` * The ${style.words} riichi design: FluffyStuff's riichi mahjong tiles (public domain, CC0; see docs/credits.md), the 34`,
+      ` * The ${style.words} riichi design: FluffyStuff's riichi mahjong tiles (public domain, CC0; see CREDITS.md), the 34`,
       " * faces of a riichi set with the tile's own plate and back and the red fives. It draws no flowers or seasons, so those",
       " * are Jarajara's own within it. Written by scripts/designs-riichi.mjs, never by hand. It is its own entry",
       " * (and fetched by an element only when asked for), because it is about 100 kB of drawings.",

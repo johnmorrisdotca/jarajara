@@ -8,7 +8,7 @@ import type { AwaseLevel, MahjongBonusRule, MahjongCells, MahjongMove } from "./
 /**
  * AWASE WITH RULES YOU CHOOSE: options a game may be given (hints, shuffles and undo given, limited or taken away) and
  * the challenges worth playing a deal for. The ideas come from the challenge modes of good mahjong solitaires (see
- * docs/credits.md); the code and the numbers are Jarajara's own. None of it touches a deal: a challenge is played on
+ * CREDITS.md); the code and the numbers are Jarajara's own. None of it touches a deal: a challenge is played on
  * exactly the tiles `generateAwase` made, so every deal here can still be cleared, and `checkAwase` still judges a
  * solve by the tiles alone.
  *

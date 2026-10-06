@@ -7,7 +7,7 @@ what Jarajara does now.
 
 **Licences.** Nothing here is copied. The code and art of Mah (MIT) were read for numbers and ideas and none is used. KMahjongg
 and mahseum were looked at only: no code, no art, no numbers copied beyond what their own public documentation states.
-Every tile face is still Jarajara's own drawing or FluffyStuff's CC0 riichi set (see [credits.md](credits.md)).
+Every tile face is still Jarajara's own drawing or FluffyStuff's CC0 riichi set (see [CREDITS.md](../CREDITS.md)).
 
 ## What the established games do
 

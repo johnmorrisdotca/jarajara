@@ -5,7 +5,7 @@ import { MAHJONG_FACES } from "./tiles.ts";
 
 /**
  * THE DESIGNS A TILE MAY BE DRAWN IN. `jarajara` is the package's own, drawn in plain strokes and always at hand;
- * `riichi` and `riichi-black` are FluffyStuff's riichi tiles (CC0, see docs/credits.md), regular and black, with their
+ * `riichi` and `riichi-black` are FluffyStuff's riichi tiles (CC0, see CREDITS.md), regular and black, with their
  * own backs and red fives, and each is fetched the first time it is asked for, so a page that stays with the default
  * pays nothing for them. They draw no flowers or seasons, so those stay Jarajara's own within them.
  */

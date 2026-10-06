@@ -1,4 +1,4 @@
-// Cuts the tile sounds in ./sounds from Kenney's Casino Audio pack (CC0; see docs/credits.md).
+// Cuts the tile sounds in ./sounds from Kenney's Casino Audio pack (CC0; see CREDITS.md).
 // Run by hand, once, on a Mac (it uses macOS's own `afconvert` to decode Ogg Vorbis and to encode AAC):
 //
 //   node scripts/sounds-cut.mjs <the pack's Audio folder>

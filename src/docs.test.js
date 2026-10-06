@@ -27,15 +27,18 @@ import * as tileSoundsEntry from "./tile-sounds.ts";
 
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 const readme = readFileSync("README.md", "utf8");
+// What would make the README too long for npm is in pages under docs/, linked from it: the tags' tables and the command line's reference.
+const elementsDoc = readFileSync("docs/ELEMENTS.md", "utf8");
+const commandLineDoc = readFileSync("docs/COMMAND-LINE.md", "utf8");
 
 /** A README section's text, from its heading (of the level given) to the next heading of the same or a higher level. */
-const section = (heading, level = 2) => {
+const section = (heading, level = 2, text = readme) => {
   const mark = "#".repeat(level);
-  const from = readme.indexOf(`\n${mark} ${heading}\n`);
-  if (from < 0) throw new Error(`no “${mark} ${heading}” in the README`);
-  const after = readme.slice(from + 5);
+  const from = text.indexOf(`\n${mark} ${heading}\n`);
+  if (from < 0) throw new Error(`no “${mark} ${heading}” in the text`);
+  const after = text.slice(from + 5);
   const next = after.search(new RegExp(`\\n#{1,${level}} `));
-  return readme.slice(from, next < 0 ? undefined : from + 5 + next);
+  return text.slice(from, next < 0 ? undefined : from + 5 + next);
 };
 
 /** The cells of every table row in a piece of text, header and rule rows left out. */
@@ -78,10 +81,10 @@ describe("the documents", () => {
       expect(readme, tag).toContain(`\`<jarajara-${tag}`);
     }
     for (const [, [element, heading]] of Object.entries(tags)) {
-      const cells = rows(section(`\`${heading}\``, 4)).map((row) => row[0]);
+      const cells = rows(section(`\`${heading}\``, 2, elementsDoc)).map((row) => row[0]);
       for (const attribute of element.observedAttributes) expect(cells.join(" "), `${heading} ${attribute}`).toMatch(new RegExp(`\`${attribute}\``));
     }
-    const shared = rows(section("`<jarajara-viewer>`, `<jarajara-group>` and `<jarajara-set>`", 4));
+    const shared = rows(section("`<jarajara-viewer>`, `<jarajara-group>` and `<jarajara-set>`", 2, elementsDoc));
     for (const [name, element] of [["viewer", JarajaraViewer], ["group", JarajaraGroup], ["set", JarajaraSet]]) {
       for (const attribute of element.observedAttributes) {
         const row = shared.find((cells) => cells[0].split(/,\s*/).includes(`\`${attribute}\``) && (cells[1].includes(name) || cells[1] === "all three"));
@@ -121,7 +124,7 @@ describe("the documents", () => {
   });
 
   it("show the command line's output as the command line prints it, and list its commands and options as its usage does", () => {
-    const text = section("The command line");
+    const text = `${section("The command line")}\n${commandLineDoc}`;
     const block = text.slice(text.indexOf("```text") + 8, text.indexOf("```", text.indexOf("```text") + 8));
     const commands = block.split(/^\$ jarajara /m).slice(1);
     expect(commands.length).toBeGreaterThanOrEqual(6);

@@ -1,55 +1,87 @@
-// Takes the pictures the README shows, from the built demo in `site/`: `pnpm pictures` (builds the demo, then runs this).
-// The page is served to a browser without a port, never fetched from the live site, and the same each run:
-// the deal is a kept seed, the pairs are taken by the game's own hint, and motion is reduced.
-// Output: docs/desktop.jpg (1280 wide, light, English) and docs/phone.jpg (390 by 844, dark, Japanese).
-import { existsSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+// Takes the pictures the README shows, from the built demo in `site/`: `pnpm screenshots:readme` (builds the demo, then runs this).
+// The family's standard is in johnmorrisdotca/.github (README-STANDARD.md); the shared part is readme-pictures-lib.mjs.
+// The page is served to a browser without a port, never fetched from the live site, and the same each run: the deal is a kept
+// seed, the pairs are taken by the game's own hint, a table is dealt from a seed and played by its computers, and motion is
+// reduced. It waits on the elements being defined and drawn, never on a clock.
+// Output: docs/images/<subject>-<desk|phone>-<light|dark>.webp.
+import { takePictures } from "./readme-pictures-lib.mjs";
 
-import { chromium } from "@playwright/test";
+const READY = "#game .board svg";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const site = join(root, "site");
-const docs = join(root, "docs");
-const host = "http://jarajara.test";
-const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".svg": "image/svg+xml", ".m4a": "audio/mp4" };
-const QUALITY = 72;
+/** The game the demo opens on, as it keeps it on the device: a layout by its size, a level, a seed, and what is shown. */
+const kept = ({ size, level = "easy", seed = 2026, showFree = false, extra = {} }) => ({
+  init: (keep) => localStorage.setItem("jarajara.page", JSON.stringify(keep)),
+  state: { size, level, seed, moves: "", showFree, ...extra },
+});
 
-if (!existsSync(join(site, "index.html"))) throw new Error("site/ is not built: run `pnpm pictures` (it builds the demo first)");
-const browser = await chromium.launch();
-
-/** A game of Awase on a layout (by its size number), dealt from seed 2026, with `pairs` pairs already taken. */
-async function shot({ width, height, colorScheme, lang, size, pairs, showFree = false, path, scrollTo, seeEnd = false }) {
-  const context = await browser.newContext({ viewport: { width, height }, colorScheme, reducedMotion: "reduce", locale: "en-US", deviceScaleFactor: 2 });
-  const page = await context.newPage();
-  await page.route(`${host}/**`, (route) => {
-    const { pathname } = new URL(route.request().url());
-    const file = join(site, pathname === "/" ? "index.html" : pathname);
-    if (!existsSync(file)) return route.fulfill({ status: 404, body: "" });
-    return route.fulfill({ body: readFileSync(file), contentType: TYPES[file.slice(file.lastIndexOf("."))] ?? "application/octet-stream" });
-  });
-  // The demo keeps its game on the device: this is the game it is opened on.
-  await page.addInitScript((kept) => localStorage.setItem("jarajara.page", JSON.stringify(kept)), { size, level: "easy", seed: 2026, moves: "", showFree });
-  await page.goto(`${host}/?lang=${lang}`);
-  await page.waitForFunction(() => customElements.get("jarajara-layout") !== undefined);
-  await page.locator("#game .board svg").first().waitFor();
-  await page.locator("#game").evaluate((game, pairs) => {
-    for (let taken = 0; taken < pairs; taken += 1) {
+/** Take `pairs` pairs by the game's own hint, so that every picture is of a state a person reaches. */
+const take = (pairs) => (page) =>
+  page.locator("#game").evaluate((game, count) => {
+    for (let taken = 0; taken < count; taken += 1) {
       const pair = game.hint();
       if (pair === null) break;
       game.take(pair[0], pair[1]);
     }
   }, pairs);
-  await page.waitForTimeout(300);
-  // Scrolled to the board: its top at the top of the window.
-  if (scrollTo) await page.locator(scrollTo).evaluate((element, seeEnd) => window.scrollTo(0, seeEnd ? element.getBoundingClientRect().bottom + window.scrollY - window.innerHeight + 16 : element.getBoundingClientRect().top + window.scrollY - 16), seeEnd);
-  await page.mouse.move(0, 0);
-  await page.screenshot({ path, type: "jpeg", quality: QUALITY });
-  await context.close();
-}
 
-// The Turtle (144 tiles), a few pairs taken, the board and the options under it.
-await shot({ width: 1280, height: 1000, colorScheme: "light", lang: "en", size: 15, pairs: 6, path: join(docs, "desktop.jpg"), scrollTo: "#game" });
-// Fuji on a phone, with the free tiles lit.
-await shot({ width: 390, height: 844, colorScheme: "dark", lang: "ja", size: 9, pairs: 8, showFree: true, path: join(docs, "phone.jpg"), scrollTo: "#game" });
-await browser.close();
+const scrollTo = (selector) => (page) => page.locator(selector).evaluate((element) => window.scrollTo(0, element.getBoundingClientRect().top + window.scrollY - 16));
+
+/** Open one of the page's tabs, and wait for its panel to show. */
+const tab = (name) => async (page) => {
+  await page.locator(`[data-testid="tab-${name}"]`).click();
+  await page.locator(`#pane-${name}`).waitFor({ state: "visible" });
+};
+
+await takePictures({
+  shots: [
+    // The Turtle (144 tiles), six pairs taken, from the top of the page. On a phone: Fuji in Japanese with the free tiles lit.
+    {
+      subject: "hero",
+      views: ["desk", "phone"],
+      url: "/?lang=en&help=off",
+      ...kept({ size: 15 }),
+      ready: READY,
+      height: 1000,
+      async prepare(page, { view }) {
+        if (view === "phone") {
+          await page.addInitScript((keep) => localStorage.setItem("jarajara.page", JSON.stringify(keep)), { size: 9, level: "easy", seed: 2026, moves: "", showFree: true });
+          await page.goto("http://jarajara.test/?lang=ja&help=off");
+          await page.waitForSelector(READY);
+          await take(8)(page);
+          await scrollTo("#game")(page);
+        } else {
+          await take(6)(page);
+          await page.evaluate(() => window.scrollTo(0, 0));
+        }
+      },
+    },
+    // Awase on the Turtle: the free tiles lit, and the buttons and the line that says how the game stands.
+    { subject: "awase", views: ["desk"], url: "/?lang=en&help=off", ...kept({ size: 15, showFree: true }), ready: READY, target: "#game", prepare: take(6) },
+    // A game with a clock: the Spark challenge on the Torii.
+    { subject: "challenge", views: ["desk"], url: "/?lang=en&help=off", ...kept({ size: 8, extra: { challenge: "spark" } }), ready: READY, target: "#game", prepare: take(3) },
+    // One tile, face up, with the backs to choose from.
+    { subject: "tiles", views: ["desk"], url: "/?lang=en&help=off", ...kept({ size: 8 }), ready: READY, target: "#pane-tiles" },
+    // A hand in a rack, sorted and grouped.
+    {
+      subject: "rack",
+      views: ["desk"],
+      url: "/?lang=en&help=off",
+      ...kept({ size: 8 }),
+      ready: READY,
+      target: "#pane-rack",
+      async prepare(page) {
+        await tab("rack")(page);
+        await page.locator('[data-testid="rack-sort"]').click();
+        await page.locator('[data-testid="rack-group-suit"]').click();
+      },
+    },
+    // The whole set: 42 faces and how many of each.
+    { subject: "set", views: ["desk"], url: "/?lang=en&help=off", ...kept({ size: 8 }), ready: READY, target: "#pane-set", prepare: tab("set") },
+    // The thirteen layouts.
+    { subject: "layouts", views: ["desk"], url: "/?lang=en&help=off", ...kept({ size: 8 }), ready: READY, target: "#pane-layouts", prepare: tab("layouts") },
+    // Awase at a table of two, with a computer.
+    { subject: "table", views: ["desk"], url: "/?lang=en&help=off", ...kept({ size: 8 }), ready: READY, target: "#pane-table", prepare: tab("table") },
+    // The designs: Jarajara's own and the riichi tiles, regular and black.
+    { subject: "designs", views: ["desk"], url: "/?lang=en&help=off", ...kept({ size: 8 }), ready: READY, target: "#pane-designs", prepare: tab("designs") },
+  ],
+});
