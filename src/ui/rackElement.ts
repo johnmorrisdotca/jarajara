@@ -2,7 +2,7 @@ import type { TileSoundKind } from "./tileSounds.ts";
 import { arrangeIndexes, arrangeTiles, groupStarts, mixTiles, TILE_ORDERS, type TileGrouping, type TileOrder } from "../arrange.ts";
 import { readTiles, tileName } from "../names.ts";
 import { redFiveIndexes } from "../designs.ts";
-import { blockHtml, blockVars, BLOCK_STYLE, BOX_UNITS, CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, playSound, reflectMethod, say, spinElement, tileDrawing, tileLabel, widthOf, wearCloth, type SpinOptions } from "./elementKit.ts";
+import { blockHtml, blockVars, BLOCK_STYLE, BOX_UNITS, CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, playSound, reflectMethod, say, spinElement, tileDrawing, tileLabel, widthOf, wearCloth, writeElementAttribute, type SpinOptions } from "./elementKit.ts";
 import { RACK_LIFT, rackPlaces, rackWidth, TILE_TALL, type RackPlace } from "./rackLayout.ts";
 
 /** How a rack's tiles are turned face down or face up. */
@@ -62,8 +62,84 @@ const writeNumbers = (list: Iterable<number>): string => [...new Set(list)].sort
  */
 export class JarajaraRack extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["tiles", "order", "group", "face-down", "turned", "lifted", "marked", "pick", "capacity", "red-fives", "design", "back", "back-colour", "mark", "size", "width", "lang", "cloth", "sound"];
+    return ["tiles", "order", "group", "face-down", "turned", "lifted", "marked", "pick", "capacity", "red-fives", "design", "back", "back-colour", "mark", "size", "width", "lang", "cloth", "sound", "theme", "label"];
   }
+
+  /** The `order` attribute, reflected without conversion. */
+  get order(): string | null { return this.getAttribute("order"); }
+  set order(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "order", value); }
+
+  /** The `face-down` attribute, reflected without conversion. */
+  get "face-down"(): string | null { return this.getAttribute("face-down"); }
+  set "face-down"(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "face-down", value); }
+
+  /** Property spelling of `face-down`. */
+  get faceDown(): string | null { return this.getAttribute("face-down"); }
+  set faceDown(value: string | number | boolean | null | undefined) { writeElementAttribute(this, "face-down", value); }
+
+  /** The `turned` attribute, reflected without conversion. */
+  get turned(): string | null { return this.getAttribute("turned"); }
+  set turned(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "turned", value); }
+
+  /** The `marked` attribute, reflected without conversion. */
+  get marked(): string | null { return this.getAttribute("marked"); }
+  set marked(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "marked", value); }
+
+  /** The `pick` attribute, reflected without conversion. */
+  get pick(): string | null { return this.getAttribute("pick"); }
+  set pick(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "pick", value); }
+
+  /** The `capacity` attribute, reflected without conversion. */
+  get capacity(): string | null { return this.getAttribute("capacity"); }
+  set capacity(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "capacity", value); }
+
+  /** The `red-fives` attribute, reflected without conversion. */
+  get "red-fives"(): string | null { return this.getAttribute("red-fives"); }
+  set "red-fives"(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "red-fives", value); }
+
+  /** Property spelling of `red-fives`. */
+  get redFives(): string | null { return this.getAttribute("red-fives"); }
+  set redFives(value: string | number | boolean | null | undefined) { writeElementAttribute(this, "red-fives", value); }
+
+  /** The `design` attribute, reflected without conversion. */
+  get design(): string | null { return this.getAttribute("design"); }
+  set design(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "design", value); }
+
+  /** The `back` attribute, reflected without conversion. */
+  get back(): string | null { return this.getAttribute("back"); }
+  set back(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "back", value); }
+
+  /** The `back-colour` attribute, reflected without conversion. */
+  get "back-colour"(): string | null { return this.getAttribute("back-colour"); }
+  set "back-colour"(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "back-colour", value); }
+
+  /** Property spelling of `back-colour`. */
+  get backColour(): string | null { return this.getAttribute("back-colour"); }
+  set backColour(value: string | number | boolean | null | undefined) { writeElementAttribute(this, "back-colour", value); }
+
+  /** The `size` attribute, reflected without conversion. */
+  get size(): string | null { return this.getAttribute("size"); }
+  set size(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "size", value); }
+
+  /** The `width` attribute, reflected without conversion. */
+  get width(): string | null { return this.getAttribute("width"); }
+  set width(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "width", value); }
+
+  /** The `cloth` attribute, reflected without conversion. */
+  get cloth(): string | null { return this.getAttribute("cloth"); }
+  set cloth(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "cloth", value); }
+
+  /** The `sound` attribute, reflected without conversion. */
+  get sound(): string | null { return this.getAttribute("sound"); }
+  set sound(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "sound", value); }
+
+  /** The `theme` attribute, reflected without conversion. */
+  get theme(): string | null { return this.getAttribute("theme"); }
+  set theme(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "theme", value); }
+
+  /** The `label` attribute, reflected without conversion. */
+  get label(): string | null { return this.getAttribute("label"); }
+  set label(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "label", value); }
 
   #root: ShadowRoot | null = null;
   #forget: (() => void) | null = null;
@@ -132,7 +208,7 @@ export class JarajaraRack extends ElementBase {
   /** The state of the rack, read from its attributes. */
   #state() {
     return {
-      down: this.hasAttribute("face-down"),
+      down: isOn(this, "face-down"),
       turned: new Set(numbersIn(this.getAttribute("turned"))),
       lifted: new Set(numbersIn(this.getAttribute("lifted"))),
       marked: new Set(numbersIn(this.getAttribute("marked"))),
@@ -171,7 +247,7 @@ export class JarajaraRack extends ElementBase {
       }
       // Every tile turned the other way is the whole rack turned: written as the rack's own side.
       if (turned.size === count) {
-        this.toggleAttribute("face-down", !this.hasAttribute("face-down"));
+        this.toggleAttribute("face-down", !isOn(this, "face-down"));
         this.removeAttribute("turned");
       } else if (turned.size === 0) this.removeAttribute("turned");
       else this.setAttribute("turned", writeNumbers(turned));
@@ -434,7 +510,7 @@ export class JarajaraRack extends ElementBase {
     if (this.#root === null) {
       this.#root = this.attachShadow({ mode: "open" });
       const pick = (event: Event) => {
-        if (!this.hasAttribute("pick")) return;
+        if (!isOn(this, "pick")) return;
         const slot = event.composedPath().find((one): one is HTMLElement => one instanceof HTMLElement && one.classList.contains("slot"));
         if (slot === undefined) return;
         const at = Number(slot.dataset.index);
@@ -484,6 +560,8 @@ export class JarajaraRack extends ElementBase {
   #draw(): void {
     const root = this.#root as ShadowRoot;
     wearCloth(this);
+    const theme = this.getAttribute("theme");
+    this.style.colorScheme = theme === "dark" || theme === "light" ? theme : "light dark";
     const tiles = this.tiles;
     this.#reconcileIds();
     const language = languageOf(this);
@@ -515,7 +593,7 @@ export class JarajaraRack extends ElementBase {
     // What a screen reader hears: the tiles, or that they are face down and how many.
     const allDown = shown.length > 0 && perm.every((at) => downIn(at));
     this.setAttribute("role", "group");
-    this.setAttribute("aria-label", shown.length === 0 ? say(language, "rackEmpty") : allDown && state.marked.size === 0 ? say(language, "rackFaceDown", { n: shown.length }) : say(language, "rackLabel", { n: shown.length, tiles: perm.map((at) => tileLabel(tiles[at]!, downIn(at), language)).join(", ") }));
+    this.setAttribute("aria-label", this.getAttribute("label") ?? (shown.length === 0 ? say(language, "rackEmpty") : allDown && state.marked.size === 0 ? say(language, "rackFaceDown", { n: shown.length }) : say(language, "rackLabel", { n: shown.length, tiles: perm.map((at) => tileLabel(tiles[at]!, downIn(at), language)).join(", ") })));
     const reds = isOn(this, "red-fives") && design?.red !== undefined ? redFiveIndexes(shown) : new Set<number>();
     const start = perm.map((at, place) => {
       const id = this.#ids[at]!;
@@ -534,7 +612,7 @@ export class JarajaraRack extends ElementBase {
       const back = tileDrawing(code, true, this, design);
       const marked = state.marked.has(at);
       const lifted = state.lifted.has(at);
-      const picks = this.hasAttribute("pick");
+      const picks = isOn(this, "pick");
       const label = tileLabel(code, down, language);
       const said = marked ? say(language, "tileMarked", { tile: label }) : lifted ? say(language, "tileLifted", { tile: label }) : label;
       return `<div class="slot" part="tile" style="${blockVars(this, design)}" data-id="${id}" data-index="${at}" data-place="${place}" data-down="${before}" data-lifted="${lifted}" aria-label="${said}"${picks ? ` role="button" tabindex="0" aria-pressed="${lifted}"` : ` role="img"`}><div class="spin"><div class="tile">${blockHtml(face, back)}</div>${markerHtml(marked)}</div></div>`;

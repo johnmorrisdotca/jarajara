@@ -49,6 +49,8 @@ Each turn is a `jarajara-flip` event that bubbles, with `{ code, faceDown }`. `f
 
 | Attribute | What it does |
 | --- | --- |
+| `theme` | `light`, `dark` or `auto` (the device’s preference) |
+| `label` | optional spoken label; otherwise the rack names its tiles |
 | `tiles` | the tiles, as codes run together (`abcF`), as names (`east red-dragon`) or as hand notation (`123m456p789s11z`), in the order they were dealt |
 | `face-down` | every tile shows its back |
 | `turned` | the places (from 0, as dealt) of tiles that show the other side from the rest |
@@ -127,3 +129,13 @@ Tiles in a rack, a group and a set are `<jarajara-tile>` elements, so a page can
 
 A table, a rack, a layout, a group, a set and a viewer all take `cloth`: `green`, `blue`, `red`, `black` or `wood`, the family's five, which a page can follow from the demo header's `family-cloth` event.
 
+
+## Embed a rack
+
+[Build a rack](https://johnmorrisdotca.github.io/jarajara/builder.html) to preview every rack attribute and copy an element, iframe, module, framework example, plain HTML block or iframe URL. The setup is in the builder link; the iframe stores nothing. The npm pin comes from this package’s major version.
+
+The iframe lives at `embed/?tiles=123m456p789s1112z&size=medium&pick=one`. Query keys are the rack’s attribute names. Tile names, codes and hand notation are validated, as are design, back, cloth, theme, size and language choices, pixel width, capacity and tile indexes. Boolean values `off`, `false`, `no` and `0` turn a switch off. `width` is each tile’s width, so the rack fits a narrow frame by scaling its tiles.
+
+Every observed attribute has a reflected property; kebab names also have camel-case spellings (`faceDown`, `redFives`, `backColour`). Existing `tiles`, `lifted` and `arranged` getters keep their structured values. Assigning `group` and `mark` still sets their attributes while reading them keeps their methods. `defineRack(tag?)` from the element entry registers a standard or custom tag without touching a tag already registered.
+
+The native `jarajara-rack`, `jarajara-pick` and `jarajara-take` events bubble and cross shadow boundaries. The iframe forwards the same JSON-safe detail as `{ type: event.type, detail: event.detail }`. A host must check `event.origin === "https://johnmorrisdotca.github.io"` and `event.source === iframe.contentWindow` before using a message. Its label is text, never HTML. Keyboard picks and reduced motion use the rack’s existing controls.

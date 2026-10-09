@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex"><meta name="color-scheme" content="light dark"><title>Jarajara · rack</title>
+<style>html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden}body{display:flex;align-items:center;justify-content:center;padding:4px;box-sizing:border-box}#stage{width:100%;min-width:0}.bad{font-family:system-ui;color:CanvasText}</style>
+</head><body><div id="stage"></div><p id="status" role="status" class="bad" hidden></p><script type="module">
+import "../dist/element-define.js";
+import { validatedAttributes } from "../embed-options.js";
+const query = new URLSearchParams(location.search.length > 1 ? location.search : location.hash.slice(1));
+const attrs = validatedAttributes(query);
+if (attrs === null) {
+  const status = document.getElementById("status"); status.hidden = false;
+  status.textContent = query.get("lang") === "ja" ? "123m456p789s1112z のような、有効な牌の記号を使ってください。" : "Use valid tiles, such as 123m456p789s1112z.";
+} else {
+  const rack = document.createElement("jarajara-rack");
+  for (const [name, value] of attrs) rack.setAttribute(name, value);
+  if (query.get("lang") === "ja") document.documentElement.lang = "ja";
+  for (const name of ["jarajara-rack", "jarajara-pick", "jarajara-take"]) rack.addEventListener(name, (event) => {
+    if (parent !== window) parent.postMessage({ type: event.type, detail: JSON.parse(JSON.stringify(event.detail)) }, "*");
+  });
+  document.getElementById("stage").append(rack);
+}
+</script></body></html>

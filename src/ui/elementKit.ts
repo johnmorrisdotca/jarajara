@@ -93,7 +93,7 @@ export function lessMotion(): boolean {
 /** An attribute that is on when present, unless it says "false", "off", "0" or "no". */
 export function isOn(element: Element, name: string): boolean {
   const value = element.getAttribute(name);
-  return value !== null && !["false", "off", "0", "no"].includes(value.toLowerCase());
+  return value !== null && !["false", "off", "0", "no"].includes(value.trim().toLowerCase());
 }
 
 const speakers = new Set<() => void>();
@@ -316,4 +316,10 @@ export function playSound(element: Element, kind: TileSoundKind, options?: PlayT
   if (playing.reduce((sum, one) => sum + one.heard, 0) + heard > MOST_SOUNDING) return;
   playing.push({ heard, until: now + (options?.delay ?? 0) + Math.max(0, (options?.count ?? 1) - 1) * (options?.gap ?? 85) + SOUND_TAIL_MS });
   pageSounds().play(kind, options);
+}
+
+/** Write a reflected attribute without changing methods or structured getters. */
+export function writeElementAttribute(element: Element, name: string, value: unknown): void {
+  if (value === null || value === undefined || value === false) element.removeAttribute(name);
+  else element.setAttribute(name, value === true ? "" : Array.isArray(value) ? value.join(" ") : String(value));
 }

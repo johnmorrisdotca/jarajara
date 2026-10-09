@@ -16,3 +16,10 @@ export type { SpinOptions } from "./ui/elementKit.ts";
 export { rackPlaces, rackWidth } from "./ui/rackLayout.ts";
 export type { RackLayoutOptions, RackPlace } from "./ui/rackLayout.ts";
 export { STRINGS } from "./ui/strings.ts";
+
+import { JarajaraRack as Rack } from "./ui/rackElement.ts";
+/** Register a rack under its standard tag or a host's own tag. Safe to call without a browser. */
+export function defineRack(tag = "jarajara-rack"): void {
+  if (typeof customElements === "undefined" || customElements.get(tag) !== undefined) return;
+  customElements.define(tag, tag === "jarajara-rack" ? Rack : class extends Rack {});
+}
