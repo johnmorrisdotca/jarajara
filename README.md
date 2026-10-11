@@ -857,9 +857,7 @@ A level is chosen by laying five deals from the seed and playing each out at ran
 
 ## Browser support
 
-The tags need custom elements, shadow DOM, container queries, `:has()` and `color-mix()`: Chrome and Edge 111, Safari 16.2 and Firefox 121, all of which are from 2023 on. The tiles' thickness is drawn with CSS 3D transforms, and sounds use the Web Audio API, which a browser without it replaces with silence. These are read off the features the code uses, not a tested list: the demo is played in a real Chromium at a phone's width (with touch) and a desk's, and in WebKit, Safari's engine, at a phone's width. Firefox is not in that run.
-
-The package itself, the drawing (which is SVG text) and the command line need no DOM: they run in Node 22 or later, which CI tests on Linux, macOS and Windows, on 22 and 24. On a server the main entry, `/awase`, `/table`, `/faces` and `/element` are safe to import.
+The browser requirements, tested engines and server-safe entry points are detailed in [Browser support](docs/browser-support.md).
 
 ## Languages
 
@@ -947,7 +945,7 @@ Jarajara is one of twenty-eight packages, each made for the same site, each at
 
 **Geography & data**
 
-- [address-plus](https://github.com/johnmorrisdotca/address-plus) (アドレスプラス): parse and format addresses in the United States, Canada, Japan, Australia and the United Kingdom. [Demo](https://johnmorrisdotca.github.io/address-plus/).
+- [address-plus](https://github.com/johnmorrisdotca/address-plus) (アドレスプラス): parse and format addresses in the United States, Canada, Japan, Australia, France, Germany and the United Kingdom. [Demo](https://johnmorrisdotca.github.io/address-plus/).
 - [Chizu](https://github.com/johnmorrisdotca/chizu) (地図): maps of the world and of countries' regions, in English and Japanese, with a quiz and callouts. [Demo](https://johnmorrisdotca.github.io/chizu/).
 - [Hata](https://github.com/johnmorrisdotca/hata) (旗): country and regional flags as SVG, at their true proportions and keyed by ISO code. [Demo](https://johnmorrisdotca.github.io/hata/).
 - [Kuni](https://github.com/johnmorrisdotca/kuni) (国): countries and their regions, with ISO codes and names in English and Japanese. [Demo](https://johnmorrisdotca.github.io/kuni/).

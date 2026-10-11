@@ -247,9 +247,9 @@ describe("the README's promises", () => {
   it("names the features the browser support rests on, as the code uses them, and the Node it runs on as package.json and CI have it", () => {
     const source = filesUnder("src/ui", ".ts").map((file) => readFileSync(file, "utf8")).join("\n");
     for (const feature of ["color-mix", ":has(", "container-type", "attachShadow", "matrix3d"]) expect(source, feature).toContain(feature);
-    expect(section("Browser support")).toMatch(/custom elements, shadow DOM, container queries, `:has\(\)` and `color-mix\(\)`/);
+    expect(section("Browser support") + readFileSync("docs/browser-support.md", "utf8")).toMatch(/custom elements, shadow DOM, container queries, `:has\(\)` and `color-mix\(\)`/);
     expect(pkg.engines.node).toBe(">=22");
-    expect(section("Browser support")).toContain("Node 22 or later");
+    expect(section("Browser support") + readFileSync("docs/browser-support.md", "utf8")).toContain("Node 22 or later");
     expect(readFileSync("src/cloth.ts", "utf8")).toContain("Object.hasOwn");
     const config = readFileSync("playwright.config.mjs", "utf8");
     for (const project of ["chromium-phone", "chromium-desk", "webkit-phone"]) expect(config, project).toContain(project);

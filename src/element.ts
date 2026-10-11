@@ -18,7 +18,16 @@ export type { RackLayoutOptions, RackPlace } from "./ui/rackLayout.ts";
 export { STRINGS } from "./ui/strings.ts";
 
 import { JarajaraRack as Rack } from "./ui/rackElement.ts";
-/** Register a rack under its standard tag or a host's own tag. Safe to call without a browser. */
+/** Register a rack under its standard tag or a host's own tag. Safe to call without a browser.
+ * @param tag - The custom tag name; omitted to use the package default.
+ * @returns Nothing; existing definitions and server imports remain safe.
+ * @example
+ * ```ts
+ * import { defineRack } from "@johnmorrisdotca/jarajara/element";
+ * defineRack();
+ * console.log(typeof defineRack); // function
+ * ```
+ */
 export function defineRack(tag = "jarajara-rack"): void {
   if (typeof customElements === "undefined" || customElements.get(tag) !== undefined) return;
   customElements.define(tag, tag === "jarajara-rack" ? Rack : class extends Rack {});

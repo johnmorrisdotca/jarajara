@@ -59,6 +59,11 @@ const writeNumbers = (list: Iterable<number>): string => [...new Set(list)].sort
  * letter, `add(tile, at?)` puts one in and `replace(tile, next)` swaps one; `lift(tiles?)`, `lower(tiles?)` and
  * `liftToggle(tiles)` pick up and put down; `mark(tiles)`, `unmark(tiles?)` and `spin(tiles?, options?)`. A change is a
  * `jarajara-rack` event that bubbles, its detail `RackDetail`; a tap that picks a tile is `jarajara-pick`, `{ index, code, lifted }`.
+ * @example
+ * ```ts
+ * import { JarajaraRack } from "@johnmorrisdotca/jarajara/element";
+ * console.log(JarajaraRack.observedAttributes.includes("lang")); // true
+ * ```
  */
 export class JarajaraRack extends ElementBase {
   static get observedAttributes(): readonly string[] {
