@@ -55,6 +55,16 @@ ${CLOTH_STYLE}
  * `red-fives` draws the first five of each suit red, in a design that has them; and
  * `design`, `back`, `back-colour`, `mark`, `size`, `width`, `lang` and `cloth` as on `<jarajara-tile>`. A tap on a tile
  * is a `jarajara-view` event, `{ code }`.
+ *
+ * @example
+ * ```ts no-run
+ * import "@johnmorrisdotca/jarajara/element/define";
+ * import { JarajaraGroup } from "@johnmorrisdotca/jarajara/element";
+ * const tile = document.createElement("jarajara-group") as JarajaraGroup;
+ * tile.setAttribute("group","dragons");
+ * document.body.append(tile);
+ * console.log(tile.tagName);
+ * ```
  */
 export class JarajaraGroup extends ElementBase {
   static get observedAttributes(): readonly string[] {
@@ -126,6 +136,16 @@ export class JarajaraGroup extends ElementBase {
  * face once with its count; `tiles` draws every tile of the set, four of each ordinary face, one flower, one season);
  * `captions="off"` takes the names away; `red-fives` makes one five of each suit red (in `tiles` mode, in a design that has them); and `design`, `back`, `size`, `width`, `lang` and `cloth` as on `<jarajara-tile>`.
  * A tap on a tile is a `jarajara-view` event, `{ code }`.
+ *
+ * @example
+ * ```ts no-run
+ * import "@johnmorrisdotca/jarajara/element/define";
+ * import { JarajaraSet } from "@johnmorrisdotca/jarajara/element";
+ * const tile = document.createElement("jarajara-set") as JarajaraSet;
+ *
+ * document.body.append(tile);
+ * console.log(tile.tagName);
+ * ```
  */
 export class JarajaraSet extends ElementBase {
   static get observedAttributes(): readonly string[] {
@@ -217,6 +237,16 @@ const VIEWER_STYLE = `
  * `editable` adds a box to type a query into; and `design`, `back`, `size`, `width` (the big tile, large unless said),
  * `lang` and `cloth` as on `<jarajara-tile>`. `lookup(text)` looks one up; each tile shown is a `jarajara-view` event,
  * `{ code, query }`.
+ *
+ * @example
+ * ```ts no-run
+ * import "@johnmorrisdotca/jarajara/element/define";
+ * import { JarajaraViewer } from "@johnmorrisdotca/jarajara/element";
+ * const tile = document.createElement("jarajara-viewer") as JarajaraViewer;
+ *
+ * document.body.append(tile);
+ * console.log(tile.tagName);
+ * ```
  */
 export class JarajaraViewer extends ElementBase {
   static get observedAttributes(): readonly string[] {

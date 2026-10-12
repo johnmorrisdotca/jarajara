@@ -104,4 +104,12 @@ function palace(): MahjongLayout {
   return { size: width, key: "palace", slots: inOrder(once(wall)) };
 }
 
+/** The large native stacked layouts and their supported size identifiers.
+ *
+ * @example
+ * ```ts
+ * import { MEGA_LAYOUTS } from "@johnmorrisdotca/jarajara";
+ * console.log(MEGA_LAYOUTS.map(layout=>[layout.size,layout.key,layout.slots.length]));
+ * ```
+ */
 export const MEGA_LAYOUTS: readonly MahjongLayout[] = [greatWall(), palace()];

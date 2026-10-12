@@ -19,7 +19,22 @@ import { EMPTY_SLOT, matchClass } from "./tiles.ts";
 
 const MOST_ATTEMPTS = 400;
 
-/** A deal laid out and the order it can be cleared in, pair by pair. */
+/** A deal laid out and the order it can be cleared in, pair by pair.
+ *
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { geometryOf, layPairs, layoutFor, pairsLeft, seededRandom } from "@johnmorrisdotca/jarajara";
+ * import type { Laid } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * const value: Laid = layPairs(geometry,layout.slots.map(()=>true),pairsLeft(cells,"group"),seededRandom(42))!;
+ * console.log(value);
+ * ```
+ */
 export type Laid = { cells: MahjongCells; order: [number, number][] };
 
 /**
@@ -27,6 +42,23 @@ export type Laid = { cells: MahjongCells; order: [number, number][] };
  * attempt reached the end. Higher slots are a little likelier to be taken
  * first, which keeps the stacks coming down together and leaves fewer
  * attempts stuck on a tower of two.
+ *
+ * @param geometry - The stacked layout’s covering and side-blocking relationships.
+ * @param present - Whether each native slot is still occupied or selected for laying.
+ * @param pairs - Matching tile-face pairs to lay into slots.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @returns Lay these pairs of tiles into the slots `present` names, or null when no attempt reached the end. Higher slots are a little likelier to be taken first, which keeps the stacks coming down together and leaves fewer attempts stuck on a tower of two.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { geometryOf, layPairs, layoutFor, pairsLeft, seededRandom } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * console.log(layPairs(geometry,layout.slots.map(()=>true),pairsLeft(cells,"group"),seededRandom(42))?.order.length);
+ * ```
  */
 export function layPairs(geometry: MahjongGeometry, present: readonly boolean[], pairs: readonly (readonly [string, string])[], random: Random): Laid | null {
   const count = present.filter(Boolean).length;
@@ -71,7 +103,21 @@ function weightedPick(free: readonly number[], slots: readonly { z: number }[], 
   return free[free.length - 1]!;
 }
 
-/** The tiles left on a layout as pairs that match, each pair's tiles together: what a shuffle lays again. */
+/** The tiles left on a layout as pairs that match, each pair's tiles together: what a shuffle lays again.
+ *
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @param rule - Grouped or identical bonus matching.
+ * @returns The tiles left on a layout as pairs that match, each pair's tiles together: what a shuffle lays again.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { pairsLeft } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const cells = deal.givens;
+ * console.log(pairsLeft(cells,"group"));
+ * ```
+ */
 export function pairsLeft(cells: MahjongCells, rule: MahjongBonusRule): [string, string][] {
   const byClass = new Map<string, string[]>();
   for (const code of cells) {
@@ -87,7 +133,17 @@ export function pairsLeft(cells: MahjongCells, rule: MahjongBonusRule): [string,
   return pairs;
 }
 
-/** A 32-bit FNV-1a hash of a string: the seed a shuffle is drawn from, so the same tiles shuffled the same time come out the same. */
+/** A 32-bit FNV-1a hash of a string: the seed a shuffle is drawn from, so the same tiles shuffled the same time come out the same.
+ *
+ * @param text - The unknown text or encoded record to interpret.
+ * @returns A 32-bit FNV-1a hash of a string: the seed a shuffle is drawn from, so the same tiles shuffled the same time come out the same.
+ * @example
+ * ```ts
+ * import { hashText } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(hashText("room-7"));
+ * ```
+ */
 export function hashText(text: string): number {
   let hash = 0x811c9dc5;
   for (let at = 0; at < text.length; at += 1) {
@@ -108,6 +164,23 @@ export function hashText(text: string): number {
  * the tiles are laid with one matching pair on two free slots, so the next
  * move exists; and where not even two slots are free, no shuffle can help and
  * this answers null.
+ *
+ * @param geometry - The stacked layout’s covering and side-blocking relationships.
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @param rule - Grouped or identical bonus matching.
+ * @param index - The shuffle count or slot index specified by the signature.
+ * @returns The remaining tiles laid again deterministically, or null when no clearable laying can be produced.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { geometryOf, layoutFor, shuffleTiles } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * console.log(shuffleTiles(geometry,cells,"group",1));
+ * ```
  */
 export function shuffleTiles(geometry: MahjongGeometry, cells: MahjongCells, rule: MahjongBonusRule, index: number): MahjongCells | null {
   const present = [...cells].map((code) => code !== EMPTY_SLOT);

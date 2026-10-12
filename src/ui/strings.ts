@@ -4,6 +4,12 @@ import type { TileLanguage } from "../names.ts";
  * THE WORDS THE ELEMENTS SAY, to a screen reader and in their own captions, in the two languages the family speaks.
  * An element speaks its own `lang`, or the nearest one above it, or the page's. `{name}` marks where a value goes
  * (`fillIn`).
+ *
+ * @example
+ * ```ts
+ * import { STRINGS } from "@johnmorrisdotca/jarajara/element";
+ * console.log(STRINGS);
+ * ```
  */
 export const STRINGS: Readonly<Record<TileLanguage, Record<string, string>>> = {
   en: {

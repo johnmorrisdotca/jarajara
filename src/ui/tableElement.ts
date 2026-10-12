@@ -32,6 +32,17 @@ const LEVELS: readonly AwaseLevel[] = ["easy", "medium", "hard"];
  *
  * `deal(seed?)` deals again. The `table` property holds the game as `encodeTable` keeps it. Each pair taken is a
  * `jarajara-table` event that bubbles, its detail `{ seat, pair, codes, points, scores, over, winners }`.
+ *
+ * @example
+ * ```ts no-run
+ * import "@johnmorrisdotca/jarajara/element/define";
+ * import { JarajaraTable } from "@johnmorrisdotca/jarajara/element";
+ * const tile = document.createElement("jarajara-table") as JarajaraTable;
+ * tile.setAttribute("size","4");
+ * tile.setAttribute("seed","2026");
+ * document.body.append(tile);
+ * console.log(tile.tagName);
+ * ```
  */
 export class JarajaraTable extends ElementBase {
   static get observedAttributes(): readonly string[] {

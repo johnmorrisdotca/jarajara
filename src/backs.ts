@@ -9,13 +9,37 @@ import { tileBackDrawing, TILE_BODY, TILE_BOX, TILE_FONT } from "./faces.ts";
  * the colour of the bamboo that old sets were backed with, with its grain and nodes; `blue` and `red`, flat colours
  * with a ring; and `ink`, near black with a field of dots. A design brings its own as well (`riichi`, `riichi-black`),
  * named like the design. Any of the five may be given a colour of its own and a few letters of writing.
+ *
+ * @example
+ * ```ts
+ * import { TILE_BACKS } from "@johnmorrisdotca/jarajara/faces";
+ * console.log(TILE_BACKS);
+ * ```
  */
 export const TILE_BACKS = ["jade", "bamboo", "blue", "red", "ink"] as const;
 
-/** A back's name: one of the five drawn here, or a design's own (`riichi`, `riichi-black`). */
+/** A back's name: one of the five drawn here, or a design's own (`riichi`, `riichi-black`).
+ *
+ * @example
+ * ```ts
+ * import type { TileBackName } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * const value: TileBackName = "jade";
+ * console.log(value);
+ * ```
+ */
 export type TileBackName = (typeof TILE_BACKS)[number] | (string & {});
 
-/** How a back is drawn. Every field may be left out. */
+/** How a back is drawn. Every field may be left out.
+ *
+ * @example
+ * ```ts
+ * import type { TileBackOptions } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * const value: TileBackOptions = {colour:"#2f5d4a",mark:"中",title:"Tile back"};
+ * console.log(value);
+ * ```
+ */
 export type TileBackOptions = {
   /** The back's colour as `#rgb` or `#rrggbb`, in place of its own; its lines are worked out from it. */
   colour?: string;
@@ -37,7 +61,17 @@ const LOOKS: Record<(typeof TILE_BACKS)[number], Look> = {
   ink: { base: "#26282d", line: "#8d919b", kind: "dots" },
 };
 
-/** Whether a name is one of the five backs drawn here. */
+/** Whether a name is one of the five backs drawn here.
+ *
+ * @param name - The local seat name, back name or design name specified by this signature.
+ * @returns Whether a name is one of the five backs drawn here.
+ * @example
+ * ```ts
+ * import { isBuiltInBack } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(isBuiltInBack("jade"));
+ * ```
+ */
 export function isBuiltInBack(name: string): name is (typeof TILE_BACKS)[number] {
   return (TILE_BACKS as readonly string[]).includes(name);
 }
@@ -92,6 +126,16 @@ function markOf(text: string | undefined, look: Look): string {
  * A back's plate and pattern in the tile's 30 by 40, without the sliver of side or the `<svg>`: the inside of a
  * `<symbol>`, or the back an element puts behind a tile it turns over. For a name that is no back drawn here, the
  * `design` given (its own back), and otherwise the jade one.
+ *
+ * @param name - The local seat name, back name or design name specified by this signature.
+ * @param options - Native game, SVG, sound or presentation options.
+ * @returns A back's plate and pattern in the tile's 30 by 40, without the sliver of side or the `<svg>`: the inside of a `<symbol>`, or the back an element puts behind a tile it turns over. For a name that is no back drawn here, the `design` given (its own back), and otherwise the jade one.
+ * @example
+ * ```ts
+ * import { tileBackFace } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(tileBackFace("jade").length);
+ * ```
  */
 export function tileBackFace(name: TileBackName = "jade", options: TileBackOptions = {}): string {
   if (!isBuiltInBack(name)) {
@@ -103,7 +147,18 @@ export function tileBackFace(name: TileBackName = "jade", options: TileBackOptio
   return `<rect x="0" y="0" width="30" height="40" rx="3" fill="${look.base}" stroke="${rim}" stroke-width="0.8"/>${pattern(name, look)}${markOf(options.mark, look)}`;
 }
 
-/** The colour of a back's plate, which is also the colour of the tile's thickness seen from the back: a built-in back's own base (with the caller's `colour`), a design's body, or null for a name with no back here. */
+/** The colour of a back's plate, which is also the colour of the tile's thickness seen from the back: a built-in back's own base (with the caller's `colour`), a design's body, or null for a name with no back here.
+ *
+ * @param name - The local seat name, back name or design name specified by this signature.
+ * @param options - Native game, SVG, sound or presentation options.
+ * @returns The colour of a back's plate, which is also the colour of the tile's thickness seen from the back: a built-in back's own base (with the caller's `colour`), a design's body, or null for a name with no back here.
+ * @example
+ * ```ts
+ * import { backBase } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(backBase("jade"));
+ * ```
+ */
 export function backBase(name: TileBackName = "jade", options: TileBackOptions = {}): string | null {
   if (isBuiltInBack(name)) return lookOf(name, options.colour).base;
   return options.design === undefined ? null : (options.design.colours.body ?? null);
@@ -114,6 +169,16 @@ export function backBase(name: TileBackName = "jade", options: TileBackOptions =
  * thickness showing on two sides (the back plate's own colour, with the ivory layer beyond it). With `flat`, the old
  * look (a sliver of side in 32 by 42) and with `bare` the back alone in 30 by 40, for a page that gives the tile its
  * thickness itself. Null for a name that is no back drawn here and no `design` to bring it.
+ *
+ * @param name - The local seat name, back name or design name specified by this signature.
+ * @param options - Native game, SVG, sound or presentation options.
+ * @returns A complete SVG back string, or null for a name without a supported back.
+ * @example
+ * ```ts
+ * import { tileBackSvg } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(tileBackSvg("jade")?.startsWith("<svg"));
+ * ```
  */
 export function tileBackSvg(name: TileBackName = "jade", options: TileBackOptions & { flat?: boolean; bare?: boolean; mirror?: TileMirror } = {}): string | null {
   if (!isBuiltInBack(name) && options.design === undefined) return null;

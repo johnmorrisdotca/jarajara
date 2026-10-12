@@ -24,18 +24,52 @@ import type { AwaseLevel, MahjongBonusRule, MahjongCells, MahjongMove } from "./
  *   sand       clear the layout from a little time, every pair adding some, to a limit
  *   purge      take every tile of the marked group before time runs out
  *   blackout   clear the layout with only the free tiles showing their faces; no undo
+ *
+ * @example
+ * ```ts
+ * import { AWASE_CHALLENGES } from "@johnmorrisdotca/jarajara/awase";
+ * console.log(AWASE_CHALLENGES);
+ * ```
  */
 export const AWASE_CHALLENGES = ["gold", "spark", "rush", "fortune", "sand", "purge", "blackout"] as const;
 
-/** A challenge's name. */
+/** A challenge's name.
+ *
+ * @example
+ * ```ts
+ * import type { AwaseChallenge } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const value: AwaseChallenge = "rush";
+ * console.log(value);
+ * ```
+ */
 export type AwaseChallenge = (typeof AWASE_CHALLENGES)[number];
 
-/** Whether a text names a challenge. */
+/** Whether a text names a challenge.
+ *
+ * @param text - The unknown text or encoded record to interpret.
+ * @returns Whether a text names a challenge.
+ * @example
+ * ```ts
+ * import { isAwaseChallenge } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * console.log(isAwaseChallenge("rush"));
+ * ```
+ */
 export function isAwaseChallenge(text: unknown): text is AwaseChallenge {
   return typeof text === "string" && (AWASE_CHALLENGES as readonly string[]).includes(text);
 }
 
-/** What the options of a game say. Every field may be left out. */
+/** What the options of a game say. Every field may be left out.
+ *
+ * @example
+ * ```ts
+ * import type { AwaseOptions } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const value: AwaseOptions = {challenge:"rush",hints:1,shuffles:1,undo:true};
+ * console.log(value);
+ * ```
+ */
 export type AwaseOptions = {
   /** A challenge to play the deal as. Unless said, plain Awase. */
   challenge?: AwaseChallenge | null;
@@ -47,7 +81,19 @@ export type AwaseOptions = {
   undo?: boolean;
 };
 
-/** What a game is played by, worked out from its options and its challenge. */
+/** What a game is played by, worked out from its options and its challenge.
+ *
+ * @example
+ * ```ts
+ * import { awaseRules, generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import type { AwaseRules } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const cells = deal.givens;
+ * const value: AwaseRules = awaseRules(cells.length,{challenge:"rush"});
+ * console.log(value);
+ * ```
+ */
 export type AwaseRules = {
   challenge: AwaseChallenge | null;
   hints: number | null;
@@ -68,7 +114,14 @@ export type AwaseRules = {
   hideBlocked: boolean;
 };
 
-/** The numbers every challenge is made from. */
+/** The numbers every challenge is made from.
+ *
+ * @example
+ * ```ts
+ * import { AWASE_CHALLENGE_NUMBERS } from "@johnmorrisdotca/jarajara/awase";
+ * console.log(AWASE_CHALLENGE_NUMBERS);
+ * ```
+ */
 export const AWASE_CHALLENGE_NUMBERS = {
   sparkMsPerTile: 2500,
   sparkBonusMs: 20_000,
@@ -90,7 +143,14 @@ export const AWASE_CHALLENGE_NUMBERS = {
   goldPointsPerTile: 20,
 } as const;
 
-/** The groups a purge may name, each a set of tiles a layout is likely to hold plenty of. */
+/** The groups a purge may name, each a set of tiles a layout is likely to hold plenty of.
+ *
+ * @example
+ * ```ts
+ * import { PURGE_GROUPS } from "@johnmorrisdotca/jarajara/awase";
+ * console.log(PURGE_GROUPS);
+ * ```
+ */
 export const PURGE_GROUPS = [
   { key: "characters", suits: ["characters"] },
   { key: "circles", suits: ["circles"] },
@@ -102,6 +162,18 @@ export const PURGE_GROUPS = [
  * The rules a game is played by. A challenge sets its own; the options given are laid over what it allows, and where a
  * challenge takes something away (undo in the spark and blackout) it stays taken away. `tiles` is how many tiles the
  * layout holds, which the clocks and goals are scaled by.
+ *
+ * @param tiles - The number of tiles in the starting layout.
+ * @param options - Native game, SVG, sound or presentation options.
+ * @returns The rules a game is played by. A challenge sets its own; the options given are laid over what it allows, and where a challenge takes something away (undo in the spark and blackout) it stays taken away. `tiles` is how many tiles the layout holds, which the clocks and goals are scaled by.
+ * @example
+ * ```ts
+ * import { awaseRules, generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const cells = deal.givens;
+ * console.log(awaseRules(cells.length,{challenge:"rush"}));
+ * ```
  */
 export function awaseRules(tiles: number, options: AwaseOptions = {}): AwaseRules {
   const challenge = options.challenge ?? null;
@@ -142,7 +214,19 @@ export function awaseRules(tiles: number, options: AwaseOptions = {}): AwaseRule
 /** Where a game stood before a move, so it can be taken back. */
 type Snapshot = { cells: MahjongCells; shuffles: number; pairs: number; score: number; combo: number; lastPairAt: number | null; bank: number | null; bankAt: number | null; spark: string | null; moves: number };
 
-/** A game of Awase, and what the challenge it is played as asks of it. */
+/** A game of Awase, and what the challenge it is played as asks of it.
+ *
+ * @example
+ * ```ts
+ * import { generateAwase, startRun } from "@johnmorrisdotca/jarajara/awase";
+ * import type { AwaseRun } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const run = startRun(deal,{},0);
+ * const value: AwaseRun = run;
+ * console.log(value);
+ * ```
+ */
 export type AwaseRun = {
   readonly size: number;
   readonly seed: number;
@@ -199,6 +283,19 @@ function pickBy<T>(list: readonly T[], seed: number, words: string): T | null {
  * Start a game of a deal. The gold face, the spark and the purge's group are chosen from the seed, so the same deal is
  * the same game; `at` starts the clock now, or leave it out and the clock starts with the first move (`startRun`'s
  * `runStart`).
+ *
+ * @param deal - The original size, seed and face-code deal.
+ * @param options - Native game, SVG, sound or presentation options.
+ * @param at - The supplied time in milliseconds, or the zero-based seat index specified by the signature.
+ * @returns Start a game of a deal. The gold face, the spark and the purge's group are chosen from the seed, so the same deal is the same game; `at` starts the clock now, or leave it out and the clock starts with the first move (`startRun`'s `runStart`).
+ * @example
+ * ```ts
+ * import { generateAwase, startRun } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const cells = deal.givens;
+ * console.log(startRun(deal,{},0).cells.length);
+ * ```
  */
 export function startRun(deal: { size: number; seed: number; givens: string }, options: AwaseOptions = {}, at: number | null = null): AwaseRun {
   const layout = layoutFor(deal.size);
@@ -235,12 +332,38 @@ export function startRun(deal: { size: number; seed: number; givens: string }, o
   return at === null || timed.timeMs === null ? { ...run, bankAt: null } : run;
 }
 
-/** Start the clock, if the game has one and it has not started. */
+/** Start the clock, if the game has one and it has not started.
+ *
+ * @param run - The current immutable native challenge run.
+ * @param at - The supplied time in milliseconds, or the zero-based seat index specified by the signature.
+ * @returns Start the clock, if the game has one and it has not started.
+ * @example
+ * ```ts
+ * import { generateAwase, runStart, startRun } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const run = startRun(deal,{},0);
+ * console.log(runStart(run,1000).bankAt);
+ * ```
+ */
 export function runStart(run: AwaseRun, at: number): AwaseRun {
   return run.bankAt === null && run.rules.timeMs !== null && run.over === null ? { ...run, bankAt: at } : run;
 }
 
-/** How much time the game has left at `at`, in milliseconds; null for a game with no clock. */
+/** How much time the game has left at `at`, in milliseconds; null for a game with no clock.
+ *
+ * @param run - The current immutable native challenge run.
+ * @param at - The supplied time in milliseconds, or the zero-based seat index specified by the signature.
+ * @returns How much time the game has left at `at`, in milliseconds; null for a game with no clock.
+ * @example
+ * ```ts
+ * import { generateAwase, runRemaining, startRun } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const run = startRun(deal,{},0);
+ * console.log(runRemaining(run,1000));
+ * ```
+ */
 export function runRemaining(run: AwaseRun, at: number): number | null {
   if (run.bank === null) return null;
   if (run.bankAt === null || run.over !== null) return Math.max(0, run.bank);
@@ -250,6 +373,18 @@ export function runRemaining(run: AwaseRun, at: number): number | null {
 /**
  * The game as it stands at `at`: lost, if its time has run out. Nothing else changes with the clock, so a page may call
  * this as often as it likes.
+ *
+ * @param run - The current immutable native challenge run.
+ * @param at - The supplied time in milliseconds, or the zero-based seat index specified by the signature.
+ * @returns The game as it stands at `at`: lost, if its time has run out. Nothing else changes with the clock, so a page may call this as often as it likes.
+ * @example
+ * ```ts
+ * import { generateAwase, runTick, startRun } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const run = startRun(deal,{},0);
+ * console.log(runTick(run,1000).over);
+ * ```
  */
 export function runTick(run: AwaseRun, at: number): AwaseRun {
   if (run.over !== null || run.bank === null || run.bankAt === null) return run;
@@ -264,12 +399,36 @@ function ruleOfRun(run: AwaseRun): MahjongBonusRule {
   return bonusRuleOf(run.givens);
 }
 
-/** Every pair that may be taken now: none once the game is over. */
+/** Every pair that may be taken now: none once the game is over.
+ *
+ * @param run - The current immutable native challenge run.
+ * @returns Every pair that may be taken now: none once the game is over.
+ * @example
+ * ```ts
+ * import { generateAwase, runPairs, startRun } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const run = startRun(deal,{},0);
+ * console.log(runPairs(run));
+ * ```
+ */
 export function runPairs(run: AwaseRun): [number, number][] {
   return run.over === null ? freePairs(geometryOfRun(run), run.cells, ruleOfRun(run)) : [];
 }
 
-/** The tiles of the group the game is hunting for, as slots: the gold face, the purge's group, or nothing. */
+/** The tiles of the group the game is hunting for, as slots: the gold face, the purge's group, or nothing.
+ *
+ * @param run - The current immutable native challenge run.
+ * @returns The tiles of the group the game is hunting for, as slots: the gold face, the purge's group, or nothing.
+ * @example
+ * ```ts
+ * import { generateAwase, runMarked, startRun } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const run = startRun(deal,{},0);
+ * console.log(runMarked(run));
+ * ```
+ */
 export function runMarked(run: AwaseRun): number[] {
   const marked: number[] = [];
   [...run.cells].forEach((code, at) => {
@@ -315,6 +474,25 @@ function nextSpark(cells: MahjongCells, after: string): string | null {
  * Take a pair at `at`: the new game, or null where the rules do not allow it (the game is over, or the two are not a
  * pair that may be taken). A pair taken after the time ran out loses the game instead. Scores the pair with its combo,
  * adds the time the challenge gives, moves the spark on, and judges whether the game is won or lost.
+ *
+ * @param run - The current immutable native challenge run.
+ * @param a - The first tile slot or code specified by this signature.
+ * @param b - The second tile slot or code specified by this signature.
+ * @param at - The supplied time in milliseconds, or the zero-based seat index specified by the signature.
+ * @returns Take a pair at `at`: the new game, or null where the rules do not allow it (the game is over, or the two are not a pair that may be taken). A pair taken after the time ran out loses the game instead. Scores the pair with its combo, adds the time the challenge gives, moves the spark on, and judges whether the game is won or lost.
+ * @example
+ * ```ts
+ * import { generateAwase, runTake, startRun } from "@johnmorrisdotca/jarajara/awase";
+ * import { freePairs, geometryOf, layoutFor } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * const pair = freePairs(geometry,cells,"group")[0];
+ * const run = startRun(deal,{},0);
+ * console.log(runTake(run,pair[0],pair[1],1000)?.pairs);
+ * ```
  */
 export function runTake(run: AwaseRun, a: number, b: number, at: number): AwaseRun | null {
   const started = runStart(run, at);
@@ -352,7 +530,20 @@ export function runTake(run: AwaseRun, a: number, b: number, at: number): AwaseR
   return judge(gold);
 }
 
-/** Shuffle what is left, which is for when no pair can be taken: the new game, or null where it may not be (a pair can still be taken, none is left to use, or no shuffle would help). */
+/** Shuffle what is left, which is for when no pair can be taken: the new game, or null where it may not be (a pair can still be taken, none is left to use, or no shuffle would help).
+ *
+ * @param run - The current immutable native challenge run.
+ * @param at - The supplied time in milliseconds, or the zero-based seat index specified by the signature.
+ * @returns Shuffle what is left, which is for when no pair can be taken: the new game, or null where it may not be (a pair can still be taken, none is left to use, or no shuffle would help).
+ * @example
+ * ```ts
+ * import { generateAwase, runShuffle, startRun } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const run = startRun(deal,{},0);
+ * console.log(runShuffle(run,1000));
+ * ```
+ */
 export function runShuffle(run: AwaseRun, at: number): AwaseRun | null {
   const timed = runTick(runStart(run, at), at);
   if (timed.over !== null) return timed.over === "lost" && timed.because === "time" ? timed : null;
@@ -373,7 +564,20 @@ export function runShuffle(run: AwaseRun, at: number): AwaseRun | null {
   });
 }
 
-/** Take the last move back, where the rules allow undo: the new game, or null. The clock is not given back, and score is. */
+/** Take the last move back, where the rules allow undo: the new game, or null. The clock is not given back, and score is.
+ *
+ * @param run - The current immutable native challenge run.
+ * @param at - The supplied time in milliseconds, or the zero-based seat index specified by the signature.
+ * @returns Take the last move back, where the rules allow undo: the new game, or null. The clock is not given back, and score is.
+ * @example
+ * ```ts
+ * import { generateAwase, runUndo, startRun } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const run = startRun(deal,{},0);
+ * console.log(runUndo(run,1000));
+ * ```
+ */
 export function runUndo(run: AwaseRun, at: number): AwaseRun | null {
   if (!run.rules.undo || run.history.length === 0) return null;
   const before = run.history[run.history.length - 1]!;
@@ -401,6 +605,23 @@ export function runUndo(run: AwaseRun, at: number): AwaseRun | null {
  * Ask for a hint: the new game with it counted and the pair named, or null where none is left to use or no pair can be
  * taken. Given the slot the player has chosen, it looks for that tile's match first (`hintFor`): `found` says whether
  * the pair is that match (`match`), another pair because the chosen tile has none (`other`), or any pair (`any`).
+ *
+ * @param run - The current immutable native challenge run.
+ * @param chosen - The selected tile slot, or null without a selection.
+ * @returns Ask for a hint: the new game with it counted and the pair named, or null where none is left to use or no pair can be taken. Given the slot the player has chosen, it looks for that tile's match first (`hintFor`): `found` says whether the pair is that match (`match`), another pair because the chosen tile has none (`other`), or any pair (`any`).
+ * @example
+ * ```ts
+ * import { generateAwase, runHint, startRun } from "@johnmorrisdotca/jarajara/awase";
+ * import { freePairs, geometryOf, layoutFor } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * const pair = freePairs(geometry,cells,"group")[0];
+ * const run = startRun(deal,{},0);
+ * console.log(runHint(run)?.pair);
+ * ```
  */
 export function runHint(run: AwaseRun, chosen?: number | null): { run: AwaseRun; pair: [number, number]; found: Exclude<HintKind, "none"> } | null {
   if (run.over !== null || (run.rules.hints !== null && run.hintsUsed >= run.rules.hints)) return null;
@@ -408,7 +629,19 @@ export function runHint(run: AwaseRun, chosen?: number | null): { run: AwaseRun;
   return hint.pair === null || hint.found === "none" ? null : { run: { ...run, hintsUsed: run.hintsUsed + 1 }, pair: hint.pair, found: hint.found };
 }
 
-/** The game as it stands, for a page to read: how the clock, the goal and the hunt are going, without working them out again. */
+/** The game as it stands, for a page to read: how the clock, the goal and the hunt are going, without working them out again.
+ *
+ * @example
+ * ```ts
+ * import { generateAwase, readRun, startRun } from "@johnmorrisdotca/jarajara/awase";
+ * import type { AwaseRunReading } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const run = startRun(deal,{},0);
+ * const value: AwaseRunReading = readRun(run,1000);
+ * console.log(value);
+ * ```
+ */
 export type AwaseRunReading = {
   state: "run" | "won" | "lost";
   because: AwaseRun["because"];
@@ -420,7 +653,20 @@ export type AwaseRunReading = {
   multiplier: number;
 };
 
-/** Read a game at `at`. */
+/** Read a game at `at`.
+ *
+ * @param run - The current immutable native challenge run.
+ * @param at - The supplied time in milliseconds, or the zero-based seat index specified by the signature.
+ * @returns Read a game at `at`.
+ * @example
+ * ```ts
+ * import { generateAwase, readRun, startRun } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const run = startRun(deal,{},0);
+ * console.log(readRun(run,1000));
+ * ```
+ */
 export function readRun(run: AwaseRun, at: number): AwaseRunReading {
   const timed = runTick(run, at);
   const rules = timed.rules;
@@ -446,7 +692,19 @@ export function readRun(run: AwaseRun, at: number): AwaseRunReading {
   };
 }
 
-/** A game's moves written as `encodeMoves` writes them, with its seed, so it can be replayed on the deal. */
+/** A game's moves written as `encodeMoves` writes them, with its seed, so it can be replayed on the deal.
+ *
+ * @param run - The current immutable native challenge run.
+ * @returns A game's moves written as `encodeMoves` writes them, with its seed, so it can be replayed on the deal.
+ * @example
+ * ```ts
+ * import { generateAwase, runMoves, startRun } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const run = startRun(deal,{},0);
+ * console.log(runMoves(run));
+ * ```
+ */
 export function runMoves(run: AwaseRun): readonly MahjongMove[] {
   return run.moves;
 }
@@ -455,6 +713,15 @@ export function runMoves(run: AwaseRun): readonly MahjongMove[] {
  * THE DAY'S GAME, the same for everybody on the same date: a layout, a level, a seed and a challenge worked out from the
  * date alone (`2026-10-01`, or a Date, in UTC), so no server need hold it. The seed is never in the block that makes a
  * deal play under the Identical rule, and the layout is never the Tiny one, which is for tests.
+ *
+ * @param date - A UTC date or native date string for the daily setup.
+ * @returns THE DAY'S GAME, the same for everybody on the same date: a layout, a level, a seed and a challenge worked out from the date alone (`2026-10-01`, or a Date, in UTC), so no server need hold it. The seed is never in the block that makes a deal play under the Identical rule, and the layout is never the Tiny one, which is for tests.
+ * @example
+ * ```ts
+ * import { dailyAwase } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * console.log(dailyAwase("2026-10-12"));
+ * ```
  */
 export function dailyAwase(date: string | Date): { date: string; size: number; level: AwaseLevel; seed: number; challenge: AwaseChallenge } {
   const day = typeof date === "string" ? date.slice(0, 10) : date.toISOString().slice(0, 10);

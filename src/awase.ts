@@ -36,20 +36,56 @@ const PLAYOUTS = 16;
  * deal was made under without a column of its own (as a Futago's does). A
  * fresh seed of the usual rule is drawn outside it; today's seed (20260929)
  * lies far below it.
+ *
+ * @example
+ * ```ts
+ * import { AWASE_SAME_BLOCK } from "@johnmorrisdotca/jarajara/awase";
+ * console.log(AWASE_SAME_BLOCK);
+ * ```
  */
 export const AWASE_SAME_BLOCK = { from: 1_500_000_000, size: 100_000_000 } as const;
 
+/** The native matching rule encoded by a seed: identical bonuses in the reserved block, grouped bonuses otherwise.
+ *
+ * @param seed - The numeric seed used to reproduce the deal or its matching rule.
+ * @returns The native matching rule encoded by a seed: identical bonuses in the reserved block, grouped bonuses otherwise.
+ * @example
+ * ```ts
+ * import { bonusRuleOfSeed } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * console.log(bonusRuleOfSeed(2026));
+ * ```
+ */
 export function bonusRuleOfSeed(seed: number): MahjongBonusRule {
   return seed >= AWASE_SAME_BLOCK.from && seed < AWASE_SAME_BLOCK.from + AWASE_SAME_BLOCK.size ? "same" : "group";
 }
 
-/** The most a seed can be: it travels in an address as a plain integer. */
+/** The most a seed can be: it travels in an address as a plain integer.
+ *
+ * @example
+ * ```ts
+ * import { SEED_MOST } from "@johnmorrisdotca/jarajara/awase";
+ * console.log(SEED_MOST);
+ * ```
+ */
 export const SEED_MOST = 2_147_483_647;
 
 /**
  * A new seed for a deal under this rule: inside `AWASE_SAME_BLOCK` for the identical rule, anywhere else from 1 to
  * `SEED_MOST` for the usual one. `draw` gives a seed for the usual rule (a site keeping blocks of seeds for its own
  * uses passes its own); a whole number from 1 to `SEED_MOST` unless said.
+ *
+ * @param rule - Grouped or identical bonus matching.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param draw - An optional function drawing a seed outside separately reserved blocks.
+ * @returns A new seed for a deal under this rule: inside `AWASE_SAME_BLOCK` for the identical rule, anywhere else from 1 to `SEED_MOST` for the usual one. `draw` gives a seed for the usual rule (a site keeping blocks of seeds for its own uses passes its own); a whole number from 1 to `SEED_MOST` unless said.
+ * @example
+ * ```ts
+ * import { freshAwaseSeed } from "@johnmorrisdotca/jarajara/awase";
+ * import { seededRandom } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(freshAwaseSeed("same",seededRandom(42)));
+ * ```
  */
 export function freshAwaseSeed(rule: MahjongBonusRule, random: Random = Math.random, draw: () => number = () => 1 + Math.floor(random() * SEED_MOST)): number {
   if (rule === "same") return AWASE_SAME_BLOCK.from + Math.floor(random() * AWASE_SAME_BLOCK.size);
@@ -68,7 +104,19 @@ function dealFrom(geometry: MahjongGeometry, rule: MahjongBonusRule, random: Ran
   return layPairs(geometry, geometry.layout.slots.map(() => true), pairs, random);
 }
 
-/** A deal of this layout at this level, made from this seed. */
+/** A deal of this layout at this level, made from this seed.
+ *
+ * @param size - The native layout size identifier, measured in tiles across.
+ * @param level - The requested easy, medium or hard seeded deal.
+ * @param seed - The numeric seed used to reproduce the deal or its matching rule.
+ * @returns A deal of this layout at this level, made from this seed.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ *
+ * console.log(generateAwase(4,"easy",2026).givens);
+ * ```
+ */
 export function generateAwase(size: number, level: AwaseLevel, seed: number): AwaseDeal {
   const layout = layoutFor(size);
   if (layout === null) throw new Error(`no Mahjong layout ${size} across`);

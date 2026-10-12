@@ -4,10 +4,28 @@
  * that is picked up is raised.
  */
 
-/** One tile's place: across and down in tile widths from where the rack starts. A lifted tile is above the row, so its `y` is negative. */
+/** One tile's place: across and down in tile widths from where the rack starts. A lifted tile is above the row, so its `y` is negative.
+ *
+ * @example
+ * ```ts
+ * import type { RackPlace } from "@johnmorrisdotca/jarajara/element";
+ *
+ * const value: RackPlace = {x:0,y:-5};
+ * console.log(value);
+ * ```
+ */
 export type RackPlace = { x: number; y: number };
 
-/** How a rack is laid out. Every field may be left out. */
+/** How a rack is laid out. Every field may be left out.
+ *
+ * @example
+ * ```ts
+ * import type { RackLayoutOptions } from "@johnmorrisdotca/jarajara/element";
+ *
+ * const value: RackLayoutOptions = {breaks:[3],lifted:[0],step:30,gap:8,lift:5};
+ * console.log(value);
+ * ```
+ */
 export type RackLayoutOptions = {
   /** The places, counted from 0 in the order the tiles lie, where a new group starts, after a gap. Unless said, none. */
   breaks?: readonly number[];
@@ -27,7 +45,18 @@ export const TILE_TALL = 47 / 37;
 /** The most a raised tile stands above the row, which a rack always leaves room for. */
 export const RACK_LIFT = 0.22;
 
-/** Where each of `count` tiles lies, in order: the first at x 0, each a step on, groups set apart, raised tiles lifted. */
+/** Where each of `count` tiles lies, in order: the first at x 0, each a step on, groups set apart, raised tiles lifted.
+ *
+ * @param count - The number of rack tiles or sounds requested.
+ * @param options - Native game, SVG, sound or presentation options.
+ * @returns Where each of `count` tiles lies, in order: the first at x 0, each a step on, groups set apart, raised tiles lifted.
+ * @example
+ * ```ts
+ * import { rackPlaces } from "@johnmorrisdotca/jarajara/element";
+ *
+ * console.log(rackPlaces(3,{breaks:[1]}));
+ * ```
+ */
 export function rackPlaces(count: number, options: RackLayoutOptions = {}): RackPlace[] {
   const whole = Math.max(0, Math.floor(Number.isFinite(count) ? count : 0));
   const step = options.step ?? 1.02;
@@ -44,7 +73,17 @@ export function rackPlaces(count: number, options: RackLayoutOptions = {}): Rack
   return places;
 }
 
-/** How wide a rack is, in tile widths: the last tile's place and the tile itself. */
+/** How wide a rack is, in tile widths: the last tile's place and the tile itself.
+ *
+ * @param places - The native rack positions.
+ * @returns How wide a rack is, in tile widths: the last tile's place and the tile itself.
+ * @example
+ * ```ts
+ * import { rackPlaces, rackWidth } from "@johnmorrisdotca/jarajara/element";
+ *
+ * console.log(rackWidth(rackPlaces(3)));
+ * ```
+ */
 export function rackWidth(places: readonly RackPlace[]): number {
   return places.length === 0 ? 0 : Math.round((Math.max(...places.map((place) => place.x)) + 1) * 1000) / 1000;
 }

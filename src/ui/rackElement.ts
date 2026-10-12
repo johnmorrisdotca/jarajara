@@ -5,7 +5,16 @@ import { redFiveIndexes } from "../designs.ts";
 import { blockHtml, blockVars, BLOCK_STYLE, BOX_UNITS, CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, playSound, reflectMethod, say, spinElement, tileDrawing, tileLabel, widthOf, wearCloth, writeElementAttribute, type SpinOptions } from "./elementKit.ts";
 import { RACK_LIFT, rackPlaces, rackWidth, TILE_TALL, type RackPlace } from "./rackLayout.ts";
 
-/** How a rack's tiles are turned face down or face up. */
+/** How a rack's tiles are turned face down or face up.
+ *
+ * @example
+ * ```ts
+ * import type { RackTurnOptions } from "@johnmorrisdotca/jarajara/element";
+ *
+ * const value: RackTurnOptions = {oneByOne:true,gap:100};
+ * console.log(value);
+ * ```
+ */
 export type RackTurnOptions = {
   /** One tile after another, from the first, rather than all at once. Unless said, all at once. */
   oneByOne?: boolean;
@@ -16,10 +25,27 @@ export type RackTurnOptions = {
 /**
  * Tiles as a method is given them: a number is the place of one tile in the rack as it was written (`tiles`), from 0;
  * a letter or a name (`"F"`, `"east"`, `"3p"`) is every tile of that face; a list is each of its parts.
+ *
+ * @example
+ * ```ts
+ * import type { TileRef } from "@johnmorrisdotca/jarajara/element";
+ *
+ * const value: TileRef = [0,1,2];
+ * console.log(value);
+ * ```
  */
 export type TileRef = number | string | readonly (number | string)[];
 
-/** How the rack lies, for the page to hear of: what is turned, raised and marked (by place in `tiles`), and how the tiles are put in order. */
+/** How the rack lies, for the page to hear of: what is turned, raised and marked (by place in `tiles`), and how the tiles are put in order.
+ *
+ * @example
+ * ```ts
+ * import type { RackDetail } from "@johnmorrisdotca/jarajara/element";
+ *
+ * const value: RackDetail = {tiles:["a","b","c"],faceDown:false,turned:[],lifted:[],marked:[],order:"dealt",group:null};
+ * console.log(value);
+ * ```
+ */
 export type RackDetail = { tiles: string[]; faceDown: boolean; turned: number[]; lifted: number[]; marked: number[]; order: TileOrder; group: TileGrouping | null };
 
 const TOSS_MS = 300;

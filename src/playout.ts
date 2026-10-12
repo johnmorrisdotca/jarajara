@@ -27,7 +27,26 @@ function underOf(geometry: MahjongGeometry): readonly (readonly number[])[] {
   return under;
 }
 
-/** How often a player taking any free pair at random clears this deal, out of `times`. */
+/** How often a player taking any free pair at random clears this deal, out of `times`.
+ *
+ * @param geometry - The stacked layout’s covering and side-blocking relationships.
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @param rule - Grouped or identical bonus matching.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param times - The number of bounded random clear attempts to measure.
+ * @returns How often a player taking any free pair at random clears this deal, out of `times`.
+ * @example
+ * ```ts
+ * import { clearRate, generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { geometryOf, layoutFor, seededRandom } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * console.log(clearRate(geometry,cells,"group",seededRandom(42),4));
+ * ```
+ */
 export function clearRate(geometry: MahjongGeometry, cells: string, rule: MahjongBonusRule, random: Random, times: number): number {
   return playOut(geometry, cells, rule, random, times).cleared / times;
 }

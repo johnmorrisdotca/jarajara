@@ -7,6 +7,7 @@
 // (Front.svg) and its back (Back.svg). Each drawing is made smaller with svgo, its size taken off, and its ids
 // given a prefix of its own, so any number may be in one page. The faces go in as they are, the plate and back
 // beside them, and the red fives (Man5-Dora.svg and the like) as `red`. Nothing here runs in CI or is published.
+import { riichiDocLines } from "./design-docs.mjs";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import process from "node:process";
@@ -65,7 +66,7 @@ for (const style of STYLES) {
       " */",
       'import type { TileDesign } from "../design.types.ts";',
       "",
-      `/** The ${style.words} riichi tiles, drawn in a box 300 by 400. */`,
+      ...riichiDocLines(style),
       `export const ${style.constant}: TileDesign = {`,
       `  name: ${JSON.stringify(style.name)},`,
       "  box: [300, 400],",

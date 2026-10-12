@@ -20,10 +20,23 @@ export { faceWords };
  * a string, so it goes into any page, framework or none. The tiles are light
  * objects on any table, so every colour is fixed, never a theme's. The text on
  * them cannot be selected: a tile is a thing to press, not a word to copy.
+ *
+ * @example
+ * ```ts
+ * import { TILE_SIZE } from "@johnmorrisdotca/jarajara/faces";
+ * console.log(TILE_SIZE);
+ * ```
  */
 export const TILE_SIZE = { width: 30, height: 40 } as const;
 
-/** The inks a face is drawn in. */
+/** The inks a face is drawn in.
+ *
+ * @example
+ * ```ts
+ * import { TILE_INK } from "@johnmorrisdotca/jarajara/faces";
+ * console.log(TILE_INK);
+ * ```
+ */
 export const TILE_INK = {
   ink: "#22231f",
   soft: "#6f6a62",
@@ -35,13 +48,34 @@ export const TILE_INK = {
   season: "#c2711c",
 } as const;
 
-/** The tile itself: its ivory face, the rim round it, the bone of its side (the sliver a flat picture shows) and the green of the back plate its thickness is drawn in. */
+/** The tile itself: its ivory face, the rim round it, the bone of its side (the sliver a flat picture shows) and the green of the back plate its thickness is drawn in.
+ *
+ * @example
+ * ```ts
+ * import { TILE_BODY } from "@johnmorrisdotca/jarajara/faces";
+ * console.log(TILE_BODY);
+ * ```
+ */
 export const TILE_BODY = { face: "#fffdf6", rim: "#b9ad96", side: "#d9c59b", sideEdge: "#a8926a", body: "#3a8a68" } as const;
 
-/** The box a solid tile is drawn in, in the face's units: the face, its thickness down and to the left, and a margin for the outlines. */
+/** The box a solid tile is drawn in, in the face's units: the face, its thickness down and to the left, and a margin for the outlines.
+ *
+ * @example
+ * ```ts
+ * import { TILE_BOX } from "@johnmorrisdotca/jarajara/faces";
+ * console.log(TILE_BOX);
+ * ```
+ */
 export const TILE_BOX = { x: -(TILE_DEPTH + 1), y: -1, width: 30 + TILE_DEPTH + 2, height: 40 + TILE_DEPTH + 2 } as const;
 
-/** The fonts the characters are drawn in, Japanese serif first; a page may load its own and name it here. */
+/** The fonts the characters are drawn in, Japanese serif first; a page may load its own and name it here.
+ *
+ * @example
+ * ```ts
+ * import { TILE_FONT } from "@johnmorrisdotca/jarajara/faces";
+ * console.log(TILE_FONT);
+ * ```
+ */
 export const TILE_FONT = "'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif CJK JP', serif";
 
 const SANS = "ui-sans-serif, system-ui, sans-serif";
@@ -163,6 +197,17 @@ function drawing(face: MahjongFace): string {
  * inside of a `<symbol>` or a `<g>`, for a board that draws its own tiles.
  * Null for a letter that is no face. With a `design`, that design's drawing of
  * the face (fitted to the 30 by 40), or Jarajara's own where it has none.
+ *
+ * @param code - The one-character face code or tile identifier.
+ * @param design - The optional tile artwork design.
+ * @param red - Whether a supported five uses its red face drawing.
+ * @returns One face's drawing, in the tile's own 30 by 40, with no tile under it: the inside of a `<symbol>` or a `<g>`, for a board that draws its own tiles. null for a letter that is no face. With a `design`, that design's drawing of the face (fitted to the 30 by 40), or Jarajara's own where it has none.
+ * @example
+ * ```ts
+ * import { tileFaceSvg } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(tileFaceSvg("a")?.length);
+ * ```
  */
 export function tileFaceSvg(code: string, design?: TileDesign, red = false): string | null {
   const face = faceOf(code);
@@ -180,22 +225,61 @@ function fitted(design: TileDesign, inner: string): string {
   return `<g transform="scale(${round(TILE_SIZE.width / w)} ${round(TILE_SIZE.height / h)})">${inner}</g>`;
 }
 
-/** The tile's own plate in a design, fitted to the tile's 30 by 40; null for a design that draws the plain rounded rectangle. */
+/** The tile's own plate in a design, fitted to the tile's 30 by 40; null for a design that draws the plain rounded rectangle.
+ *
+ * @param design - The optional tile artwork design.
+ * @returns The tile's own plate in a design, fitted to the tile's 30 by 40; null for a design that draws the plain rounded rectangle.
+ * @example
+ * ```ts
+ * import { jarajaraDesign, tileBodySvg } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(tileBodySvg(jarajaraDesign()));
+ * ```
+ */
 export function tileBodySvg(design: TileDesign | undefined): string | null {
   return design === undefined || design.body === null ? null : fitted(design, design.body);
 }
 
-/** The back of a tile in a design, plate and pattern, fitted to the tile's 30 by 40. */
+/** The back of a tile in a design, plate and pattern, fitted to the tile's 30 by 40.
+ *
+ * @param design - The optional tile artwork design.
+ * @returns The back of a tile in a design, plate and pattern, fitted to the tile's 30 by 40.
+ * @example
+ * ```ts
+ * import { jarajaraDesign, tileBackDrawing } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(tileBackDrawing(jarajaraDesign()).length);
+ * ```
+ */
 export function tileBackDrawing(design: TileDesign): string {
   return fitted(design, design.back);
 }
 
-/** The colours of a tile's rim and thickness: a design's, or Jarajara's own ivory and jade. */
+/** The colours of a tile's rim and thickness: a design's, or Jarajara's own ivory and jade.
+ *
+ * @param design - The optional tile artwork design.
+ * @returns The colours of a tile's rim and thickness: a design's, or Jarajara's own ivory and jade.
+ * @example
+ * ```ts
+ * import { jarajaraDesign, tileColours } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(tileColours(jarajaraDesign()));
+ * ```
+ */
 export function tileColours(design?: TileDesign): { face: string; rim: string; side: string; sideEdge: string; body?: string } {
   return design?.colours ?? TILE_BODY;
 }
 
-/** How a set of symbols is made. */
+/** How a set of symbols is made.
+ *
+ * @example
+ * ```ts
+ * import type { TileSymbolOptions } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * const value: TileSymbolOptions = {faces:["a","F"],red:true};
+ * console.log(value);
+ * ```
+ */
 export type TileSymbolOptions = {
   /** A design's drawings instead of Jarajara's own. */
   design?: TileDesign;
@@ -210,6 +294,16 @@ export type TileSymbolOptions = {
  * of 144 tiles draws 42 pictures and places each with a `<use>`. A design with
  * a plate of its own adds it as `<prefix>-body`, and its red fives are
  * `<prefix>-<code>-red`.
+ *
+ * @param prefix - The identifier prefix of the generated SVG symbols.
+ * @param options - Native game, SVG, sound or presentation options.
+ * @returns Every face as a `<symbol>` in one `<defs>`, ids `<prefix>-<code>`, so a board of 144 tiles draws 42 pictures and places each with a `<use>`. A design with a plate of its own adds it as `<prefix>-body`, and its red fives are `<prefix>-<code>-red`.
+ * @example
+ * ```ts
+ * import { tileFaceSymbols } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(tileFaceSymbols("article",{faces:["a","F"]}).length);
+ * ```
  */
 export function tileFaceSymbols(prefix: string, options: TileSymbolOptions = {}): string {
   const { design, red = false } = options;
@@ -226,7 +320,16 @@ export function tileFaceSymbols(prefix: string, options: TileSymbolOptions = {})
   return `<defs>${symbols.join("")}</defs>`;
 }
 
-/** How a tile on its own is drawn. */
+/** How a tile on its own is drawn.
+ *
+ * @example
+ * ```ts
+ * import type { TileSvgOptions } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * const value: TileSvgOptions = {title:"One of characters",mirror:"horizontal"};
+ * console.log(value);
+ * ```
+ */
 export type TileSvgOptions = {
   /** A design's drawing instead of Jarajara's own. */
   design?: TileDesign;
@@ -254,6 +357,16 @@ function tileOpen(face: MahjongFace, title: string | undefined, box: string, ext
  * on two sides, named for a screen reader. Its width and height are the caller's, through CSS; the picture keeps its
  * box (`TILE_BOX`). With `flat`, the old look (a sliver of its side in 32 by 42), and with `bare` the face alone in
  * 30 by 40. Null for a letter that is no face.
+ *
+ * @param code - The one-character face code or tile identifier.
+ * @param options - Native game, SVG, sound or presentation options.
+ * @returns A complete SVG tile string, or null for an unknown face code.
+ * @example
+ * ```ts
+ * import { tileSvg } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(tileSvg("a",{title:"One of characters"})?.startsWith("<svg"));
+ * ```
  */
 export function tileSvg(code: string, options: TileSvgOptions = {}): string | null {
   const face = faceOf(code);

@@ -241,4 +241,12 @@ const DRAGON = made("dragon", 17, [
   ]),
 ]);
 
+/** The additional native stacked layouts and their supported size identifiers.
+ *
+ * @example
+ * ```ts
+ * import { MORE_LAYOUTS } from "@johnmorrisdotca/jarajara";
+ * console.log(MORE_LAYOUTS.map(layout=>[layout.size,layout.key,layout.slots.length]));
+ * ```
+ */
 export const MORE_LAYOUTS: readonly MahjongLayout[] = [PAGODA, FORTRESS, PYRAMID, BRIDGE, BUTTERFLY, DRAGON];

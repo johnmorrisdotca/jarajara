@@ -26,10 +26,23 @@ import { bonusRuleOf, pairGoesAgain, pairPoints } from "./tiles.ts";
  * passed with no cover screen: nothing is secret at this table.
  *
  * Pure, like every rule here: each function returns a new table.
+ *
+ * @example
+ * ```ts
+ * import { AWASE_TABLE } from "@johnmorrisdotca/jarajara/table";
+ * console.log(AWASE_TABLE);
+ * ```
  */
 export const AWASE_TABLE = { least: 2, most: 4, nameMost: 20 } as const;
 
-/** The four seats' winds, east first, as a mahjong table seats its players. */
+/** The four seats' winds, east first, as a mahjong table seats its players.
+ *
+ * @example
+ * ```ts
+ * import { SEAT_WINDS } from "@johnmorrisdotca/jarajara/table";
+ * console.log(SEAT_WINDS);
+ * ```
+ */
 export const SEAT_WINDS: readonly { label: string; kanji: string }[] = [
   { label: "East", kanji: "東" },
   { label: "South", kanji: "南" },
@@ -37,18 +50,49 @@ export const SEAT_WINDS: readonly { label: string; kanji: string }[] = [
   { label: "North", kanji: "北" },
 ];
 
-/** A players count from an address, or 1 (the solitaire) for anything that is not two to four. */
+/** A players count from an address, or 1 (the solitaire) for anything that is not two to four.
+ *
+ * @param value - The unknown player-count value to normalize.
+ * @returns A players count from an address, or 1 (the solitaire) for anything that is not two to four.
+ * @example
+ * ```ts
+ * import { tablePlayersAsked } from "@johnmorrisdotca/jarajara/table";
+ *
+ * console.log(tablePlayersAsked("3"));
+ * ```
+ */
 export function tablePlayersAsked(value: unknown): number {
   const count = Number(value);
   return Number.isInteger(count) && count >= AWASE_TABLE.least && count <= AWASE_TABLE.most ? count : 1;
 }
 
-/** A name as kept: trimmed, one line, and no longer than a line holds. */
+/** A name as kept: trimmed, one line, and no longer than a line holds.
+ *
+ * @param name - The local seat name, back name or design name specified by this signature.
+ * @returns A name as kept: trimmed, one line, and no longer than a line holds.
+ * @example
+ * ```ts
+ * import { tidySeatName } from "@johnmorrisdotca/jarajara/table";
+ *
+ * console.log(tidySeatName("  Seat  1  "));
+ * ```
+ */
 export function tidySeatName(name: string): string {
   return name.replace(/\s+/g, " ").trim().slice(0, AWASE_TABLE.nameMost);
 }
 
-/** What a seat is called: its name, "Computer 2", or its wind. */
+/** What a seat is called: its name, "Computer 2", or its wind.
+ *
+ * @param seats - The two to four local player names and optional computer flags.
+ * @param at - The supplied time in milliseconds, or the zero-based seat index specified by the signature.
+ * @returns What a seat is called: its name, "Computer 2", or its wind.
+ * @example
+ * ```ts
+ * import { seatName } from "@johnmorrisdotca/jarajara/table";
+ *
+ * console.log(seatName([{name:"Seat 1"},{name:"Seat 2"}],0));
+ * ```
+ */
 export function seatName(seats: readonly AwaseSeat[], at: number): string {
   const seat = seats[at];
   if (seat === undefined) return SEAT_WINDS[at]?.label ?? `Player ${at + 1}`;
@@ -57,7 +101,20 @@ export function seatName(seats: readonly AwaseSeat[], at: number): string {
   return SEAT_WINDS[at]?.label ?? `Player ${at + 1}`;
 }
 
-/** A new game at the table: the deal made from the seed, these seats, and nothing taken. */
+/** A new game at the table: the deal made from the seed, these seats, and nothing taken.
+ *
+ * @param deal - The original size, seed and face-code deal.
+ * @param seats - The two to four local player names and optional computer flags.
+ * @returns A new game at the table: the deal made from the seed, these seats, and nothing taken.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { startTable } from "@johnmorrisdotca/jarajara/table";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * console.log(startTable(deal,[{name:"Seat 1"},{name:"Seat 2"}]).seats.length);
+ * ```
+ */
 export function startTable(deal: { size: number; level: AwaseLevel; seed: number; givens: string }, seats: readonly AwaseSeat[]): AwaseTable {
   const count = Math.min(Math.max(seats.length, AWASE_TABLE.least), AWASE_TABLE.most);
   const seated = Array.from({ length: count }, (_, at) => {
@@ -110,6 +167,18 @@ function rulesOf(table: AwaseTable): { geometry: MahjongGeometry; rule: MahjongB
 /**
  * WHERE THE GAME STANDS, played again from its pairs: null for a deal that is
  * not one, or a pair the rules would not have allowed.
+ *
+ * @param table - The shared native table and its recorded pair takes.
+ * @returns WHERE THE GAME STANDS, played again from its pairs: null for a deal that is not one, or a pair the rules would not have allowed.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { readTable, startTable } from "@johnmorrisdotca/jarajara/table";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const table = startTable(deal,[{name:"Seat 1"},{name:"Seat 2"}]);
+ * console.log(readTable(table)?.turn);
+ * ```
  */
 export function readTable(table: AwaseTable): AwaseTableState | null {
   const rules = rulesOf(table);
@@ -133,7 +202,21 @@ export function readTable(table: AwaseTable): AwaseTableState | null {
   return state;
 }
 
-/** The pairs the player to move may take: none once the game is over. */
+/** The pairs the player to move may take: none once the game is over.
+ *
+ * @param table - The shared native table and its recorded pair takes.
+ * @param state - A previously replayed native table state, or null to read it again.
+ * @returns The pairs the player to move may take: none once the game is over.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { startTable, tablePairs } from "@johnmorrisdotca/jarajara/table";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const table = startTable(deal,[{name:"Seat 1"},{name:"Seat 2"}]);
+ * console.log(tablePairs(table));
+ * ```
+ */
 export function tablePairs(table: AwaseTable, state: AwaseTableState | null = readTable(table)): [number, number][] {
   const rules = rulesOf(table);
   if (state === null || state.over || rules === null) return [];
@@ -144,6 +227,27 @@ export function tablePairs(table: AwaseTable, state: AwaseTableState | null = re
  * The player to move takes this pair: the table and where it now stands, or
  * null where the rules do not allow it. Played on from `state` where the
  * caller holds it, so a turn costs one pair rather than the whole game again.
+ *
+ * @param table - The shared native table and its recorded pair takes.
+ * @param a - The first tile slot or code specified by this signature.
+ * @param b - The second tile slot or code specified by this signature.
+ * @param state - A previously replayed native table state, or null to read it again.
+ * @returns The player to move takes this pair: the table and where it now stands, or null where the rules do not allow it. Played on from `state` where the caller holds it, so a turn costs one pair rather than the whole game again.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { freePairs, geometryOf, layoutFor } from "@johnmorrisdotca/jarajara";
+ * import { playAtTable, readTable, startTable } from "@johnmorrisdotca/jarajara/table";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * const pair = freePairs(geometry,cells,"group")[0];
+ * const table = startTable(deal,[{name:"Seat 1"},{name:"Seat 2"}]);
+ * const state = readTable(table)!;
+ * console.log(playAtTable(table,pair[0],pair[1],state)?.state.scores);
+ * ```
  */
 export function playAtTable(table: AwaseTable, a: number, b: number, state: AwaseTableState | null = readTable(table)): { table: AwaseTable; state: AwaseTableState } | null {
   const rules = rulesOf(table);
@@ -152,28 +256,101 @@ export function playAtTable(table: AwaseTable, a: number, b: number, state: Awas
   return next === null ? null : { table: { ...table, takes: [...table.takes, [a, b] as const] }, state: next };
 }
 
-/** The table after the player to move takes this pair, or null where the rules do not allow it. */
+/** The table after the player to move takes this pair, or null where the rules do not allow it.
+ *
+ * @param table - The shared native table and its recorded pair takes.
+ * @param a - The first tile slot or code specified by this signature.
+ * @param b - The second tile slot or code specified by this signature.
+ * @returns The table after the player to move takes this pair, or null where the rules do not allow it.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { freePairs, geometryOf, layoutFor } from "@johnmorrisdotca/jarajara";
+ * import { startTable, takeAtTable } from "@johnmorrisdotca/jarajara/table";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * const pair = freePairs(geometry,cells,"group")[0];
+ * const table = startTable(deal,[{name:"Seat 1"},{name:"Seat 2"}]);
+ * console.log(takeAtTable(table,pair[0],pair[1])?.takes.length);
+ * ```
+ */
 export function takeAtTable(table: AwaseTable, a: number, b: number): AwaseTable | null {
   return playAtTable(table, a, b)?.table ?? null;
 }
 
-/** The table with its last pair given back: the undo a table agrees to. Null with nothing to give back. */
+/** The table with its last pair given back: the undo a table agrees to. Null with nothing to give back.
+ *
+ * @param table - The shared native table and its recorded pair takes.
+ * @returns The table with its last pair given back: the undo a table agrees to. null with nothing to give back.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { startTable, undoAtTable } from "@johnmorrisdotca/jarajara/table";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const table = startTable(deal,[{name:"Seat 1"},{name:"Seat 2"}]);
+ * console.log(undoAtTable(table));
+ * ```
+ */
 export function undoAtTable(table: AwaseTable): AwaseTable | null {
   if (table.takes.length === 0) return null;
   return { ...table, takes: table.takes.slice(0, -1) };
 }
 
-/** Whether a computer plays this seat. */
+/** Whether a computer plays this seat.
+ *
+ * @param table - The shared native table and its recorded pair takes.
+ * @param at - The supplied time in milliseconds, or the zero-based seat index specified by the signature.
+ * @returns Whether a computer plays this seat.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { isComputerSeat, startTable } from "@johnmorrisdotca/jarajara/table";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const table = startTable(deal,[{name:"Seat 1"},{name:"Seat 2"}]);
+ * console.log(isComputerSeat(table,0));
+ * ```
+ */
 export function isComputerSeat(table: AwaseTable, at: number): boolean {
   return table.seats[at]?.computer === true;
 }
 
-/** As kept in the browser: the table as JSON, its takes as slot pairs. */
+/** As kept in the browser: the table as JSON, its takes as slot pairs.
+ *
+ * @param table - The shared native table and its recorded pair takes.
+ * @returns As kept in the browser: the table as JSON, its takes as slot pairs.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { encodeTable, startTable } from "@johnmorrisdotca/jarajara/table";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const table = startTable(deal,[{name:"Seat 1"},{name:"Seat 2"}]);
+ * console.log(encodeTable(table));
+ * ```
+ */
 export function encodeTable(table: AwaseTable): string {
   return JSON.stringify({ v: 1, ...table });
 }
 
-/** A kept table read back, its shape checked and every pair played again; null for anything that is not one. */
+/** A kept table read back, its shape checked and every pair played again; null for anything that is not one.
+ *
+ * @param text - The unknown text or encoded record to interpret.
+ * @returns A kept table read back, its shape checked and every pair played again; null for anything that is not one.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { decodeTable, encodeTable, startTable } from "@johnmorrisdotca/jarajara/table";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const table = startTable(deal,[{name:"Seat 1"},{name:"Seat 2"}]);
+ * console.log(decodeTable(encodeTable(table))?.seed);
+ * ```
+ */
 export function decodeTable(text: string | null): AwaseTable | null {
   if (text === null) return null;
   try {

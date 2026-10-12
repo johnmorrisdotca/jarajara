@@ -13,7 +13,15 @@
  */
 import type { TileDesign } from "../design.types.ts";
 
-/** The black riichi tiles, drawn in a box 300 by 400. */
+/** The black riichi tiles, drawn in a box 300 by 400.
+ *
+ * @example
+ * ```ts
+ * import { RIICHI_BLACK } from "@johnmorrisdotca/jarajara/designs/riichi-black";
+ * import { tileSvg } from "@johnmorrisdotca/jarajara/faces";
+ * console.log(RIICHI_BLACK.name, tileSvg("F", { design: RIICHI_BLACK })?.length);
+ * ```
+ */
 export const RIICHI_BLACK: TileDesign = {
   name: "riichi-black",
   box: [300, 400],

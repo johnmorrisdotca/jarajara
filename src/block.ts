@@ -11,20 +11,53 @@ import type { TileDesign } from "./design.types.ts";
  * soft shadow under it that lengthens with the layer.
  */
 
-/** How thick a tile is, and so how far each layer is lifted, in the face's units. */
+/** How thick a tile is, and so how far each layer is lifted, in the face's units.
+ *
+ * @example
+ * ```ts
+ * import { TILE_DEPTH } from "@johnmorrisdotca/jarajara/faces";
+ * console.log(TILE_DEPTH);
+ * ```
+ */
 export const TILE_DEPTH = 5;
 
 /** The steps a block's thickness is drawn in: the first `LIP_STEPS` are the ivory layer, the rest the back plate. */
 const BLOCK_STEPS = 5;
 const LIP_STEPS = 3;
 
-/** The ways a board may be looked at: as it is, turned left to right, turned top to bottom, or both. The rules never see it. */
+/** The ways a board may be looked at: as it is, turned left to right, turned top to bottom, or both. The rules never see it.
+ *
+ * @example
+ * ```ts
+ * import { TILE_MIRRORS } from "@johnmorrisdotca/jarajara/faces";
+ * console.log(TILE_MIRRORS);
+ * ```
+ */
 export const TILE_MIRRORS = ["none", "horizontal", "vertical", "both"] as const;
 
-/** One of the four views. */
+/** One of the four views.
+ *
+ * @example
+ * ```ts
+ * import type { TileMirror } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * const value: TileMirror = "horizontal";
+ * console.log(value);
+ * ```
+ */
 export type TileMirror = (typeof TILE_MIRRORS)[number];
 
-/** Whether a text names a view. */
+/** Whether a text names a view.
+ *
+ * @param text - The unknown text or encoded record to interpret.
+ * @returns Whether a text names a view.
+ * @example
+ * ```ts
+ * import { isTileMirror } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(isTileMirror("both"));
+ * ```
+ */
 export function isTileMirror(text: unknown): text is TileMirror {
   return typeof text === "string" && (TILE_MIRRORS as readonly string[]).includes(text);
 }
@@ -32,15 +65,43 @@ export function isTileMirror(text: unknown): text is TileMirror {
 /**
  * Which way a view lifts the layers and shows the thickness: `x` is 1 when each layer is lifted to the right (and the
  * thickness shows on the left), -1 the other way round; `y` is 1 when it is lifted upward (thickness below), -1 downward.
+ *
+ * @example
+ * ```ts
+ * import type { BlockDirection } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * const value: BlockDirection = {x:1,y:1};
+ * console.log(value);
+ * ```
  */
 export type BlockDirection = { x: 1 | -1; y: 1 | -1 };
 
-/** The direction a view draws in. */
+/** The direction a view draws in.
+ *
+ * @param mirror - The native mirrored tile orientation.
+ * @returns The direction a view draws in.
+ * @example
+ * ```ts
+ * import { directionOf } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(directionOf("horizontal"));
+ * ```
+ */
 export function directionOf(mirror: TileMirror | undefined): BlockDirection {
   return { x: mirror === "horizontal" || mirror === "both" ? -1 : 1, y: mirror === "vertical" || mirror === "both" ? -1 : 1 };
 }
 
-/** The colours a block is drawn in. */
+/** The colours a block is drawn in.
+ *
+ * @example
+ * ```ts
+ * import type { BlockColours } from "@johnmorrisdotca/jarajara/faces";
+ * import { blockColours } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * const value: BlockColours = blockColours();
+ * console.log(value);
+ * ```
+ */
 export type BlockColours = {
   /** The ivory layer's side, and the line between it and the back plate. */
   lip: string;
@@ -60,6 +121,16 @@ export type BlockColours = {
  * The colours of a design's blocks, from its own: the back plate is `colours.body` (the green of most real tiles unless
  * the design says another, or the caller's `body`), the ivory layer a shade of the face, and the seam round the face is the design's `rim` if it
  * stands out from the face, otherwise a line that does: darker on a light face, lighter on a dark one.
+ *
+ * @param design - The optional tile artwork design.
+ * @param body - An optional body-colour override.
+ * @returns The colours of a design's blocks, from its own: the back plate is `colours.body` (the green of most real tiles unless the design says another, or the caller's `body`), the ivory layer a shade of the face, and the seam round the face is the design's `rim` if it stands out from the face, otherwise a line that does: darker on a light face, lighter on a dark one.
+ * @example
+ * ```ts
+ * import { blockColours } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(blockColours());
+ * ```
  */
 export function blockColours(design?: TileDesign, body?: string): BlockColours {
   const colours = design?.colours ?? { face: "#fffdf6", rim: "#b9ad96", side: "#d9c59b", sideEdge: "#a8926a" };
@@ -96,6 +167,17 @@ function slab(dx: number, dy: number, grow: number, attrs: string): string {
 /**
  * The shadow a tile casts on what lies under it: soft, in three widening layers, falling the way the thickness shows and
  * reaching further the higher the tile (`layer` 0 is a tile on the table: a tight contact shadow). Under the block.
+ *
+ * @param colours - The solid tile block’s colours.
+ * @param direction - The horizontal and vertical orientation of the block.
+ * @param layer - The stacked layer number for the shadow.
+ * @returns The shadow a tile casts on what lies under it: soft, in three widening layers, falling the way the thickness shows and reaching further the higher the tile (`layer` 0 is a tile on the table: a tight contact shadow). Under the block.
+ * @example
+ * ```ts
+ * import { blockColours, shadowSvg } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(shadowSvg(blockColours(),{x:1,y:1},0).length);
+ * ```
  */
 export function shadowSvg(colours: BlockColours, direction: BlockDirection, layer: number): string {
   const sx = -direction.x;
@@ -108,6 +190,17 @@ export function shadowSvg(colours: BlockColours, direction: BlockDirection, laye
  * The block drawn behind a face: the back plate and the ivory layer in steps from the far side to the face, and the
  * shading of the sides (the side the light falls on lighter, the other darker). The face is drawn over it by the caller.
  * For a tile seen from its back (`side: "back"`) the back plate is the near layer and the ivory the far one.
+ *
+ * @param colours - The solid tile block’s colours.
+ * @param direction - The horizontal and vertical orientation of the block.
+ * @param side - Whether to show the face or the back.
+ * @returns The block drawn behind a face: the back plate and the ivory layer in steps from the far side to the face, and the shading of the sides (the side the light falls on lighter, the other darker). The face is drawn over it by the caller. For a tile seen from its back (`side: "back"`) the back plate is the near layer and the ivory the far one.
+ * @example
+ * ```ts
+ * import { blockColours, blockSvg } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(blockSvg(blockColours(),{x:1,y:1}).length);
+ * ```
  */
 export function blockSvg(colours: BlockColours, direction: BlockDirection, side: "face" | "back" = "face"): string {
   const sx = -direction.x;
@@ -133,7 +226,17 @@ export function blockSvg(colours: BlockColours, direction: BlockDirection, side:
   return parts.join("");
 }
 
-/** The outline and the raised edge laid over a face, in the face's own units. */
+/** The outline and the raised edge laid over a face, in the face's own units.
+ *
+ * @param colours - The solid tile block’s colours.
+ * @returns The outline and the raised edge laid over a face, in the face's own units.
+ * @example
+ * ```ts
+ * import { blockColours, faceEdgeSvg } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(faceEdgeSvg(blockColours()).length);
+ * ```
+ */
 export function faceEdgeSvg(colours: BlockColours): string {
   return `<rect x="0" y="0" width="30" height="40" rx="3" fill="none" stroke="${colours.seam}" stroke-width="0.9" pointer-events="none"/><rect x="1" y="1" width="28" height="38" rx="2.2" fill="none" stroke="${colours.bevel}" stroke-width="0.7" opacity="0.85" pointer-events="none"/>`;
 }

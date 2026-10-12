@@ -9,23 +9,67 @@
  * Jarajara never makes a sound by itself. A table, or an element given `sound`, asks for one with `play`.
  */
 
-/** Every kind of sound, in the order a game meets them. */
+/** Every kind of sound, in the order a game meets them.
+ *
+ * @example
+ * ```ts
+ * import { TILE_SOUND_KINDS } from "@johnmorrisdotca/jarajara/tile-sounds";
+ * console.log(TILE_SOUND_KINDS);
+ * ```
+ */
 export const TILE_SOUND_KINDS = ["pick", "place", "flip", "pair", "shuffle", "win"] as const;
 
-/** One kind of sound: `pick` a tile lifted, `place` one set down, `flip` one turned over, `pair` two knocked together, `shuffle` the tiles washed, `win` a clatter of tiles. */
+/** One kind of sound: `pick` a tile lifted, `place` one set down, `flip` one turned over, `pair` two knocked together, `shuffle` the tiles washed, `win` a clatter of tiles.
+ *
+ * @example
+ * ```ts
+ * import type { TileSoundKind } from "@johnmorrisdotca/jarajara/tile-sounds";
+ *
+ * const value: TileSoundKind = "pair";
+ * console.log(value);
+ * ```
+ */
 export type TileSoundKind = (typeof TILE_SOUND_KINDS)[number];
 
-/** The recordings, by name (`deal-2`), as base64 AAC. */
+/** The recordings, by name (`deal-2`), as base64 AAC.
+ *
+ * @example
+ * ```ts
+ * import type { TileSoundData } from "@johnmorrisdotca/jarajara/tile-sounds";
+ * import { TILE_SOUND_DATA } from "@johnmorrisdotca/jarajara/sounds";
+ *
+ * const value: TileSoundData = TILE_SOUND_DATA;
+ * console.log(Object.keys(value));
+ * ```
+ */
 export type TileSoundData = Readonly<Record<string, string>>;
 
-/** The parts of a window the sounds use: an audio context and `atob`. Any of them may be missing. */
+/** The parts of a window the sounds use: an audio context and `atob`. Any of them may be missing.
+ *
+ * @example
+ * ```ts
+ * import type { TileSoundWindow } from "@johnmorrisdotca/jarajara/tile-sounds";
+ *
+ * const value: TileSoundWindow = {};
+ * console.log(value);
+ * ```
+ */
 export type TileSoundWindow = {
   AudioContext?: typeof AudioContext;
   webkitAudioContext?: typeof AudioContext;
   atob?: (text: string) => string;
 };
 
-/** How a table's sounds are made. Every field may be left out. */
+/** How a table's sounds are made. Every field may be left out.
+ *
+ * @example
+ * ```ts
+ * import type { TileSoundsOptions } from "@johnmorrisdotca/jarajara/tile-sounds";
+ *
+ * const value: TileSoundsOptions = {muted:true,volume:0.5,window:null};
+ * console.log(value);
+ * ```
+ */
 export type TileSoundsOptions = {
   /** Start muted: nothing plays, and nothing is fetched, until `setMuted(false)`. Unless said, not muted. */
   muted?: boolean;
@@ -37,7 +81,16 @@ export type TileSoundsOptions = {
   window?: TileSoundWindow | null;
 };
 
-/** How one sound is played. */
+/** How one sound is played.
+ *
+ * @example
+ * ```ts
+ * import type { PlayTileSoundOptions } from "@johnmorrisdotca/jarajara/tile-sounds";
+ *
+ * const value: PlayTileSoundOptions = {count:3,gap:100,delay:0};
+ * console.log(value);
+ * ```
+ */
 export type PlayTileSoundOptions = {
   /** How many tiles: `place` with 13 is thirteen tiles set down one after another (heard as at most `MOST_SOUNDS_AT_ONCE`). Unless said, one. */
   count?: number;
@@ -47,7 +100,18 @@ export type PlayTileSoundOptions = {
   delay?: number;
 };
 
-/** A table's sounds: `play` one, mute and unmute, change the volume, `close` when the table goes. */
+/** A table's sounds: `play` one, mute and unmute, change the volume, `close` when the table goes.
+ *
+ * @example
+ * ```ts
+ * import type { TileSounds } from "@johnmorrisdotca/jarajara/tile-sounds";
+ * import { createTileSounds } from "@johnmorrisdotca/jarajara/tile-sounds";
+ *
+ * const value: TileSounds = createTileSounds({muted:true,window:null});
+ * console.log(value.muted);
+ * value.close();
+ * ```
+ */
 export type TileSounds = {
   /** Play a sound, or several of one kind in a row; nothing while muted or closed. */
   play(kind: TileSoundKind, options?: PlayTileSoundOptions): void;
@@ -63,10 +127,28 @@ export type TileSounds = {
   close(): void;
 };
 
-/** As many sounds as one call plays: thirteen tiles set down are eight clicks, not a wall of noise. */
+/** As many sounds as one call plays: thirteen tiles set down are eight clicks, not a wall of noise.
+ *
+ * @example
+ * ```ts
+ * import { MOST_SOUNDS_AT_ONCE } from "@johnmorrisdotca/jarajara/tile-sounds";
+ * console.log(MOST_SOUNDS_AT_ONCE);
+ * ```
+ */
 export const MOST_SOUNDS_AT_ONCE = 8;
 
-/** When each of `count` sounds starts, in milliseconds from the first: one every `gap`, and no more than `MOST_SOUNDS_AT_ONCE`, spread over the same time. */
+/** When each of `count` sounds starts, in milliseconds from the first: one every `gap`, and no more than `MOST_SOUNDS_AT_ONCE`, spread over the same time.
+ *
+ * @param count - The number of rack tiles or sounds requested.
+ * @param gap - The delay or spacing between successive sounds.
+ * @returns When each of `count` sounds starts, in milliseconds from the first: one every `gap`, and no more than `MOST_SOUNDS_AT_ONCE`, spread over the same time.
+ * @example
+ * ```ts
+ * import { soundTimes } from "@johnmorrisdotca/jarajara/tile-sounds";
+ *
+ * console.log(soundTimes(3,100));
+ * ```
+ */
 export function soundTimes(count: number, gap = 85): number[] {
   const whole = Math.max(1, Math.floor(Number.isFinite(count) ? count : 1));
   const span = (whole - 1) * Math.max(0, gap);
@@ -110,7 +192,19 @@ const RUNS: Partial<Record<TileSoundKind, { count: number; gap: number; rate: (a
   win: { count: 6, gap: 90, rate: (at) => 0.9 + at * 0.1 },
 };
 
-/** A table's tile sounds. Nothing is fetched and no audio context is made until the first sound. */
+/** A table's tile sounds. Nothing is fetched and no audio context is made until the first sound.
+ *
+ * @param options - Native game, SVG, sound or presentation options.
+ * @returns A table's tile sounds. Nothing is fetched and no audio context is made until the first sound.
+ * @example
+ * ```ts
+ * import { createTileSounds } from "@johnmorrisdotca/jarajara/tile-sounds";
+ *
+ * const sounds = createTileSounds({muted:true,window:null});
+ * console.log(sounds.muted,sounds.volume);
+ * sounds.close();
+ * ```
+ */
 export function createTileSounds(options: TileSoundsOptions = {}): TileSounds {
   const win: TileSoundWindow | undefined = options.window === null ? undefined : (options.window ?? (typeof window === "undefined" ? undefined : (window as unknown as TileSoundWindow)));
   const load = options.load ?? ((): Promise<{ TILE_SOUND_DATA: TileSoundData }> => import("../sounds.ts"));

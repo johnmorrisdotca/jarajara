@@ -23,6 +23,16 @@ import { blockHtml, blockVars, BLOCK_STYLE, BOX_UNITS, codeOf, designNamed, Elem
  *
  * Each turn is a `jarajara-flip` event that bubbles, with `{ code, faceDown }` as its detail. `spin(options?)`
  * spins it where it lies, slowing to a stop as it was.
+ *
+ * @example
+ * ```ts no-run
+ * import "@johnmorrisdotca/jarajara/element/define";
+ * import { JarajaraTile } from "@johnmorrisdotca/jarajara/element";
+ * const tile = document.createElement("jarajara-tile") as JarajaraTile;
+ * tile.setAttribute("code","a");
+ * document.body.append(tile);
+ * console.log(tile.tagName);
+ * ```
  */
 export class JarajaraTile extends ElementBase {
   static get observedAttributes(): readonly string[] {

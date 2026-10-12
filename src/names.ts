@@ -7,7 +7,16 @@ import type { MahjongFace, MahjongSuit } from "./types.ts";
  * riichi players write hands in (`3p`, `1z`), back into the face. Pure text, no drawing, so a server can use it.
  */
 
-/** The two languages a tile is named in. */
+/** The two languages a tile is named in.
+ *
+ * @example
+ * ```ts
+ * import type { TileLanguage } from "@johnmorrisdotca/jarajara";
+ *
+ * const value: TileLanguage = "ja";
+ * console.log(value);
+ * ```
+ */
 export type TileLanguage = "en" | "ja";
 
 const WIND_NAMES = ["east", "south", "west", "north"] as const;
@@ -21,7 +30,19 @@ const DRAGON_KANJI = ["中", "發", "白"] as const;
 const FLOWER_KANJI = ["梅", "蘭", "菊", "竹"] as const;
 const SEASON_KANJI = ["春", "夏", "秋", "冬"] as const;
 
-/** What a face is called, in English: "3 of characters", "east wind", "red dragon", "plum (flower)". */
+/** What a face is called, in English: "3 of characters", "east wind", "red dragon", "plum (flower)".
+ *
+ * @param face - The decoded suit and rank of one tile face.
+ * @returns What a face is called, in English: "3 of characters", "east wind", "red dragon", "plum (flower)".
+ * @example
+ * ```ts
+ * import { faceOf } from "@johnmorrisdotca/jarajara";
+ * import { faceWords } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * const face = faceOf("a")!;
+ * console.log(faceWords(face));
+ * ```
+ */
 export function faceWords(face: MahjongFace): string {
   switch (face.suit) {
     case "characters":
@@ -39,7 +60,18 @@ export function faceWords(face: MahjongFace): string {
   }
 }
 
-/** What a face is called in Japanese: 三萬, 五筒, 七索, 東, 中, 梅, 春. */
+/** What a face is called in Japanese: 三萬, 五筒, 七索, 東, 中, 梅, 春.
+ *
+ * @param face - The decoded suit and rank of one tile face.
+ * @returns What a face is called in Japanese: 三萬, 五筒, 七索, 東, 中, 梅, 春.
+ * @example
+ * ```ts
+ * import { faceOf, faceWordsJa } from "@johnmorrisdotca/jarajara";
+ *
+ * const face = faceOf("a")!;
+ * console.log(faceWordsJa(face));
+ * ```
+ */
 export function faceWordsJa(face: MahjongFace): string {
   switch (face.suit) {
     case "characters":
@@ -57,14 +89,32 @@ export function faceWordsJa(face: MahjongFace): string {
   }
 }
 
-/** A tile's name in a language, from its code; the code itself for a letter that is no face. */
+/** A tile's name in a language, from its code; the code itself for a letter that is no face.
+ *
+ * @param code - The one-character face code or tile identifier.
+ * @param language - The English or Japanese display language.
+ * @returns A tile's name in a language, from its code; the code itself for a letter that is no face.
+ * @example
+ * ```ts
+ * import { tileName } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(tileName("F","ja"));
+ * ```
+ */
 export function tileName(code: string, language: TileLanguage = "en"): string {
   const face = faceOf(code);
   if (face === null) return code;
   return language === "ja" ? faceWordsJa(face) : faceWords(face);
 }
 
-/** What a suit or group is called, in English and in Japanese. */
+/** What a suit or group is called, in English and in Japanese.
+ *
+ * @example
+ * ```ts
+ * import { SUIT_WORDS } from "@johnmorrisdotca/jarajara";
+ * console.log(SUIT_WORDS);
+ * ```
+ */
 export const SUIT_WORDS: Readonly<Record<MahjongSuit, { en: string; ja: string }>> = {
   characters: { en: "Characters", ja: "萬子" },
   circles: { en: "Circles", ja: "筒子" },
@@ -79,20 +129,55 @@ export const SUIT_WORDS: Readonly<Record<MahjongSuit, { en: string; ja: string }
  * THE GROUPS A SET FALLS INTO, for a viewer: each suit, and the bigger families people name them by: `honours`
  * (winds and dragons), `bonus` (flowers and seasons), the `numbers` (the three suits), and the `terminals` (the
  * ones and nines) and `simples` (two to eight) a hand is judged by.
+ *
+ * @example
+ * ```ts
+ * import { TILE_GROUPS } from "@johnmorrisdotca/jarajara";
+ * console.log(TILE_GROUPS);
+ * ```
  */
 export const TILE_GROUPS = ["characters", "circles", "bamboo", "winds", "dragons", "flowers", "seasons", "numbers", "honours", "bonus", "terminals", "simples"] as const;
 
-/** A group's name. */
+/** A group's name.
+ *
+ * @example
+ * ```ts
+ * import type { TileGroup } from "@johnmorrisdotca/jarajara";
+ *
+ * const value: TileGroup = "dragons";
+ * console.log(value);
+ * ```
+ */
 export type TileGroup = (typeof TILE_GROUPS)[number];
 
 const NUMBER_SUITS: readonly MahjongSuit[] = ["characters", "circles", "bamboo"];
 
-/** Whether a text names a group. */
+/** Whether a text names a group.
+ *
+ * @param text - The unknown text or encoded record to interpret.
+ * @returns Whether a text names a group.
+ * @example
+ * ```ts
+ * import { isTileGroup } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(isTileGroup("dragons"));
+ * ```
+ */
 export function isTileGroup(text: unknown): text is TileGroup {
   return typeof text === "string" && (TILE_GROUPS as readonly string[]).includes(text);
 }
 
-/** The faces of a group, in the set's order. */
+/** The faces of a group, in the set's order.
+ *
+ * @param group - The native tile group identifier.
+ * @returns The faces of a group, in the set's order.
+ * @example
+ * ```ts
+ * import { groupFaces } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(groupFaces("dragons"));
+ * ```
+ */
 export function groupFaces(group: TileGroup): MahjongFace[] {
   switch (group) {
     case "numbers":
@@ -110,7 +195,18 @@ export function groupFaces(group: TileGroup): MahjongFace[] {
   }
 }
 
-/** What a group is called, in English and in Japanese. */
+/** What a group is called, in English and in Japanese.
+ *
+ * @param group - The native tile group identifier.
+ * @param language - The English or Japanese display language.
+ * @returns What a group is called, in English and in Japanese.
+ * @example
+ * ```ts
+ * import { groupWords } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(groupWords("dragons","ja"));
+ * ```
+ */
 export function groupWords(group: TileGroup, language: TileLanguage = "en"): string {
   const words: Record<string, { en: string; ja: string }> = {
     ...SUIT_WORDS,
@@ -123,19 +219,48 @@ export function groupWords(group: TileGroup, language: TileLanguage = "en"): str
   return words[group]![language];
 }
 
-/** How many of a face the set holds: four of every ordinary face, one of each flower and season. */
+/** How many of a face the set holds: four of every ordinary face, one of each flower and season.
+ *
+ * @param code - The one-character face code or tile identifier.
+ * @returns How many of a face the set holds: four of every ordinary face, one of each flower and season.
+ * @example
+ * ```ts
+ * import { copiesOf } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(copiesOf("I"));
+ * ```
+ */
 export function copiesOf(code: string): number {
   const face = faceOf(code);
   if (face === null) return 0;
   return face.suit === "flowers" || face.suit === "seasons" ? 1 : 4;
 }
 
-/** The whole set as an inventory: each of the 42 faces and how many of it the 144 tiles hold. */
+/** The whole set as an inventory: each of the 42 faces and how many of it the 144 tiles hold.
+ *
+ * @returns The whole set as an inventory: each of the 42 faces and how many of it the 144 tiles hold.
+ * @example
+ * ```ts
+ * import { setInventory } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(setInventory().reduce((n,row)=>n+row.copies,0));
+ * ```
+ */
 export function setInventory(): { face: MahjongFace; copies: number }[] {
   return MAHJONG_FACES.map((face) => ({ face, copies: copiesOf(face.code) }));
 }
 
-/** How many of each face a list of tiles holds, by code; faces it holds none of are left out. */
+/** How many of each face a list of tiles holds, by code; faces it holds none of are left out.
+ *
+ * @param codes - The tile face codes in current order.
+ * @returns How many of each face a list of tiles holds, by code; faces it holds none of are left out.
+ * @example
+ * ```ts
+ * import { countTiles } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log([...countTiles(["a","a","b"])]);
+ * ```
+ */
 export function countTiles(codes: Iterable<string>): Map<string, number> {
   const counts = new Map<string, number>();
   for (const code of codes) if (isFaceCode(code)) counts.set(code, (counts.get(code) ?? 0) + 1);
@@ -186,6 +311,15 @@ function rankIn(token: string): number | null {
  * a number and a suit letter: `3m` characters, `3p` circles, `3s` bamboo, `1z`–`4z` the winds and `5z`–`7z` white,
  * green and red (the riichi order), plus `1f` and `1t` for the flowers and seasons, which are Jarajara's own.
  * `0m`, `0p` and `0s` are the red fives, which are fives here.
+ *
+ * @param text - The unknown text or encoded record to interpret.
+ * @returns The tile a text names, or null. It takes a face's code (`F`, case matters: one letter is a code); its English name in any usual spelling ("3 of circles", "circles 3", "three circles", "east wind", "plum", "red dragon"); its Japanese name (三筒, 東, 中) or the readings players use (`ton`, `haku`); and the notation hands are written in, a number and a suit letter: `3m` characters, `3p` circles, `3s` bamboo, `1z`–`4z` the winds and `5z`–`7z` white, green and red (the riichi order), plus `1f` and `1t` for the flowers and seasons, which are Jarajara's own. `0m`, `0p` and `0s` are the red fives, which are fives here.
+ * @example
+ * ```ts
+ * import { findFace } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(findFace("red dragon"));
+ * ```
  */
 export function findFace(text: string): MahjongFace | null {
   if (typeof text !== "string") return null;
@@ -219,7 +353,17 @@ export function findFace(text: string): MahjongFace | null {
   return null;
 }
 
-/** Every tile a text names: the one face `findFace` finds, or, for the name of a group (`winds`, `honours`, `circles`), all of its faces. */
+/** Every tile a text names: the one face `findFace` finds, or, for the name of a group (`winds`, `honours`, `circles`), all of its faces.
+ *
+ * @param text - The unknown text or encoded record to interpret.
+ * @returns Every tile a text names: the one face `findFace` finds, or, for the name of a group (`winds`, `honours`, `circles`), all of its faces.
+ * @example
+ * ```ts
+ * import { findFaces } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(findFaces("dragons"));
+ * ```
+ */
 export function findFaces(text: string): MahjongFace[] {
   const one = findFace(text);
   if (one !== null) return [one];
@@ -252,6 +396,15 @@ const NOTATION_OF = (face: MahjongFace): { suit: string; rank: number } => {
 /**
  * Tiles written the way hands are: digits then a suit letter, `123m456p789s1112z`. Runs of one suit share its
  * letter. Anything that is no tile is left out. `readNotation` is its inverse.
+ *
+ * @param codes - The tile face codes in current order.
+ * @returns Tiles written the way hands are: digits then a suit letter, `123m456p789s1112z`. Runs of one suit share its letter. Anything that is no tile is left out. `readNotation` is its inverse.
+ * @example
+ * ```ts
+ * import { writeNotation } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(writeNotation(["a","b","c"]));
+ * ```
  */
 export function writeNotation(codes: Iterable<string>): string {
   let out = "";
@@ -271,12 +424,32 @@ export function writeNotation(codes: Iterable<string>): string {
   return out + (digits === "" ? "" : digits + suit);
 }
 
-/** Whether a text is written as hand notation, `123m456p`: nothing but digit runs each closed by a suit letter. */
+/** Whether a text is written as hand notation, `123m456p`: nothing but digit runs each closed by a suit letter.
+ *
+ * @param text - The unknown text or encoded record to interpret.
+ * @returns Whether a text is written as hand notation, `123m456p`: nothing but digit runs each closed by a suit letter.
+ * @example
+ * ```ts
+ * import { isNotation } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(isNotation("123m"));
+ * ```
+ */
 export function isNotation(text: string): boolean {
   return /^(?:[0-9]+[mpszft])+$/i.test(text.trim());
 }
 
-/** The tiles a hand's notation writes, as codes in the order written; null when the text is not notation or names a tile there is not (`8z`). */
+/** The tiles a hand's notation writes, as codes in the order written; null when the text is not notation or names a tile there is not (`8z`).
+ *
+ * @param text - The unknown text or encoded record to interpret.
+ * @returns The tiles a hand's notation writes, as codes in the order written; null when the text is not notation or names a tile there is not (`8z`).
+ * @example
+ * ```ts
+ * import { readNotation } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(readNotation("123m456p"));
+ * ```
+ */
 export function readNotation(text: string): string[] | null {
   const trimmed = text.trim().toLowerCase();
   if (!isNotation(trimmed)) return null;
@@ -296,6 +469,15 @@ export function readNotation(text: string): string[] | null {
  * run of one-letter codes (`abcF`), and hand notation (`123m456p`) is read as it is written. Words that are no
  * tile are dropped, and so is `.`, the empty slot. A bare word that is a name wins over its letters, so `east` is the
  * east wind and not four tiles.
+ *
+ * @param text - The unknown text or encoded record to interpret.
+ * @returns A LIST OF TILES AS TEXT, read the forgiving way: each word is a tile's name (`east`, `red-dragon`, `3p`) or a run of one-letter codes (`abcF`), and hand notation (`123m456p`) is read as it is written. Words that are no tile are dropped, and so is `.`, the empty slot. A bare word that is a name wins over its letters, so `east` is the east wind and not four tiles.
+ * @example
+ * ```ts
+ * import { readTiles } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(readTiles("123m456p"));
+ * ```
  */
 export function readTiles(text: string | null | undefined): string[] {
   if (typeof text !== "string") return [];
@@ -318,7 +500,17 @@ export function readTiles(text: string | null | undefined): string[] {
   return out;
 }
 
-/** Tiles as their one-letter codes run together, `abcF`: what `readTiles` reads and a layout's cells are written in. */
+/** Tiles as their one-letter codes run together, `abcF`: what `readTiles` reads and a layout's cells are written in.
+ *
+ * @param codes - The tile face codes in current order.
+ * @returns Tiles as their one-letter codes run together, `abcF`: what `readTiles` reads and a layout's cells are written in.
+ * @example
+ * ```ts
+ * import { writeTiles } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(writeTiles(["a","b","c"]));
+ * ```
+ */
 export function writeTiles(codes: Iterable<string>): string {
   return [...codes].filter(isFaceCode).join("");
 }

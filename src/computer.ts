@@ -31,7 +31,22 @@ function bestAfter(geometry: MahjongGeometry, cells: string, rule: MahjongBonusR
   return best;
 }
 
-/** The pair a computer in the seat to move takes, or null when there is nothing to take. */
+/** The pair a computer in the seat to move takes, or null when there is nothing to take.
+ *
+ * @param table - The shared native table and its recorded pair takes.
+ * @param state - A previously replayed native table state, or null to read it again.
+ * @returns The pair a computer in the seat to move takes, or null when there is nothing to take.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { computerPair, readTable, startTable } from "@johnmorrisdotca/jarajara/table";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const table = startTable(deal,[{name:"Seat 1"},{name:"Seat 2"}]);
+ * const state = readTable(table)!;
+ * console.log(computerPair(table,state));
+ * ```
+ */
 export function computerPair(table: AwaseTable, state: AwaseTableState | null = readTable(table)): [number, number] | null {
   const layout = layoutFor(table.size);
   if (layout === null || state === null || state.over) return null;

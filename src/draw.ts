@@ -23,10 +23,32 @@ export { TILE_DEPTH };
  * view only: a tile's `data-slot` is still its slot in the layout, so freeness, moves and saved games do not change.
  */
 
-/** The marks a page may put on tiles: the one chosen, ones hinted, the matches Find lights, and a wash over the blocked. */
+/** The marks a page may put on tiles: the one chosen, ones hinted, the matches Find lights, and a wash over the blocked.
+ *
+ * @example
+ * ```ts
+ * import { TILE_MARKS } from "@johnmorrisdotca/jarajara/faces";
+ * console.log(TILE_MARKS);
+ * ```
+ */
 export const TILE_MARKS = { chosen: "#dbe8d3", chosenRing: "#52664b", hinted: "#9d6c1f", blockedWash: "rgba(34, 35, 31, 0.26)", shadow: "#2a1d0e", gold: "#d4a017", found: "#1c6e8c" } as const;
 
-/** Where a slot's tile face is drawn, raised by its layer along the thickness's direction. With a view that turns the board (`mirror`) the layout's `width` and `height` in half-tiles are needed too. */
+/** Where a slot's tile face is drawn, raised by its layer along the thickness's direction. With a view that turns the board (`mirror`) the layout's `width` and `height` in half-tiles are needed too.
+ *
+ * @param slot - The zero-based slot index or slot coordinates specified by this signature.
+ * @param layers - The total number of stacked layers.
+ * @param mirror - The native mirrored tile orientation.
+ * @param extent - The complete layout width and height.
+ * @returns Where a slot's tile face is drawn, raised by its layer along the thickness's direction. With a view that turns the board (`mirror`) the layout's `width` and `height` in half-tiles are needed too.
+ * @example
+ * ```ts
+ * import { layoutExtent, layoutFor } from "@johnmorrisdotca/jarajara";
+ * import { tileAt } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * const layout = layoutFor(4)!;
+ * console.log(tileAt(layout.slots[0],layoutExtent(layout).layers));
+ * ```
+ */
 export function tileAt(slot: MahjongSlot, layers: number, mirror: TileMirror = "none", extent?: { width: number; height: number }): { x: number; y: number } {
   const direction = directionOf(extent === undefined ? "none" : mirror);
   const across = direction.x < 0 ? (extent as { width: number }).width - 2 - slot.x : slot.x;
@@ -37,7 +59,17 @@ export function tileAt(slot: MahjongSlot, layers: number, mirror: TileMirror = "
   };
 }
 
-/** The drawing's width and height for a layout's size, room left for the thickness and the layers. Null for a size with no layout. The same in every view. */
+/** The drawing's width and height for a layout's size, room left for the thickness and the layers. Null for a size with no layout. The same in every view.
+ *
+ * @param size - The native layout size identifier, measured in tiles across.
+ * @returns The drawing's width and height for a layout's size, room left for the thickness and the layers. null for a size with no layout. The same in every view.
+ * @example
+ * ```ts
+ * import { layoutBox } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(layoutBox(4));
+ * ```
+ */
 export function layoutBox(size: number): { width: number; height: number } | null {
   const layout = layoutFor(size);
   if (layout === null) return null;
@@ -45,7 +77,17 @@ export function layoutBox(size: number): { width: number; height: number } | nul
   return { width: (width * TILE_SIZE.width) / 2 + (layers + 1) * TILE_DEPTH, height: (height * TILE_SIZE.height) / 2 + (layers + 1) * TILE_DEPTH };
 }
 
-/** The drawing's viewBox: where it starts and how large it is, in the face's units. */
+/** The drawing's viewBox: where it starts and how large it is, in the face's units.
+ *
+ * @example
+ * ```ts
+ * import type { LayoutFrame } from "@johnmorrisdotca/jarajara/faces";
+ * import { layoutFrame } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * const value: LayoutFrame = layoutFrame(4)!;
+ * console.log(value);
+ * ```
+ */
 export type LayoutFrame = { x: number; y: number; width: number; height: number };
 
 /**
@@ -56,6 +98,16 @@ export type LayoutFrame = { x: number; y: number; width: number; height: number 
  * tiles off centre by its reach; it spills into the margin instead, which is why a frame wants a margin of at least a few
  * units. Taken tiles do not change the box: it is the layout's, so a game keeps one steady frame. `margin` defaults to 0.
  * Null for a size with no layout.
+ *
+ * @param size - The native layout size identifier, measured in tiles across.
+ * @param options - Native game, SVG, sound or presentation options.
+ * @returns The drawn tile bounds plus margin, or null for an unsupported layout size.
+ * @example
+ * ```ts
+ * import { layoutFrame } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * console.log(layoutFrame(4,{margin:10}));
+ * ```
  */
 export function layoutFrame(size: number, options: { mirror?: TileMirror | string; margin?: number; shadow?: boolean } = {}): LayoutFrame | null {
   const layout = layoutFor(size);
@@ -87,6 +139,16 @@ export function layoutFrame(size: number, options: { mirror?: TileMirror | strin
   return { x: round(x0 - margin), y: round(y0 - margin), width: round(x1 - x0 + 2 * margin), height: round(y1 - y0 + 2 * margin) };
 }
 
+/** Native tile, highlight, artwork, cloth and layout-view choices for SVG rendering.
+ *
+ * @example
+ * ```ts
+ * import type { LayoutSvgOptions } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * const value: LayoutSvgOptions = {showFree:true,cloth:"green"};
+ * console.log(value);
+ * ```
+ */
 export type LayoutSvgOptions = {
   /** The slot chosen, ringed and tinted. */
   chosen?: number | null;
@@ -126,6 +188,20 @@ const CLOTH_MARGIN = TILE_DEPTH * 3;
 /**
  * The whole layout as one `<svg>`, the tiles in `cells` where they lie (a face letter a slot, "." for one taken). Null
  * for a size with no layout or cells of the wrong length.
+ *
+ * @param size - The native layout size identifier, measured in tiles across.
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @param options - Native game, SVG, sound or presentation options.
+ * @returns The whole layout as one `<svg>`, the tiles in `cells` where they lie (a face letter a slot, "." for one taken). null for a size with no layout or cells of the wrong length.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { layoutSvg } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const cells = deal.givens;
+ * console.log(layoutSvg(4,cells)?.startsWith("<svg"));
+ * ```
  */
 export function layoutSvg(size: number, cells: string, options: LayoutSvgOptions = {}): string | null {
   const layout = layoutFor(size);

@@ -15,10 +15,29 @@ import { bonusRuleOf, isFaceCode, pairPoints } from "../tiles.ts";
 import type { AwaseLevel, MahjongBonusRule, MahjongLayout } from "../types.ts";
 import { boxOf, CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, playSound, reflectMethod, say, wearCloth, FRAME_MARGIN, FRAME_STYLE } from "./elementKit.ts";
 
-/** How many of a thing a game allows: a number, or no limit at all. */
+/** How many of a thing a game allows: a number, or no limit at all.
+ *
+ * @example
+ * ```ts
+ * import type { Allowance } from "@johnmorrisdotca/jarajara/element";
+ *
+ * const value: Allowance = null;
+ * console.log(value);
+ * ```
+ */
 export type Allowance = number | null;
 
-/** Read an allowance from an attribute: nothing or `unlimited` is no limit, `off` or `0` is none, a number is that many. */
+/** Read an allowance from an attribute: nothing or `unlimited` is no limit, `off` or `0` is none, a number is that many.
+ *
+ * @param text - The unknown text or encoded record to interpret.
+ * @returns Read an allowance from an attribute: nothing or `unlimited` is no limit, `off` or `0` is none, a number is that many.
+ * @example
+ * ```ts
+ * import { allowanceOf } from "@johnmorrisdotca/jarajara/element";
+ *
+ * console.log(allowanceOf("3"));
+ * ```
+ */
 export function allowanceOf(text: string | null): Allowance {
   if (text === null || text.trim() === "" || /^(unlimited|any|many)$/i.test(text.trim())) return null;
   if (/^(off|no|none|false)$/i.test(text.trim())) return 0;
@@ -28,7 +47,24 @@ export function allowanceOf(text: string | null): Allowance {
 
 const LEVELS: readonly AwaseLevel[] = ["easy", "medium", "hard"];
 
-/** What a hint is: the free pair that leaves the stacks lowest after it, so a hint never digs a tile deeper than it must. */
+/** What a hint is: the free pair that leaves the stacks lowest after it, so a hint never digs a tile deeper than it must.
+ *
+ * @param layout - The native stacked tile positions.
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @param rule - Grouped or identical bonus matching.
+ * @returns The preferred legal free pair, or null when no matching free pair exists.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { layoutFor } from "@johnmorrisdotca/jarajara";
+ * import { hintPair } from "@johnmorrisdotca/jarajara/element";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const cells = deal.givens;
+ * console.log(hintPair(layout,cells,"group"));
+ * ```
+ */
 export function hintPair(layout: MahjongLayout, cells: string, rule: MahjongBonusRule): [number, number] | null {
   const pairs = freePairs(geometryOf(layout), cells, rule);
   let best: [number, number] | null = null;
@@ -86,6 +122,17 @@ function clockOf(ms: number): string {
  * `moves` (as `encodeMoves` writes them), `tilesLeft`, `score` and `run`, the game as an `AwaseRun`. Events, all bubbling: `jarajara-take` (`{ pair, codes, tilesLeft }`),
  * `jarajara-shuffle`, `jarajara-stuck`, `jarajara-clear` (`{ moves, seconds, score }`, a game won), `jarajara-lost` (`{ because }`: `time` or `stuck`), `jarajara-hint`, `jarajara-undo` and `jarajara-deal`
  * (`{ size, level, seed }`, a deal made, which a page that keeps the game listens for).
+ *
+ * @example
+ * ```ts no-run
+ * import "@johnmorrisdotca/jarajara/element/define";
+ * import { JarajaraLayout } from "@johnmorrisdotca/jarajara/element";
+ * const tile = document.createElement("jarajara-layout") as JarajaraLayout;
+ * tile.setAttribute("size","4");
+ * tile.setAttribute("seed","2026");
+ * document.body.append(tile);
+ * console.log(tile.tagName);
+ * ```
  */
 export class JarajaraLayout extends ElementBase {
   static get observedAttributes(): readonly string[] {

@@ -36,7 +36,19 @@ export function designNamed(name: string | null): { design: TileDesign | null; r
   return { design: null, ready: loadingDesigns.get(name) as Promise<TileDesign | null> };
 }
 
-/** The language an element speaks: its own `lang`, or the nearest one above it, or the page's; Japanese for anything that starts `ja`. */
+/** The language an element speaks: its own `lang`, or the nearest one above it, or the page's; Japanese for anything that starts `ja`.
+ *
+ * @param element - The DOM element whose language is read.
+ * @returns The language an element speaks: its own `lang`, or the nearest one above it, or the page's; Japanese for anything that starts `ja`.
+ * @example
+ * ```ts no-run
+ * import { languageOf } from "@johnmorrisdotca/jarajara/element";
+ *
+ * const tile = document.createElement("div");
+ * tile.lang = "ja";
+ * console.log(languageOf(tile));
+ * ```
+ */
 export function languageOf(element: Element): TileLanguage {
   const tag = element.closest("[lang]")?.getAttribute("lang") ?? (typeof document === "undefined" ? "" : document.documentElement.lang);
   return String(tag).toLowerCase().startsWith("ja") ? "ja" : "en";
@@ -52,7 +64,14 @@ export function codeOf(text: string | null): string | null {
   return text === null ? null : (findFace(text)?.code ?? null);
 }
 
-/** The sizes every element takes, as a tile's width in pixels. */
+/** The sizes every element takes, as a tile's width in pixels.
+ *
+ * @example
+ * ```ts
+ * import { ELEMENT_SIZES } from "@johnmorrisdotca/jarajara/element";
+ * console.log(ELEMENT_SIZES);
+ * ```
+ */
 export const ELEMENT_SIZES = { small: 32, medium: 48, large: 72 } as const;
 
 /** An element's tile width in CSS: its `width` in pixels, or its `size`, or the page's `--jarajara-tile-width`, or medium. */
@@ -101,6 +120,17 @@ let listening: MutationObserver | null = null;
 /**
  * Redraw an element when the page changes its language (`<html lang>`), as a language chooser does, until the function
  * returned is called. One watcher serves every element on the page.
+ *
+ * @param redraw - The callback invoked when the page language changes.
+ * @returns Redraw an element when the page changes its language (`<html lang>`), as a language chooser does, until the function returned is called. One watcher serves every element on the page.
+ * @example
+ * ```ts
+ * import { followLanguage } from "@johnmorrisdotca/jarajara/element";
+ *
+ * const stop = followLanguage(()=>console.log("Language changed"));
+ * stop();
+ * console.log("Listener removed");
+ * ```
  */
 export function followLanguage(redraw: () => void): () => void {
   speakers.add(redraw);
@@ -197,7 +227,16 @@ export function markerHtml(marked: boolean): string {
 /** The mark's look, for every element that draws one. */
 export const MARKER_STYLE = `.marker { position: absolute; left: 9%; top: -3%; width: 24%; aspect-ratio: 1; border-radius: 50%; background: var(--jarajara-marker, #f2b134); box-shadow: 0 0 0 2px #fff, 0 1px 3px rgba(0,0,0,.45); pointer-events: none; }`;
 
-/** How a tile is spun. */
+/** How a tile is spun.
+ *
+ * @example
+ * ```ts
+ * import type { SpinOptions } from "@johnmorrisdotca/jarajara/element";
+ *
+ * const value: SpinOptions = {direction:"clockwise",turns:1,ms:300};
+ * console.log(value);
+ * ```
+ */
 export type SpinOptions = {
   /** Which way it spins. Unless said, clockwise. */
   direction?: "clockwise" | "anticlockwise";
@@ -288,6 +327,19 @@ export function pageSounds(): TileSounds {
 /**
  * Give every element on the page another player for its sounds: a page's own, or a test's stand-in that only records
  * what was asked. Pass `null` to go back to the package's own, made again when next needed.
+ *
+ * @param next - The page sound handle, or null to clear and close it.
+ * @returns Give every element on the page another player for its sounds: a page's own, or a test's stand-in that only records what was asked. Pass `null` to go back to the package's own, made again when next needed.
+ * @example
+ * ```ts
+ * import { createTileSounds } from "@johnmorrisdotca/jarajara/tile-sounds";
+ * import { setPageSounds } from "@johnmorrisdotca/jarajara/element";
+ *
+ * const sounds = createTileSounds({muted:true,window:null});
+ * setPageSounds(sounds);
+ * setPageSounds(null);
+ * console.log(sounds.muted);
+ * ```
  */
 export function setPageSounds(next: TileSounds | null): void {
   if (next === null) sounds?.close();
@@ -298,7 +350,14 @@ export function setPageSounds(next: TileSounds | null): void {
 /** The sounds begun and when each was due to end, so that a burst of changes cannot stack into a roar. */
 const playing: { until: number; heard: number }[] = [];
 
-/** The most clicks sounding at one moment, across every element on the page. */
+/** The most clicks sounding at one moment, across every element on the page.
+ *
+ * @example
+ * ```ts
+ * import { MOST_SOUNDING } from "@johnmorrisdotca/jarajara/element";
+ * console.log(MOST_SOUNDING);
+ * ```
+ */
 export const MOST_SOUNDING = 12;
 
 /** How long a sound is heard for after it starts, in milliseconds, on top of the spacing of a run of them. */

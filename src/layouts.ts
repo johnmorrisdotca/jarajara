@@ -124,6 +124,14 @@ const TURTLE: MahjongSlot[] = [
  */
 const TINY: MahjongSlot[] = [...row(0, 0, 0, 6), ...row(1, 0, 1, 5), ...at(2, 0, 3)];
 
+/** The built-in native layouts in supported size order.
+ *
+ * @example
+ * ```ts
+ * import { MAHJONG_LAYOUTS } from "@johnmorrisdotca/jarajara";
+ * console.log(MAHJONG_LAYOUTS.map(layout=>[layout.size,layout.key,layout.slots.length]));
+ * ```
+ */
 export const MAHJONG_LAYOUTS: readonly MahjongLayout[] = [
   { size: 4, key: "tiny", slots: inOrder(TINY) },
   { size: 8, key: "torii", slots: inOrder(TORII) },
@@ -135,15 +143,42 @@ export const MAHJONG_LAYOUTS: readonly MahjongLayout[] = [
 /**
  * Every layout there is: the five above, which itsutsu.com's kept games are made on and which never change, then Jarajara's
  * own more (`layouts-more.ts`), each of a width none of the others has.
+ *
+ * @example
+ * ```ts
+ * import { ALL_LAYOUTS } from "@johnmorrisdotca/jarajara";
+ * console.log(ALL_LAYOUTS);
+ * ```
  */
 export const ALL_LAYOUTS: readonly MahjongLayout[] = [...MAHJONG_LAYOUTS, ...MORE_LAYOUTS, ...MEGA_LAYOUTS];
 
-/** The layout a size names, or null for one there is not. */
+/** The layout a size names, or null for one there is not.
+ *
+ * @param size - The native layout size identifier, measured in tiles across.
+ * @returns The layout a size names, or null for one there is not.
+ * @example
+ * ```ts
+ * import { layoutFor } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(layoutFor(4)?.key);
+ * ```
+ */
 export function layoutFor(size: number): MahjongLayout | null {
   return ALL_LAYOUTS.find((layout) => layout.size === size) ?? null;
 }
 
-/** The layout's extent in half units: how far right and down its tiles reach, and how many layers. */
+/** The layout's extent in half units: how far right and down its tiles reach, and how many layers.
+ *
+ * @param layout - The native stacked tile positions.
+ * @returns The layout's extent in half units: how far right and down its tiles reach, and how many layers.
+ * @example
+ * ```ts
+ * import { layoutExtent, layoutFor } from "@johnmorrisdotca/jarajara";
+ *
+ * const layout = layoutFor(4)!;
+ * console.log(layoutExtent(layout));
+ * ```
+ */
 export function layoutExtent(layout: MahjongLayout): { width: number; height: number; layers: number } {
   let width = 0;
   let height = 0;

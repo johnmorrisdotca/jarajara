@@ -13,7 +13,18 @@ import { EMPTY_SLOT, matchClass } from "./tiles.ts";
 
 const GEOMETRIES = new WeakMap<MahjongLayout, MahjongGeometry>();
 
-/** What lies on and beside each slot, worked out once for a layout and kept. */
+/** What lies on and beside each slot, worked out once for a layout and kept.
+ *
+ * @param layout - The native stacked tile positions.
+ * @returns What lies on and beside each slot, worked out once for a layout and kept.
+ * @example
+ * ```ts
+ * import { geometryOf, layoutFor } from "@johnmorrisdotca/jarajara";
+ *
+ * const layout = layoutFor(4)!;
+ * console.log(geometryOf(layout).above.length);
+ * ```
+ */
 export function geometryOf(layout: MahjongLayout): MahjongGeometry {
   const known = GEOMETRIES.get(layout);
   if (known !== undefined) return known;
@@ -35,7 +46,18 @@ export function geometryOf(layout: MahjongLayout): MahjongGeometry {
   return geometry;
 }
 
-/** Whether two slots of one layer overlap, which no layout may have: a tile cannot share a place. */
+/** Whether two slots of one layer overlap, which no layout may have: a tile cannot share a place.
+ *
+ * @param layout - The native stacked tile positions.
+ * @returns Whether two slots of one layer overlap, which no layout may have: a tile cannot share a place.
+ * @example
+ * ```ts
+ * import { layoutFor, overlapsOnLayer } from "@johnmorrisdotca/jarajara";
+ *
+ * const layout = layoutFor(4)!;
+ * console.log(overlapsOnLayer(layout));
+ * ```
+ */
 export function overlapsOnLayer(layout: MahjongLayout): boolean {
   const { slots } = layout;
   return slots.some((slot, index) =>
@@ -43,14 +65,50 @@ export function overlapsOnLayer(layout: MahjongLayout): boolean {
   );
 }
 
-/** Whether a slot's tile could be taken now, among the slots `present` says are still filled. */
+/** Whether a slot's tile could be taken now, among the slots `present` says are still filled.
+ *
+ * @param geometry - The stacked layout’s covering and side-blocking relationships.
+ * @param present - Whether each native slot is still occupied or selected for laying.
+ * @param slot - The zero-based slot index or slot coordinates specified by this signature.
+ * @returns Whether a slot's tile could be taken now, among the slots `present` says are still filled.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { freePairs, geometryOf, isFreeAmong, layoutFor } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * const pair = freePairs(geometry,cells,"group")[0];
+ * console.log(isFreeAmong(geometry,slot=>cells[slot]!==".",pair[0]));
+ * ```
+ */
 export function isFreeAmong(geometry: MahjongGeometry, present: (slot: number) => boolean, slot: number): boolean {
   if (!present(slot)) return false;
   if (geometry.above[slot]!.some(present)) return false;
   return !geometry.left[slot]!.some(present) || !geometry.right[slot]!.some(present);
 }
 
-/** Whether the tile in this slot is free. */
+/** Whether the tile in this slot is free.
+ *
+ * @param geometry - The stacked layout’s covering and side-blocking relationships.
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @param slot - The zero-based slot index or slot coordinates specified by this signature.
+ * @returns Whether the tile in this slot is free.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { freePairs, geometryOf, isFree, layoutFor } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * const pair = freePairs(geometry,cells,"group")[0];
+ * console.log(isFree(geometry,cells,pair[0]));
+ * ```
+ */
 export function isFree(geometry: MahjongGeometry, cells: MahjongCells, slot: number): boolean {
   if (cells[slot] === EMPTY_SLOT) return false;
   // Loops rather than `isFreeAmong`'s closures: this runs for every slot of every step of every playout a deal is graded by.
@@ -62,14 +120,48 @@ export function isFree(geometry: MahjongGeometry, cells: MahjongCells, slot: num
   return true;
 }
 
-/** Every free tile, by slot. */
+/** Every free tile, by slot.
+ *
+ * @param geometry - The stacked layout’s covering and side-blocking relationships.
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @returns Every free tile, by slot.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { freeSlots, geometryOf, layoutFor } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * console.log(freeSlots(geometry,cells));
+ * ```
+ */
 export function freeSlots(geometry: MahjongGeometry, cells: MahjongCells): number[] {
   const free: number[] = [];
   for (let slot = 0; slot < cells.length; slot += 1) if (isFree(geometry, cells, slot)) free.push(slot);
   return free;
 }
 
-/** Why a tile cannot be taken now: covered by a tile on it, or held on both sides. Null for a free tile or an empty slot. */
+/** Why a tile cannot be taken now: covered by a tile on it, or held on both sides. Null for a free tile or an empty slot.
+ *
+ * @param geometry - The stacked layout’s covering and side-blocking relationships.
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @param slot - The zero-based slot index or slot coordinates specified by this signature.
+ * @returns Why a tile cannot be taken now: covered by a tile on it, or held on both sides. null for a free tile or an empty slot.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { blockedBy, freePairs, geometryOf, layoutFor } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * const pair = freePairs(geometry,cells,"group")[0];
+ * console.log(blockedBy(geometry,cells,pair[0]));
+ * ```
+ */
 export function blockedBy(geometry: MahjongGeometry, cells: MahjongCells, slot: number): "covered" | "sides" | null {
   const present = (at: number) => cells[at] !== EMPTY_SLOT;
   if (!present(slot)) return null;
@@ -78,7 +170,24 @@ export function blockedBy(geometry: MahjongGeometry, cells: MahjongCells, slot: 
   return null;
 }
 
-/** Every pair that could be taken now, each once, lower slot first, in slot order. */
+/** Every pair that could be taken now, each once, lower slot first, in slot order.
+ *
+ * @param geometry - The stacked layout’s covering and side-blocking relationships.
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @param rule - Grouped or identical bonus matching.
+ * @returns Every pair that could be taken now, each once, lower slot first, in slot order.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { freePairs, geometryOf, layoutFor } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * console.log(freePairs(geometry,cells,"group"));
+ * ```
+ */
 export function freePairs(geometry: MahjongGeometry, cells: MahjongCells, rule: MahjongBonusRule): [number, number][] {
   const free = freeSlots(geometry, cells);
   const pairs: [number, number][] = [];
@@ -90,14 +199,52 @@ export function freePairs(geometry: MahjongGeometry, cells: MahjongCells, rule: 
   return pairs;
 }
 
-/** Whether these two slots are a pair that may be taken now. */
+/** Whether these two slots are a pair that may be taken now.
+ *
+ * @param geometry - The stacked layout’s covering and side-blocking relationships.
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @param rule - Grouped or identical bonus matching.
+ * @param a - The first tile slot or code specified by this signature.
+ * @param b - The second tile slot or code specified by this signature.
+ * @returns Whether these two slots are a pair that may be taken now.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { canTake, freePairs, geometryOf, layoutFor } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * const pair = freePairs(geometry,cells,"group")[0];
+ * console.log(canTake(geometry,cells,"group",pair[0],pair[1]));
+ * ```
+ */
 export function canTake(geometry: MahjongGeometry, cells: MahjongCells, rule: MahjongBonusRule, a: number, b: number): boolean {
   if (a === b || a < 0 || b < 0 || a >= cells.length || b >= cells.length) return false;
   if (!isFree(geometry, cells, a) || !isFree(geometry, cells, b)) return false;
   return matchClass(cells[a]!, rule) === matchClass(cells[b]!, rule);
 }
 
-/** The tiles with a pair taken. The caller has asked `canTake`. */
+/** The tiles with a pair taken. The caller has asked `canTake`.
+ *
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @param a - The first tile slot or code specified by this signature.
+ * @param b - The second tile slot or code specified by this signature.
+ * @returns The tiles with a pair taken. The caller has asked `canTake`.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { freePairs, geometryOf, layoutFor, takePair } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * const pair = freePairs(geometry,cells,"group")[0];
+ * console.log(takePair(cells,pair[0],pair[1]));
+ * ```
+ */
 export function takePair(cells: MahjongCells, a: number, b: number): MahjongCells {
   const next = [...cells];
   next[a] = EMPTY_SLOT;
@@ -105,19 +252,61 @@ export function takePair(cells: MahjongCells, a: number, b: number): MahjongCell
   return next.join("");
 }
 
-/** How many tiles are still on the layout. */
+/** How many tiles are still on the layout.
+ *
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @returns How many tiles are still on the layout.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { tilesLeft } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const cells = deal.givens;
+ * console.log(tilesLeft(cells));
+ * ```
+ */
 export function tilesLeft(cells: MahjongCells): number {
   let count = 0;
   for (const code of cells) if (code !== EMPTY_SLOT) count += 1;
   return count;
 }
 
-/** Whether every tile has been taken. */
+/** Whether every tile has been taken.
+ *
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @returns Whether every tile has been taken.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { isCleared } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const cells = deal.givens;
+ * console.log(isCleared(cells));
+ * ```
+ */
 export function isCleared(cells: MahjongCells): boolean {
   return tilesLeft(cells) === 0;
 }
 
-/** Which tile Find would show for a slot: the ones that could be taken with it now, and the ones that match but are held. */
+/** Which tile Find would show for a slot: the ones that could be taken with it now, and the ones that match but are held.
+ *
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { freePairs, geometryOf, layoutFor, matchesOf } from "@johnmorrisdotca/jarajara";
+ * import type { MatchesOf } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * const pair = freePairs(geometry,cells,"group")[0];
+ * const value: MatchesOf = matchesOf(geometry,cells,"group",pair[0]);
+ * console.log(value);
+ * ```
+ */
 export type MatchesOf = {
   /** The slots that match the tile and could be taken with it now: both are free. Empty when the tile itself is held. */
   free: number[];
@@ -128,6 +317,24 @@ export type MatchesOf = {
 /**
  * EVERY TILE THAT MATCHES A SLOT'S, under the bonus rule in play, told apart by whether it could be taken with it now.
  * A tile's own slot is never in either list, and an empty slot has no matches. Pure: it reads the tiles as they lie.
+ *
+ * @param geometry - The stacked layout’s covering and side-blocking relationships.
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @param rule - Grouped or identical bonus matching.
+ * @param slot - The zero-based slot index or slot coordinates specified by this signature.
+ * @returns EVERY TILE THAT MATCHES A SLOT'S, under the bonus rule in play, told apart by whether it could be taken with it now. A tile's own slot is never in either list, and an empty slot has no matches. Pure: it reads the tiles as they lie.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { freePairs, geometryOf, layoutFor, matchesOf } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * const pair = freePairs(geometry,cells,"group")[0];
+ * console.log(matchesOf(geometry,cells,"group",pair[0]));
+ * ```
  */
 export function matchesOf(geometry: MahjongGeometry, cells: MahjongCells, rule: MahjongBonusRule, slot: number): MatchesOf {
   const none: MatchesOf = { free: [], blocked: [] };
@@ -143,10 +350,34 @@ export function matchesOf(geometry: MahjongGeometry, cells: MahjongCells, rule: 
   return result;
 }
 
-/** What a hint found: a pair with the chosen tile in it (`match`), another pair because the chosen tile has no free match (`other`), a pair when no tile was chosen (`any`), or no pair at all (`none`). */
+/** What a hint found: a pair with the chosen tile in it (`match`), another pair because the chosen tile has no free match (`other`), a pair when no tile was chosen (`any`), or no pair at all (`none`).
+ *
+ * @example
+ * ```ts
+ * import type { HintKind } from "@johnmorrisdotca/jarajara";
+ *
+ * const value: HintKind = "match";
+ * console.log(value);
+ * ```
+ */
 export type HintKind = "match" | "other" | "any" | "none";
 
-/** A hint: the pair to show (the chosen tile first, for a `match`) and what kind of answer it is. */
+/** A hint: the pair to show (the chosen tile first, for a `match`) and what kind of answer it is.
+ *
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { geometryOf, hintFor, layoutFor } from "@johnmorrisdotca/jarajara";
+ * import type { Hint } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * const value: Hint = hintFor(geometry,cells,"group");
+ * console.log(value);
+ * ```
+ */
 export type Hint = { pair: [number, number] | null; found: HintKind };
 
 /**
@@ -155,6 +386,23 @@ export type Hint = { pair: [number, number] | null; found: HintKind };
  * none, any free pair, said so (`"other"`), so a page can say "no free match for that tile" before it shows another. With
  * nothing chosen (or a chosen tile that is not free) it is any free pair as ever (`"any"`): the one lifting the layers
  * highest, so a hint never digs a tile deeper than it must. With no pair at all, `pair` is null and `found` is `"none"`.
+ *
+ * @param geometry - The stacked layout’s covering and side-blocking relationships.
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @param rule - Grouped or identical bonus matching.
+ * @param chosen - The selected tile slot, or null without a selection.
+ * @returns A HINT, WHICH LOOKS FIRST FOR THE CHOSEN TILE'S MATCH. With a free tile chosen, the answer is a free tile that matches it, as a pair with the chosen tile first (`found: "match"`), the one that leaves the stacks lowest after it; if it has none, any free pair, said so (`"other"`), so a page can say "no free match for that tile" before it shows another. With nothing chosen (or a chosen tile that is not free) it is any free pair as ever (`"any"`): the one lifting the layers highest, so a hint never digs a tile deeper than it must. With no pair at all, `pair` is null and `found` is `"none"`.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { geometryOf, hintFor, layoutFor } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const layout = layoutFor(4)!;
+ * const geometry = geometryOf(layout);
+ * const cells = deal.givens;
+ * console.log(hintFor(geometry,cells,"group"));
+ * ```
  */
 export function hintFor(geometry: MahjongGeometry, cells: MahjongCells, rule: MahjongBonusRule, chosen?: number | null): Hint {
   const slots = geometry.layout.slots;

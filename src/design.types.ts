@@ -2,6 +2,15 @@
  * A SET OF DRAWN TILES, a design: how the tile itself is drawn, its back, and each face's picture. Every drawing is
  * what goes inside an `<svg>` of the design's own box, so a design may be drawn at any scale (Jarajara's own is in a
  * box 30 by 40, the riichi sets in one 300 by 400) and is fitted to the tile's 30 by 40 when it is used.
+ *
+ * @example
+ * ```ts
+ * import type { TileDesign } from "@johnmorrisdotca/jarajara/faces";
+ * import { jarajaraDesign } from "@johnmorrisdotca/jarajara/faces";
+ *
+ * const value: TileDesign = jarajaraDesign();
+ * console.log(value.name);
+ * ```
  */
 export type TileDesign = {
   /** The design's name, as an element's `design` attribute and `loadTileDesign` take it: `jarajara`, `riichi`, `riichi-black`. */

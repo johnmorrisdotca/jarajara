@@ -13,7 +13,15 @@
  */
 import type { TileDesign } from "../design.types.ts";
 
-/** The regular riichi tiles, drawn in a box 300 by 400. */
+/** The regular riichi tiles, drawn in a box 300 by 400.
+ *
+ * @example
+ * ```ts
+ * import { RIICHI } from "@johnmorrisdotca/jarajara/designs/riichi";
+ * import { tileSvg } from "@johnmorrisdotca/jarajara/faces";
+ * console.log(RIICHI.name, tileSvg("F", { design: RIICHI })?.length);
+ * ```
+ */
 export const RIICHI: TileDesign = {
   name: "riichi",
   box: [300, 400],

@@ -22,8 +22,24 @@ const SUIT_RANKS: readonly [MahjongSuit, number][] = [
 /** One letter a face, in the order of `SUIT_RANKS`: a–i characters, j–r circles, s–A bamboo, B–E winds, F–H dragons, I–L flowers, M–P seasons. */
 const FACE_CODES = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP";
 
+/** The cell marker for a tile already removed from the layout.
+ *
+ * @example
+ * ```ts
+ * import { EMPTY_SLOT } from "@johnmorrisdotca/jarajara";
+ * console.log(EMPTY_SLOT);
+ * ```
+ */
 export const EMPTY_SLOT = ".";
 
+/** The forty-two tile faces in stable code order, including bonus tiles.
+ *
+ * @example
+ * ```ts
+ * import { MAHJONG_FACES } from "@johnmorrisdotca/jarajara";
+ * console.log(MAHJONG_FACES.length);
+ * ```
+ */
 export const MAHJONG_FACES: readonly MahjongFace[] = (() => {
   const faces: MahjongFace[] = [];
   for (const [suit, ranks] of SUIT_RANKS) {
@@ -34,16 +50,47 @@ export const MAHJONG_FACES: readonly MahjongFace[] = (() => {
 
 const BY_CODE = new Map(MAHJONG_FACES.map((face) => [face.code, face]));
 
-/** The face a letter stands for, or null for anything that is not one. */
+/** The face a letter stands for, or null for anything that is not one.
+ *
+ * @param code - The one-character face code or tile identifier.
+ * @returns The face a letter stands for, or null for anything that is not one.
+ * @example
+ * ```ts
+ * import { faceOf } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(faceOf("a"));
+ * ```
+ */
 export function faceOf(code: string): MahjongFace | null {
   return BY_CODE.get(code) ?? null;
 }
 
+/** Whether a single character names a supported tile face.
+ *
+ * @param code - The one-character face code or tile identifier.
+ * @returns Whether a single character names a supported tile face.
+ * @example
+ * ```ts
+ * import { isFaceCode } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(isFaceCode("?"));
+ * ```
+ */
 export function isFaceCode(code: string): boolean {
   return BY_CODE.has(code);
 }
 
-/** A flower or a season: one of a kind in the set, and matched by its group under the usual rule. */
+/** A flower or a season: one of a kind in the set, and matched by its group under the usual rule.
+ *
+ * @param code - The one-character face code or tile identifier.
+ * @returns A flower or a season: one of a kind in the set, and matched by its group under the usual rule.
+ * @example
+ * ```ts
+ * import { isBonus } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(isBonus("I"));
+ * ```
+ */
 export function isBonus(code: string): boolean {
   const suit = faceOf(code)?.suit;
   return suit === "flowers" || suit === "seasons";
@@ -52,6 +99,16 @@ export function isBonus(code: string): boolean {
 /**
  * THE MATCHING RULE. Two identical tiles match; under the usual rule a flower
  * matches any flower and a season any season, since there is only one of each.
+ *
+ * @param code - The one-character face code or tile identifier.
+ * @param rule - Grouped or identical bonus matching.
+ * @returns THE MATCHING RULE. Two identical tiles match; under the usual rule a flower matches any flower and a season any season, since there is only one of each.
+ * @example
+ * ```ts
+ * import { matchClass } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(matchClass("I","group"));
+ * ```
  */
 export function matchClass(code: string, rule: MahjongBonusRule): string {
   const face = faceOf(code);
@@ -60,6 +117,19 @@ export function matchClass(code: string, rule: MahjongBonusRule): string {
   return code;
 }
 
+/** Whether two tile face codes match under the selected bonus rule.
+ *
+ * @param a - The first tile slot or code specified by this signature.
+ * @param b - The second tile slot or code specified by this signature.
+ * @param rule - Grouped or identical bonus matching.
+ * @returns Whether two tile face codes match under the selected bonus rule.
+ * @example
+ * ```ts
+ * import { tilesMatch } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(tilesMatch("I","J","group"));
+ * ```
+ */
 export function tilesMatch(a: string, b: string, rule: MahjongBonusRule): boolean {
   return a !== EMPTY_SLOT && b !== EMPTY_SLOT && matchClass(a, rule) === matchClass(b, rule);
 }
@@ -68,6 +138,18 @@ export function tilesMatch(a: string, b: string, rule: MahjongBonusRule): boolea
  * The deal's rule, read from the deal itself: a bonus tile dealt twice can
  * only be the Identical rule, since the usual one deals each flower and season
  * once. A deal holding no bonus tile plays alike under both, and says `group`.
+ *
+ * @param cells - The face-code string in native slot order; dot marks a removed tile.
+ * @returns The deal's rule, read from the deal itself: a bonus tile dealt twice can only be the Identical rule, since the usual one deals each flower and season once. A deal holding no bonus tile plays alike under both, and says `group`.
+ * @example
+ * ```ts
+ * import { generateAwase } from "@johnmorrisdotca/jarajara/awase";
+ * import { bonusRuleOf } from "@johnmorrisdotca/jarajara";
+ *
+ * const deal = generateAwase(4,"easy",2026);
+ * const cells = deal.givens;
+ * console.log(bonusRuleOf(cells));
+ * ```
  */
 export function bonusRuleOf(cells: string): MahjongBonusRule {
   const seen = new Set<string>();
@@ -91,6 +173,17 @@ export function bonusRuleOf(cells: string): MahjongBonusRule {
  * flower or a season is dealt once, since a deal that held one twice would be read as the Identical rule
  * (`bonusRuleOf`). The bonus pairs a further set would have held are four more pairs of ordinary faces, drawn at
  * random, so the tile count is the same.
+ *
+ * @param rule - Grouped or identical bonus matching.
+ * @param random - A reproducible random source returning values in [0,1).
+ * @param sets - The number of complete physical tile sets.
+ * @returns EVERY PAIR THE SET HOLDS, 72 of them: each ordinary face twice (four copies), and the eight bonus tiles as four pairs — two flowers and two seasons, split at random under the usual rule, or four faces drawn twice each under the Identical rule. `random` decides the splits; the order is the set's, and the deal shuffles it.
+ * @example
+ * ```ts
+ * import { seededRandom, setPairs } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(setPairs("group",seededRandom(42)).length);
+ * ```
  */
 export function setPairs(rule: MahjongBonusRule, random: () => number, sets = 1): [string, string][] {
   const pairs: [string, string][] = [];
@@ -124,6 +217,15 @@ export function setPairs(rule: MahjongBonusRule, random: () => number, sets = 1)
  * the ones and nines two, the winds three and the dragons four — the honours
  * and terminals are the tiles a mahjong hand prizes — and a flower or season
  * pair two, with another turn, as a bonus tile draws again in the full game.
+ *
+ * @param code - The one-character face code or tile identifier.
+ * @returns WHAT A PAIR IS WORTH AT THE TABLE (`table.ts`): the plain suit tiles one, the ones and nines two, the winds three and the dragons four — the honours and terminals are the tiles a mahjong hand prizes — and a flower or season pair two, with another turn, as a bonus tile draws again in the full game.
+ * @example
+ * ```ts
+ * import { pairPoints } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(pairPoints("F"));
+ * ```
  */
 export function pairPoints(code: string): number {
   const face = faceOf(code);
@@ -141,7 +243,17 @@ export function pairPoints(code: string): number {
   }
 }
 
-/** Whether taking this pair gives its taker another turn at the table: a flower or season pair. */
+/** Whether taking this pair gives its taker another turn at the table: a flower or season pair.
+ *
+ * @param code - The one-character face code or tile identifier.
+ * @returns Whether taking this pair gives its taker another turn at the table: a flower or season pair.
+ * @example
+ * ```ts
+ * import { pairGoesAgain } from "@johnmorrisdotca/jarajara";
+ *
+ * console.log(pairGoesAgain("I"));
+ * ```
+ */
 export function pairGoesAgain(code: string): boolean {
   return isBonus(code);
 }
