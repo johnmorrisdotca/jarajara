@@ -6,6 +6,8 @@ All notable changes to this project are written here. The format follows
 
 ## [Unreleased]
 
+- Add the bilingual documentation site, checked public examples, paired guides, local search and machine-readable pages.
+
 - Add a rack builder and a validated, storage-free iframe with the same rack, pick and take event detail as the element.
 - Reflect rack attributes as properties, add theme and spoken label, and respect false aliases without replacing existing methods or structured getters.
 

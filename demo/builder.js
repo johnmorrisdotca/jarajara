@@ -6,7 +6,7 @@ import { familyEmbedBuilder, FAMILY_EMBED_BUILDER_WORDS } from "./family-embed-b
 
 const words = {
   en: {
-    ...FAMILY_EMBED_BUILDER_WORDS.en,
+    ...FAMILY_EMBED_BUILDER_WORDS.en, pageDocs: "Docs", pageApi: "API reference",
     pitch: "Arrange a rack of mahjong tiles, preview it, and copy the code for your page.",
     name: "Jarajara is the Japanese sound of mahjong tiles rattling together.",
     nameLink: "About the name",
@@ -18,7 +18,7 @@ const words = {
     badTiles: "Use valid tiles, such as 123m456p789s1112z."
   },
   ja: {
-    ...FAMILY_EMBED_BUILDER_WORDS.ja,
+    ...FAMILY_EMBED_BUILDER_WORDS.ja, pageDocs: "ドキュメント", pageApi: "API（英語）",
     pitch: "麻雀牌の手牌を並べ、表示を確認して、ページに埋め込むコードをコピーできます。",
     name: "「ジャラジャラ」は、麻雀牌がぶつかり合う音です。",
     nameLink: "名前について",
@@ -51,7 +51,7 @@ const options = [
   row("mark", "text", ["Mark", "The mark drawn on marked tiles."], ["印の種類", "印を付けた牌に表示する印です。"]),
 ];
 let mounted;
-const page = globalThis.familyLanguage({ id: "jarajara", words, onChange: () => mounted?.draw() });
+const page = globalThis.familyLanguage({ id: "jarajara", words, onChange: () => { docsLink(); mounted?.draw(); } });
 const builder = familyEmbedBuilder({ id: "jarajara", packageName: "@johnmorrisdotca/jarajara", major: VERSION.split(".")[0], site: "https://johnmorrisdotca.github.io/jarajara/", title: "Jarajara · rack", titleJa: "手牌の埋め込み", options, leftOut: {}, groups: { rack: { en: "The rack", ja: "手牌の設定" } }, makers: { rack: { names: "rack", element: "rack", tag: "jarajara-rack", embed: "embed/", required: ["tiles"], description: "makerRackSays", formats: ["element", "iframe", "module", "react", "vue", "svelte", "angular", "html", "url"], width: 720, height: (settings) => Math.ceil((Number(settings.width) || ({ small: 32, medium: 48, large: 72 }[settings.size] ?? 48)) * 2.2) + 28 } }, code: ({ maker, format, settings }) => {
   if (validTiles(settings.tiles ?? "123m456p789s1112z") === null) return null;
   if ((format === "iframe" || format === "url") && settings.lang === undefined) return builder.codeFor(maker, format, options, { ...settings, lang: page.lang });
@@ -65,3 +65,6 @@ mounted = builder.mount({ words, language: () => page, colourDefault: () => "#2f
   stage.append(rack);
   return { destroy() { rack.remove(); } };
 } });
+
+function docsLink() { document.querySelector('[data-say="pageDocs"]')?.setAttribute("href", page.lang === "ja" ? "docs/ja/index.html" : "docs/index.html"); }
+docsLink();

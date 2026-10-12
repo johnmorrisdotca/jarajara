@@ -34,9 +34,9 @@ const page = `<!doctype html>
   <head>
     ${familyHead({
       id,
-      title: "Jarajara · mahjong tiles, and Awase to play",
+      title: "Jarajara ジャラジャラ — Mahjong tiles and mahjong solitaire",
       description: "Play Awase, the mahjong matching solitaire, and see the tiles, racks, layouts and tables Jarajara draws on any page. Jarajara is the open-source mahjong tile library it is built on, in English and Japanese.",
-      ogTitle: "Jarajara mahjong tiles",
+      ogTitle: "Jarajara ジャラジャラ — Mahjong tiles and mahjong solitaire",
       ogDescription: "Take the tiles away two at a time, two that match and that are both free, until the layout is clear.",
     })}
     <link rel="icon" href="${ICON}" />
@@ -45,7 +45,7 @@ const page = `<!doctype html>
   </head>
   <body>
     <main>
-      ${familyHeader({ id, links: [{ href: "api.html", say: "pageApi" }] })}
+      ${familyHeader({ id, links: [{ href: "docs/index.html", say: "pageDocs" }, { href: "api.html", say: "pageApi" }] })}
 ${body}
       ${familyFooter({ id })}
     </main>
@@ -69,7 +69,7 @@ cpSync("demo/embed", "site/embed", { recursive: true });
 writeFileSync("site/family-embed-builder.js", `export const FAMILY_EMBED_BUILDER_WORDS = ${JSON.stringify(FAMILY_EMBED_BUILDER_WORDS)};\nexport ${familyEmbedBuilder.toString()};\n`);
 const builderParts = {
   builderHead: familyHead({ id, title: "Jarajara · build a rack of tiles", description: "Arrange mahjong tiles, preview them and copy the embed code." }),
-  builderHeader: familyHeader({ id, links: [{ href: "./", say: "toGallery" }] }),
+  builderHeader: familyHeader({ id, links: [{ href: "./", say: "toGallery" }, { href: "docs/index.html", say: "pageDocs" }, { href: "api.html", say: "pageApi" }] }),
   unreviewed: familyUnreviewed({ id }), footer: familyFooter({ id }), script: `<script>${FAMILY_SCRIPT}</script>`,
 };
 writeFileSync("site/builder.html", readFileSync("demo/builder.html", "utf8").replace(/<!-- family:([A-Za-z]+) -->/g, (_match, key) => builderParts[key]));

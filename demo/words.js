@@ -1,6 +1,7 @@
 // The page's own words, in the two languages it speaks. Set as text, never as HTML.
 export const WORDS = {
   en: {
+    pageDocs: "Docs",
     pageApi: "API reference",
     pitch: "Mahjong tiles for JavaScript and TypeScript, and the elements to put them on any page: a tile, a rack, a layout to play, a table, and viewers of the whole set. Below is Awase, the matching solitaire.",
     name: "Jarajara (ジャラジャラ) is the rattle of mahjong tiles being shuffled.",
@@ -123,6 +124,7 @@ export const WORDS = {
     foot: "Every deal is laid in reverse, so every deal can be cleared. Your game stays on this device.",
   },
   ja: {
+    pageDocs: "ドキュメント",
     pageApi: "API（英語）",
     pitch: "JavaScriptとTypeScriptのための麻雀牌と、それをどのページにも置けるエレメントです。牌一枚、牌立て、遊べる配置、卓、そして牌の一覧。下は「合わせ」、牌を二枚ずつ取り除く一人遊びです。",
     name: "「ジャラジャラ」は、麻雀牌を混ぜるときの音です。",

@@ -1,0 +1,45 @@
+{
+  "measured": "esbuild 0.28.2, bundled, minified, ES2020, gzip level 9",
+  "entries": {
+    ".": {
+      "minified": 21513,
+      "gzip": 7789
+    },
+    "./awase": {
+      "minified": 20912,
+      "gzip": 7598
+    },
+    "./table": {
+      "minified": 12820,
+      "gzip": 4659
+    },
+    "./faces": {
+      "minified": 258938,
+      "gzip": 41850
+    },
+    "./element": {
+      "minified": 401702,
+      "gzip": 97130
+    },
+    "./element/define": {
+      "minified": 401286,
+      "gzip": 96879
+    },
+    "./designs/riichi": {
+      "minified": 118108,
+      "gzip": 16759
+    },
+    "./designs/riichi-black": {
+      "minified": 115607,
+      "gzip": 16683
+    },
+    "./tile-sounds": {
+      "minified": 52573,
+      "gzip": 26733
+    },
+    "./sounds": {
+      "minified": 48980,
+      "gzip": 24501
+    }
+  }
+}

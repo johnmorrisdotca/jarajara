@@ -1,4 +1,4 @@
-<h1 align="center">Jarajara <sub>ジャラジャラ</sub></h1>
+<h1 align="center">Jarajara <sub>ジャラジャラ</sub> — Mahjong tiles and mahjong solitaire</h1>
 
 <p align="center"><strong>Mahjong tiles for JavaScript and TypeScript.</strong><br>
 The 144-tile set in 42 faces, drawn as SVG, with backs and cloths; custom elements for one tile, a rack, a layout to play, a table and viewers of the set; the stacked layouts tile games are played on; which tiles are free, which match, dealing and shuffling; a game written as text; Awase, the matching solitaire, alone or at a table of two to four with a computer player; and a command line. Seeded, and every deal can be cleared. No dependencies.</p>
@@ -9,16 +9,18 @@ The 144-tile set in 42 faces, drawn as SVG, with backs and cloths; custom elemen
   <a href="./LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-2f5d4a"></a>
   <img alt="No dependencies" src="https://img.shields.io/badge/dependencies-0-2f5d4a">
   <img alt="TypeScript" src="https://img.shields.io/badge/types-TypeScript-3178c6">
+  <a href="https://johnmorrisdotca.github.io/jarajara/docs/api/main/index.html"><img alt="7.8 kB minified and gzipped" src="https://img.shields.io/badge/min%2Bgzip-7.8%20kB-2f5d4a"></a>
+  <a href="https://www.npmjs.com/package/@johnmorrisdotca/jarajara#provenance"><img alt="Published with npm provenance" src="https://img.shields.io/badge/npm-provenance-2f5d4a"></a>
 </p>
 
-<p align="center"><a href="https://johnmorrisdotca.github.io/jarajara/"><strong>Play Awase →</strong></a> · <a href="https://johnmorrisdotca.github.io/jarajara/api.html">API reference</a></p>
+<p align="center"><a href="https://johnmorrisdotca.github.io/jarajara/"><strong>Play Awase →</strong></a> · <a href="https://johnmorrisdotca.github.io/jarajara/docs/">Documentation</a> · <a href="https://johnmorrisdotca.github.io/jarajara/docs/guides/getting-started.html">Getting started</a> · <a href="https://johnmorrisdotca.github.io/jarajara/api.html">API reference</a></p>
 
 <table align="center">
 <tr>
 <td align="center" valign="top">
 <picture>
 <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/jarajara/main/docs/images/hero-desk-dark.webp">
-<img src="https://raw.githubusercontent.com/johnmorrisdotca/jarajara/main/docs/images/hero-desk-light.webp" alt="The demo on a desk, in English: the page header with the language chooser, the API reference link, five cloth patches and the Help switch, Awase on the Turtle, a layout of 144 solid mahjong tiles stacked five layers high, centred in a frame on a green cloth with six pairs already taken, the line 132 tiles left and 12 pairs you can take, the New deal, Undo, Hint, Shuffle and Flip buttons, and the layout, challenge and level options under it" width="600">
+<img src="https://raw.githubusercontent.com/johnmorrisdotca/jarajara/main/docs/images/hero-desk-light.webp" alt="The demo on a desk, in English: the page header with the language chooser, the Docs and API reference links, five cloth patches and the Help switch, Awase on the Turtle, a layout of 144 solid mahjong tiles stacked five layers high, centred in a frame on a green cloth with six pairs already taken, the line 132 tiles left and 12 pairs you can take, the New deal, Undo, Hint, Shuffle and Flip buttons, and the layout, challenge and level options under it" width="600">
 </picture>
 <br><em>The demo on a desk: Awase on the Turtle, six pairs taken.</em>
 </td>
@@ -179,6 +181,17 @@ Each picture is the real thing, drawn by the package's own tags and taken from [
 ## Use it in your project
 
 Jarajara is four things, each usable without the others: **the rules** (the set, the layouts, free tiles, matching, dealing, Awase and the table, as plain functions over strings), **the drawing** (SVG text), **the tags** (custom elements that draw and play them in a page) and **the command line**. The table under [API](#api) says which entry holds which.
+
+### Install under another name
+
+```sh
+npm install mahjong@npm:@johnmorrisdotca/jarajara
+```
+
+```ts no-check
+import { MAHJONG_FACES } from "mahjong";
+console.log(MAHJONG_FACES.length);
+```
 
 ### Install
 
@@ -770,7 +783,7 @@ For a terminal, a script or a teacher's handout: the same deals, checks and tile
 
 ## API
 
-The [API reference](https://johnmorrisdotca.github.io/jarajara/api.html) lists every export of every entry point with its signature and its doc comment. It is made from the source by `pnpm site`, so it cannot fall behind the code.
+The [documentation](https://johnmorrisdotca.github.io/jarajara/docs/) includes bilingual guides, local search, signatures, parameters, return values and checked examples, built from source by `pnpm docs:site`. The [API index](https://johnmorrisdotca.github.io/jarajara/api.html) preserves export anchors.
 
 | Import | What it holds |
 | --- | --- |
@@ -875,7 +888,7 @@ Left out on purpose: any account, ranking or storage. A page keeps its own games
 
 ## Architecture
 
-The rules are plain functions over strings, with no DOM; the drawing is a separate entry, so a server that only checks a game never loads it; the tags are classes in another entry, defined only by the `/element/define` entry. Tests sit beside the code they test, and `site.fixture.json` holds every deal and table game itsutsu.com made before the move, played again on every build. `demo/` is the playable page, `e2e/` its browser tests, `bin/` the command line's few lines, and `scripts/` builds the demo and its API reference page, checks the package as npm packs it and the command line as a child process, and builds a page in each framework. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) lists every source file and what it does.
+The [record and source-layout guide](docs/guides/records-and-seeds.md#source-layout) explains the architecture; [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) preserves the complete tree.
 
 ## The name
 
