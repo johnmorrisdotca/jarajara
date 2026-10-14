@@ -6,6 +6,8 @@ All notable changes to this project are written here. The format follows
 
 ## [Unreleased]
 
+- Keep large documentation resource catalogues on the entry index and the active resource beside core navigation, preserving every reference page; render valid default imports in HTML and Markdown.
+
 - Add the bilingual documentation site, checked public examples, paired guides, local search and machine-readable pages.
 
 - Add a rack builder and a validated, storage-free iframe with the same rack, pick and take event detail as the element.
