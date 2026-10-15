@@ -2,7 +2,7 @@
 title: Embed racks, elements and sounds
 section: how-to
 order: 6
-description: Learn embed racks, elements and sounds.
+description: Register the tile elements in a browser, embed a rack, and add optional sounds.
 ---
 
 ## Register browser elements

@@ -31,6 +31,7 @@ const readme = readFileSync("README.md", "utf8");
 // What would make the README too long for npm is in pages under docs/, linked from it: the tags' tables and the command line's reference.
 const elementsDoc = readFileSync("docs/ELEMENTS.md", "utf8");
 const commandLineDoc = readFileSync("docs/COMMAND-LINE.md", "utf8");
+const challengesDoc = readFileSync("docs/CHALLENGES.md", "utf8");
 
 /** A README section's text, from its heading (of the level given) to the next heading of the same or a higher level. */
 const section = (heading, level = 2, text = readme) => {
@@ -111,8 +112,8 @@ describe("the documents", () => {
     }
     expect(table.length - 1).toBe(ALL_LAYOUTS.length);
     expect(readme).toContain(`${MAHJONG_FACES.length} tiles in ${MAHJONG_FACES.length === 42 ? "42" : "?"} faces`.replace(/^\d+/, "144"));
-    for (const challenge of AWASE_CHALLENGES) expect(rows(section("Options and challenges", 3)).some((cells) => cells[0] === `\`${challenge}\``), challenge).toBe(true);
-    const challenges = section("Options and challenges", 3);
+    for (const challenge of AWASE_CHALLENGES) expect(rows(section("Options and challenges", 3, challengesDoc)).some((cells) => cells[0] === `\`${challenge}\``), challenge).toBe(true);
+    const challenges = section("Options and challenges", 3, challengesDoc);
     const n = AWASE_CHALLENGE_NUMBERS;
     expect(challenges).toContain(`${n.sparkMsPerTile / 1000} s a tile`);
     expect(challenges).toContain(`adds ${n.sparkBonusMs / 1000} s`);
@@ -196,7 +197,7 @@ describe("the README's promises", () => {
     expect(family.length).toBeGreaterThanOrEqual(16);
     const block = readme.slice(readme.indexOf("### The family"), readme.indexOf("\n## ", readme.indexOf("### The family")));
     for (const { id, name, kana } of family) expect(block, id).toContain(`- [${name}](${familyRepo(id)}) (${kana}`);
-    const words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twenty-one", "twenty-two", "twenty-three", "twenty-four", "twenty-five", "twenty-six", "twenty-seven", "twenty-eight"];
+    const words = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twenty-one", "twenty-two", "twenty-three", "twenty-four", "twenty-five", "twenty-six", "twenty-seven", "twenty-eight", "twenty-nine", "thirty", "thirty-one", "thirty-two"];
     expect(block).toContain(`one of ${words[family.length]} packages`);
     expect([...block.matchAll(/^- \[/gm)]).toHaveLength(family.length);
   });

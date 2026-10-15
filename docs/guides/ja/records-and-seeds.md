@@ -2,7 +2,7 @@
 title: シード付き配置と記録の再生
 section: explanation
 order: 8
-description: シード付き配置と記録の再生の使い方と注意点。
+description: シードから取り切れる配置を作り、配置と操作として保存し、再生します。
 ---
 
 ## 逆から取れる順を作る

@@ -2,7 +2,7 @@
 title: 積み重ねの座標とSVG
 section: explanation
 order: 7
-description: 積み重ねの座標とSVGの使い方と注意点。
+description: 牌を半牌単位の座標に置き、同じ配置を別の見た目で描き、ルールと表示を分けます。
 ---
 
 ## 半分の単位で重なりを表す

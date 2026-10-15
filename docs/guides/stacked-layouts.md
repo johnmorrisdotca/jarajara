@@ -2,7 +2,7 @@
 title: Stacked geometry and SVG views
 section: explanation
 order: 7
-description: Learn stacked geometry and svg views.
+description: Place tiles on a half-tile grid, draw the same layout in different views, and keep rules apart from display.
 ---
 
 ## Half-tile units preserve overlap

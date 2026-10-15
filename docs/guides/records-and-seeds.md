@@ -2,7 +2,7 @@
 title: Seeded deals and replayed records
 section: explanation
 order: 8
-description: Learn seeded deals and replayed records.
+description: Generate a solvable layout from a seed, save it as a layout and moves, and replay it.
 ---
 
 ## Make a clearing order in reverse

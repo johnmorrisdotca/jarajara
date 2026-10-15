@@ -2,7 +2,7 @@
 title: Draw SVG and select designs
 section: how-to
 order: 3
-description: Learn draw svg and select designs.
+description: Draw tiles and layouts as SVG strings or elements, load only the designs you need, and keep SVG identifiers apart.
 ---
 
 ## Draw strings or native elements

@@ -2,7 +2,7 @@
 title: 問題の確認とFAQ
 section: troubleshooting
 order: 9
-description: 問題の確認とFAQの使い方と注意点。
+description: 組が取れない、nullの意味、要素や音が動かないといった場合の原因を確認します。
 ---
 
 ## 組が取れない

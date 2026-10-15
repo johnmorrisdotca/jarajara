@@ -2,7 +2,7 @@
 title: はじめに
 section: tutorial
 order: 1
-description: はじめにの使い方と注意点。
+description: Jarajaraを入れ、シードで「合わせ」の配置を配ります。
 ---
 
 Jarajaraには麻雀牌、積み重ねた配置、SVGの図柄、牌を合わせるひとり遊びがあります。対戦卓は2〜4人の組を取る得点ゲームで、リーチ麻雀の1局全体や点数計算のエンジンではありません。

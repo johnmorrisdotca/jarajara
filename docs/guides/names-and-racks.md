@@ -2,7 +2,7 @@
 title: Read names, notation and racks
 section: how-to
 order: 2
-description: Learn read names, notation and racks.
+description: Tell tile codes from notation, arrange a rack without changing its tiles, and use the rack element.
 ---
 
 ## Keep face codes separate from notation

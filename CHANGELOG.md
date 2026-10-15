@@ -6,23 +6,23 @@ All notable changes to this project are written here. The format follows
 
 ## [Unreleased]
 
-- Synchronize documentation tooling for repository layouts, generated type references, Node entry points and repository-specific README links.
+## [1.7.0] - 2026-10-14
 
-- Keep large documentation resource catalogues on the entry index and the active resource beside core navigation, preserving every reference page; render valid default imports in HTML and Markdown.
-
-- Add the bilingual documentation site, checked public examples, paired guides, local search and machine-readable pages.
-
-- Add a rack builder and a validated, storage-free iframe with the same rack, pick and take event detail as the element.
-- Reflect rack attributes as properties, add theme and spoken label, and respect false aliases without replacing existing methods or structured getters.
+The rack is a custom element with the family's standard embed attributes and a shared builder, and the package has an English and Japanese documentation site with a checked example for every export. The layouts, deals, matching rules, saved records and tables are unchanged.
 
 ### Added
 
+- Add the bilingual documentation site, checked public examples, paired guides, local search and machine-readable pages.
+- Add a rack builder and a validated, storage-free iframe with the same rack, pick and take event detail as the element.
 - Share a package-independent embed builder for option controls, preview adapters, code tabs and shareable links.
 
 ### Changed
 
+- Synchronize documentation tooling for repository layouts, generated type references, Node entry points and repository-specific README links.
+- Keep large documentation resource catalogues on the entry index and the active resource beside core navigation, preserving every reference page; render valid default imports in HTML and Markdown.
+- Reflect rack attributes as properties, add theme and spoken label, and respect false aliases without replacing existing methods or structured getters.
+- The table of the seven challenges moved from the README to `docs/CHALLENGES.md`, so that the README, which now lists the sports packages too, stays under npm's 65,536 characters; the README keeps a summary and a link.
 - Group the package family by kind, alphabetize each group, and include the geography packages and REST in Pieces in the shared footer and README.
-
 - Update the shared family description for addresses in all seven supported countries, including France and Germany.
 
 ## [1.6.2] - 2026-10-06

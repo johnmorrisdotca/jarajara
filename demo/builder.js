@@ -27,7 +27,7 @@ const words = {
     makerRack: "手牌",
     makerRackSays: "攻略記事などで、手牌を見せるために使います。",
     copyLink: "この手牌へのリンクをコピー",
-    badTiles: "123m456p789s1112z のような、有効な牌のコードを使ってください。"
+    badTiles: "123m456p789s1112zのような、有効な牌のコードを使ってください。"
   },
 };
 const row = (id, kind, en, ja, extra = {}) => ({ id, kind, group: "rack", names: { rack: id }, say: { en: { label: en[0], help: en[1] }, ja: { label: ja[0], help: ja[1] } }, ...extra });

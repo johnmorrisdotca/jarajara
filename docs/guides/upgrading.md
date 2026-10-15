@@ -2,12 +2,12 @@
 title: Upgrading and moving from other libraries
 section: upgrading
 order: 10
-description: Learn upgrading and moving from other libraries.
+description: Keep the 1.x baseline and choose the right feature when coming from another mahjong library.
 ---
 
 ## Preserve the 1.x baseline
 
-The original five layouts and seeded deals remain stable; new layouts, challenges, visual designs and rack methods extend that baseline. Keep recorded layout identifiers and face-code order. The current rollout changes documentation, examples and navigation without changing emitted SDK behavior, recordings or SVG assets.
+The original five layouts and seeded deals remain stable; new layouts, challenges, visual designs and rack methods extend that baseline. Keep recorded layout identifiers and face-code order.
 
 ## Choose the matching contract
 

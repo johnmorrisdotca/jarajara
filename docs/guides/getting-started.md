@@ -2,7 +2,7 @@
 title: Getting started
 section: tutorial
 order: 1
-description: Learn getting started.
+description: Install Jarajara and deal a seeded Awase layout.
 ---
 
 Jarajara supplies mahjong tiles and stacked layouts, SVG artwork and Awase matching solitaire. The shared table is a scoring matching game for two to four; these APIs are not a complete riichi round/scoring engine.

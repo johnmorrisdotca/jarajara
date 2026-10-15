@@ -2,7 +2,7 @@
 title: Play at a shared table
 section: how-to
 order: 5
-description: Learn play at a shared table.
+description: Play two to four players at one table, score pairs, and restore a table from its record.
 ---
 
 ## Read state from recorded takes

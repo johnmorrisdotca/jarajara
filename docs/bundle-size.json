@@ -3,43 +3,43 @@
   "entries": {
     ".": {
       "minified": 21513,
-      "gzip": 7789
+      "gzip": 7862
     },
     "./awase": {
       "minified": 20912,
-      "gzip": 7598
+      "gzip": 7650
     },
     "./table": {
       "minified": 12820,
-      "gzip": 4659
+      "gzip": 4707
     },
     "./faces": {
       "minified": 258938,
-      "gzip": 41850
+      "gzip": 41921
     },
     "./element": {
       "minified": 401702,
-      "gzip": 97130
+      "gzip": 97657
     },
     "./element/define": {
       "minified": 401286,
-      "gzip": 96879
+      "gzip": 97401
     },
     "./designs/riichi": {
       "minified": 118108,
-      "gzip": 16759
+      "gzip": 16603
     },
     "./designs/riichi-black": {
       "minified": 115607,
-      "gzip": 16683
+      "gzip": 16540
     },
     "./tile-sounds": {
       "minified": 52573,
-      "gzip": 26733
+      "gzip": 26662
     },
     "./sounds": {
       "minified": 48980,
-      "gzip": 24501
+      "gzip": 24350
     }
   }
 }

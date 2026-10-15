@@ -9,7 +9,7 @@ const query = new URLSearchParams(location.search.length > 1 ? location.search :
 const attrs = validatedAttributes(query);
 if (attrs === null) {
   const status = document.getElementById("status"); status.hidden = false;
-  status.textContent = query.get("lang") === "ja" ? "123m456p789s1112z のような、有効な牌の記号を使ってください。" : "Use valid tiles, such as 123m456p789s1112z.";
+  status.textContent = query.get("lang") === "ja" ? "123m456p789s1112zのような、有効な牌のコードを使ってください。" : "Use valid tiles, such as 123m456p789s1112z.";
 } else {
   const rack = document.createElement("jarajara-rack");
   for (const [name, value] of attrs) rack.setAttribute(name, value);

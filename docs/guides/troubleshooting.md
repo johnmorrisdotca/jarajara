@@ -2,7 +2,7 @@
 title: Troubleshooting and FAQ
 section: troubleshooting
 order: 9
-description: Learn troubleshooting and faq.
+description: Find out why a pair cannot be taken, what null means, and why an element or sound does not work.
 ---
 
 ## A pair cannot be taken

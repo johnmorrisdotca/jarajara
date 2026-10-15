@@ -2,7 +2,7 @@
 title: Play solitaire and challenges
 section: how-to
 order: 4
-description: Learn play solitaire and challenges.
+description: Take free matching pairs, pass the time in yourself for challenges, and keep hints and refusals.
 ---
 
 ## Take free matching pairs

@@ -1,6 +1,6 @@
 {
   "name": "@johnmorrisdotca/jarajara",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "description": "Jarajara \u30b8\u30e3\u30e9\u30b8\u30e3\u30e9 \u2014 Mahjong tiles and mahjong solitaire: the 144-tile set in 42 SVG faces, stacked layouts, matching rules, seeded deals and Awase alone or at a table of two to four. TypeScript, zero dependencies.",
   "keywords": [
     "angular",
