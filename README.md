@@ -989,7 +989,7 @@ Please follow the [code of conduct](./CODE_OF_CONDUCT.md). A way to make the che
 
 ## Changes
 
-See [CHANGELOG.md](./CHANGELOG.md). The latest release, 1.7.0, adds the rack's standard embed attributes, the shared embed builder, and the documentation site with a checked example for every export.
+See [CHANGELOG.md](./CHANGELOG.md). The latest release, 1.7.1, changes nothing a player sees.
 
 ## Licence
 
