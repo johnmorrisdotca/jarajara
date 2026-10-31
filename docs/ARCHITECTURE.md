@@ -53,8 +53,10 @@ src/
     ├── strings.ts        the words the elements say, in English and Japanese
     ├── tileElement.ts    <jarajara-tile>
     ├── rackElement.ts    <jarajara-rack>
+    ├── rackView.ts       how a rack reads its attributes and draws its tiles
     ├── rackLayout.ts     where tiles lie in a rack
     ├── layoutElement.ts  <jarajara-layout>
+    ├── layoutView.ts     how a layout is drawn, its clock and its pointer
     ├── tableElement.ts   <jarajara-table>
     ├── tileSounds.ts     the sounds: played from the recordings, or made in the browser
     └── viewerElements.ts <jarajara-viewer>, <jarajara-group> and <jarajara-set>
