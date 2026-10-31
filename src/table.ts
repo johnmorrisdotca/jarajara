@@ -1,11 +1,10 @@
-import type { AwaseLevel } from "./types.ts";
 import { canTake, freePairs, geometryOf, isCleared, takePair } from "./board.ts";
 import { shuffleTiles } from "./deal.ts";
 import { layoutFor } from "./layouts.ts";
 import { dealFits } from "./moves.ts";
-import type { MahjongBonusRule, MahjongGeometry } from "./types.ts";
 import type { AwaseSeat, AwaseTable, AwaseTableState } from "./table.types.ts";
 import { bonusRuleOf, pairGoesAgain, pairPoints } from "./tiles.ts";
+import type { AwaseLevel, MahjongBonusRule, MahjongGeometry } from "./types.ts";
 
 /**
  * THE RULES AT THE TABLE. Two to four players share one layout and take turns,

@@ -3,6 +3,7 @@
  * two, a wind three, a dragon four, a flower or season two and another turn), most points wins. With a computer
  * player for any seat.
  */
-export * from "./table.ts";
+
 export * from "./computer.ts";
+export * from "./table.ts";
 export type * from "./table.types.ts";

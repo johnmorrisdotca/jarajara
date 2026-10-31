@@ -1,16 +1,16 @@
 // The demo page's script: the language the header's chooser picks, the cloth the header's patches choose, and each panel.
 import "./dist/element-define.js";
-import { WORDS } from "./words.js";
-import { initPlay } from "./play.js";
-import { initTile } from "./tile.js";
-import { initRack } from "./rack.js";
-import { initViewers } from "./viewers.js";
 import { initBacks } from "./backs.js";
-import { initLayouts } from "./layouts.js";
-import { initTable } from "./tableDemo.js";
-import { initDesigns } from "./designs.js";
-import { initSounds } from "./sounds.js";
 import { initChallenges } from "./challenges.js";
+import { initDesigns } from "./designs.js";
+import { initLayouts } from "./layouts.js";
+import { initPlay } from "./play.js";
+import { initRack } from "./rack.js";
+import { initSounds } from "./sounds.js";
+import { initTable } from "./tableDemo.js";
+import { initTile } from "./tile.js";
+import { initViewers } from "./viewers.js";
+import { WORDS } from "./words.js";
 
 const listeners = [];
 // `familyLanguage` is the family's shared script, loaded before this one.
@@ -19,7 +19,9 @@ const language = familyLanguage({
   words: WORDS,
   onChange: (lang) => {
     docsLink(lang);
-    listeners.forEach((listen) => listen(lang));
+    listeners.forEach((listen) => {
+      listen(lang);
+    });
   },
 });
 const ctx = {

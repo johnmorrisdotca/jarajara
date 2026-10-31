@@ -1,6 +1,6 @@
-import type { AwaseCheck } from "./types.ts";
 import { isCleared } from "./board.ts";
 import { dealFits, decodeMoves, playSolve } from "./moves.ts";
+import type { AwaseCheck } from "./types.ts";
 
 /**
  * Whether a solve clears a Mahjong deal: the check the browser makes to say

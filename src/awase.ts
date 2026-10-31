@@ -1,12 +1,11 @@
-import type { AwaseDeal, AwaseLevel } from "./types.ts";
-import { seededRandom, shuffled, type Random } from "./random.ts";
 import { geometryOf } from "./board.ts";
-import { hashText, layPairs, type Laid } from "./deal.ts";
+import { hashText, type Laid, layPairs } from "./deal.ts";
 import { layoutFor } from "./layouts.ts";
-import type { MahjongBonusRule, MahjongGeometry } from "./types.ts";
 import { encodeMoves } from "./moves.ts";
 import { clearRate, clearShare } from "./playout.ts";
+import { type Random, seededRandom, shuffled } from "./random.ts";
 import { setPairs } from "./tiles.ts";
+import type { AwaseDeal, AwaseLevel, MahjongBonusRule, MahjongGeometry } from "./types.ts";
 
 /**
  * MAKING A DEAL, in the browser, from a seed.

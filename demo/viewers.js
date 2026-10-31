@@ -1,5 +1,5 @@
 // The viewer panels: a tile looked up, a group of the set, and the whole set as an inventory.
-import { TILE_GROUPS, countTiles, groupWords, readTiles } from "./dist/index.js";
+import { countTiles, groupWords, readTiles, TILE_GROUPS } from "./dist/index.js";
 
 const CHIPS = ["east", "3p", "red dragon", "plum", "五萬", "winds", "123m456p", "haku", "characters-9", "spring"];
 

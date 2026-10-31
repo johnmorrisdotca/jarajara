@@ -4,6 +4,7 @@ import { AWASE_SAME_BLOCK, bonusRuleOfSeed, generateAwase } from "./awase.ts";
 import {
   AWASE_CHALLENGE_NUMBERS,
   AWASE_CHALLENGES,
+  type AwaseRun,
   awaseRules,
   dailyAwase,
   isAwaseChallenge,
@@ -19,7 +20,6 @@ import {
   runTick,
   runUndo,
   startRun,
-  type AwaseRun,
 } from "./challenge.ts";
 import { layoutFor } from "./layouts.ts";
 import { seededRandom } from "./random.ts";

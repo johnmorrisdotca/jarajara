@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
-
+import { generateAwase } from "./awase.ts";
 import { tileBackSvg } from "./backs.ts";
 import { blockColours, directionOf, TILE_DEPTH, TILE_MIRRORS } from "./block.ts";
-import { generateAwase } from "./awase.ts";
-import { isFree, geometryOf, matchesOf } from "./board.ts";
+import { geometryOf, isFree, matchesOf } from "./board.ts";
 import { lightness } from "./colour.ts";
 import { loadTileDesign, TILE_DESIGNS } from "./designs.ts";
-import { layoutFrame, layoutSvg, tileAt, TILE_MARKS } from "./draw.ts";
+import { layoutFrame, layoutSvg, TILE_MARKS, tileAt } from "./draw.ts";
 import { TILE_SIZE, tileSvg } from "./faces.ts";
 import { ALL_LAYOUTS, layoutExtent, layoutFor } from "./layouts.ts";
 

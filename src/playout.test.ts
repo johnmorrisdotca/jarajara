@@ -4,7 +4,7 @@ import { freePairs, geometryOf, takePair, tilesLeft } from "./board.ts";
 import { hashText, layPairs } from "./deal.ts";
 import { ALL_LAYOUTS } from "./layouts.ts";
 import { clearRate } from "./playout.ts";
-import { seededRandom, shuffled, type Random } from "./random.ts";
+import { type Random, seededRandom, shuffled } from "./random.ts";
 import { setPairs } from "./tiles.ts";
 import type { MahjongBonusRule } from "./types.ts";
 

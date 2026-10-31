@@ -1,5 +1,5 @@
 // The sounds panel: each kind of sound on a tap, and the page's Sound switch for the elements.
-import { TILE_SOUND_KINDS, createTileSounds } from "./dist/tile-sounds.js";
+import { createTileSounds, TILE_SOUND_KINDS } from "./dist/tile-sounds.js";
 
 export function initSounds(ctx) {
   const kinds = document.getElementById("sound-kinds");

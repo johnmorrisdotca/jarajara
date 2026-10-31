@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { AWASE_SAME_BLOCK, bonusRuleOfSeed, generateAwase } from "./awase.ts";
+import { freePairs, geometryOf, overlapsOnLayer } from "./board.ts";
 import { dailyAwase } from "./challenge.ts";
 import { checkAwase } from "./check.ts";
 import { computerPair } from "./computer.ts";
-import { freePairs, geometryOf, overlapsOnLayer } from "./board.ts";
 import { shuffleTiles } from "./deal.ts";
 import { ALL_LAYOUTS, layoutExtent, layoutFor } from "./layouts.ts";
 import { MEGA_LAYOUTS } from "./layouts-mega.ts";

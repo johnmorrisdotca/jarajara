@@ -1,15 +1,15 @@
-import { SEED_MOST, bonusRuleOfSeed, freshAwaseSeed, generateAwase } from "./awase.ts";
-import { checkAwase } from "./check.ts";
+import { bonusRuleOfSeed, freshAwaseSeed, generateAwase, SEED_MOST } from "./awase.ts";
 import { dailyAwase } from "./challenge.ts";
+import { checkAwase } from "./check.ts";
+import { CLI_STRINGS, LAYOUT_NAMES_JA } from "./cliWords.ts";
 import { computerPair } from "./computer.ts";
 import { ALL_LAYOUTS, layoutExtent, layoutFor } from "./layouts.ts";
 import { decodeMoves } from "./moves.ts";
-import { SUIT_WORDS, copiesOf, findFaces, readNotation, tileName, writeNotation, type TileLanguage } from "./names.ts";
+import { copiesOf, findFaces, readNotation, SUIT_WORDS, type TileLanguage, tileName, writeNotation } from "./names.ts";
 import { AWASE_TABLE, encodeTable, playAtTable, readTable, startTable } from "./table.ts";
 import type { AwaseTable } from "./table.types.ts";
 import { faceOf } from "./tiles.ts";
 import type { AwaseLevel, MahjongBonusRule, MahjongLayout } from "./types.ts";
-import { CLI_STRINGS, LAYOUT_NAMES_JA } from "./cliWords.ts";
 import { fillIn } from "./ui/strings.ts";
 import { VERSION } from "./version.ts";
 

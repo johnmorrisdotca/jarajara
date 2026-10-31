@@ -4,6 +4,6 @@
  * levels, every one of them clearable, and a finished game is checked in one pass.
  */
 export * from "./awase.ts";
-export * from "./check.ts";
 export * from "./challenge.ts";
+export * from "./check.ts";
 export type { AwaseCheck, AwaseDeal, AwaseLevel } from "./types.ts";

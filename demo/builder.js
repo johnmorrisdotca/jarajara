@@ -1,8 +1,8 @@
-import { VERSION } from "./dist/index.js";
 import { JarajaraRack } from "./dist/element.js";
+import { VERSION } from "./dist/index.js";
 import "./dist/element-define.js";
 import { choices, validTiles } from "./embed-options.js";
-import { familyEmbedBuilder, FAMILY_EMBED_BUILDER_WORDS } from "./family-embed-builder.js";
+import { FAMILY_EMBED_BUILDER_WORDS, familyEmbedBuilder } from "./family-embed-builder.js";
 
 const words = {
   en: {

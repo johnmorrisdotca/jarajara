@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-
+import { AWASE_SAME_BLOCK, bonusRuleOfSeed, freshAwaseSeed, generateAwase } from "./awase.ts";
 import {
   blockedBy,
   canTake,
@@ -13,12 +13,11 @@ import {
 } from "./board.ts";
 import { checkAwase } from "./check.ts";
 import { layPairs, pairsLeft, shuffleTiles } from "./deal.ts";
-import { AWASE_SAME_BLOCK, bonusRuleOfSeed, freshAwaseSeed, generateAwase } from "./awase.ts";
-import { MAHJONG_LAYOUTS, layoutExtent, layoutFor } from "./layouts.ts";
-import type { MahjongLayout } from "./types.ts";
-import { SHUFFLE_MARK, decodeMoves, encodeMoves, playSolve } from "./moves.ts";
-import { MAHJONG_FACES, bonusRuleOf, faceOf, matchClass, pairPoints, setPairs, tilesMatch } from "./tiles.ts";
+import { layoutExtent, layoutFor, MAHJONG_LAYOUTS } from "./layouts.ts";
+import { decodeMoves, encodeMoves, playSolve, SHUFFLE_MARK } from "./moves.ts";
 import { seededRandom } from "./random.ts";
+import { bonusRuleOf, faceOf, MAHJONG_FACES, matchClass, pairPoints, setPairs, tilesMatch } from "./tiles.ts";
+import type { MahjongLayout } from "./types.ts";
 
 /**
  * Mahjong Solitaire ("mahjong"): what makes a tile free, a pair a match, a deal

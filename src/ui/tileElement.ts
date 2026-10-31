@@ -1,9 +1,9 @@
 import { isFaceCode } from "../tiles.ts";
 import {
-  blockHtml,
-  blockVars,
   BLOCK_STYLE,
   BOX_UNITS,
+  blockHtml,
+  blockVars,
   codeOf,
   designNamed,
   ElementBase,
@@ -11,17 +11,17 @@ import {
   isOn,
   languageOf,
   lessMotion,
-  markerHtml,
   MARKER_STYLE,
+  markerHtml,
   playSound,
   reflectMethod,
+  type SpinOptions,
   say,
   spinElement,
+  TILE_ASPECT,
   tileDrawing,
   tileLabel,
-  TILE_ASPECT,
   widthOf,
-  type SpinOptions,
 } from "./elementKit.ts";
 
 /**
@@ -151,7 +151,7 @@ export class JarajaraTile extends ElementBase {
     this.#turning = false;
     const flips = isOn(this, "flip");
     this.setAttribute("role", flips ? "button" : "img");
-    if (flips) this.tabIndex = this.tabIndex < 0 ? 0 : this.tabIndex;
+    if (flips) this.tabIndex = Math.max(this.tabIndex, 0);
     else this.removeAttribute("tabindex");
     const marked = known && this.hasAttribute("marked");
     const name = known ? tileLabel(code, down, language) : "";

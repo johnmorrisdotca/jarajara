@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { AWASE_SAME_BLOCK, bonusRuleOfSeed, generateAwase } from "./awase.ts";
 import { dailyAwase } from "./challenge.ts";
-import { CLI_STRINGS, LAYOUT_NAMES_JA } from "./cliWords.ts";
 import { cliLanguage, runCli } from "./cli.ts";
+import { CLI_STRINGS, LAYOUT_NAMES_JA } from "./cliWords.ts";
 import { ALL_LAYOUTS } from "./layouts.ts";
 import { decodeTable, readTable } from "./table.ts";
 import { VERSION } from "./version.ts";

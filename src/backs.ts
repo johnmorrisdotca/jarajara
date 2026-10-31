@@ -1,7 +1,7 @@
-import type { TileDesign } from "./design.types.ts";
 import { blockColours, blockSvg, directionOf, type TileMirror } from "./block.ts";
 import { mixColours as mix, rgbOf as rgb } from "./colour.ts";
-import { tileBackDrawing, TILE_BODY, TILE_BOX, TILE_FONT } from "./faces.ts";
+import type { TileDesign } from "./design.types.ts";
+import { TILE_BODY, TILE_BOX, TILE_FONT, tileBackDrawing } from "./faces.ts";
 
 /**
  * THE BACKS OF THE TILES, drawn as SVG in the tile's own 30 by 40: what a tile lying face down shows. Five are drawn
@@ -205,9 +205,9 @@ export function tileBackSvg(
       `${tileBackFace(name, options)}</svg>`
     );
   }
-  if (options.bare === true) return open("0 0 30 40", ` overflow="visible"`) + `${tileBackFace(name, options)}</svg>`;
+  if (options.bare === true) return `${open("0 0 30 40", ` overflow="visible"`)}${tileBackFace(name, options)}</svg>`;
   const direction = directionOf(options.mirror);
   const colours = blockColours(options.design, backBase(name, options) ?? undefined);
   const box = `${direction.x > 0 ? TILE_BOX.x : -1} ${direction.y > 0 ? TILE_BOX.y : TILE_BOX.x} ${TILE_BOX.width} ${TILE_BOX.height}`;
-  return open(box) + blockSvg(colours, direction, "back") + `${tileBackFace(name, options)}</svg>`;
+  return `${open(box) + blockSvg(colours, direction, "back")}${tileBackFace(name, options)}</svg>`;
 }

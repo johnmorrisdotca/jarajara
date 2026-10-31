@@ -103,7 +103,7 @@ test("the backs panel draws every back, and a colour and a mark change it", asyn
   for (const name of ["jade", "bamboo", "blue", "red", "ink"])
     await expect(page.locator(at(`back-${name}`))).toBeVisible();
   await tap(page, at("back-bamboo"));
-  await expect(page.locator(at("back-show") + " svg")).toHaveAttribute("data-back", "bamboo");
+  await expect(page.locator(`${at("back-show")} svg`)).toHaveAttribute("data-back", "bamboo");
   await page.fill(at("back-mark"), "SITE");
   await expect(page.locator(at("back-show"))).toContainText("SITE");
   await expect(page.locator(at("back-code"))).toContainText('mark="SITE"');
@@ -111,7 +111,7 @@ test("the backs panel draws every back, and a colour and a mark change it", asyn
     el.value = "#aa3355";
     el.dispatchEvent(new Event("input"));
   });
-  await expect(page.locator(at("back-show") + " svg")).toContainText("SITE");
+  await expect(page.locator(`${at("back-show")} svg`)).toContainText("SITE");
   expect(await page.locator(at("back-show")).innerHTML()).toContain("#aa3355");
   expect(errors).toEqual([]);
 });

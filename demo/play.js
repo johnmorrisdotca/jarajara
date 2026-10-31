@@ -1,7 +1,8 @@
 // The play panel: Awase on any layout and level, as the <jarajara-layout> element plays it, kept on this device between visits.
-import { ALL_LAYOUTS } from "./dist/index.js";
-import { TILE_DESIGNS as DESIGNS } from "./dist/faces-entry.js";
+
 import { AWASE_CHALLENGES, dailyAwase } from "./dist/awase-entry.js";
+import { TILE_DESIGNS as DESIGNS } from "./dist/faces-entry.js";
+import { ALL_LAYOUTS } from "./dist/index.js";
 
 const KEY = "jarajara.page";
 const LEVELS = ["easy", "medium", "hard"];

@@ -13,12 +13,13 @@
  * The recordings themselves are `@johnmorrisdotca/jarajara/sounds`, loaded by the first sound played. Kenney's Casino
  * Audio, CC0: see CREDITS.md.
  */
-export { MOST_SOUNDS_AT_ONCE, TILE_SOUND_KINDS, createTileSounds, soundTimes } from "./ui/tileSounds.ts";
+
 export type {
   PlayTileSoundOptions,
   TileSoundData,
   TileSoundKind,
-  TileSoundWindow,
   TileSounds,
   TileSoundsOptions,
+  TileSoundWindow,
 } from "./ui/tileSounds.ts";
+export { createTileSounds, MOST_SOUNDS_AT_ONCE, soundTimes, TILE_SOUND_KINDS } from "./ui/tileSounds.ts";

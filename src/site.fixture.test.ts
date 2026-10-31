@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
-
-import fixture from "./site.fixture.json" with { type: "json" };
 import { generateAwase } from "./awase.ts";
 import { computerPair } from "./computer.ts";
 import { MAHJONG_LAYOUTS } from "./layouts.ts";
 import { decodeMoves, playSolve } from "./moves.ts";
 import { seededRandom } from "./random.ts";
+import fixture from "./site.fixture.json" with { type: "json" };
 import { encodeTable, readTable, startTable, takeAtTable } from "./table.ts";
 import { MAHJONG_FACES, matchClass, pairPoints, setPairs } from "./tiles.ts";
 

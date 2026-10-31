@@ -7,12 +7,12 @@
 // (Front.svg) and its back (Back.svg). Each drawing is made smaller with svgo, its size taken off, and its ids
 // given a prefix of its own, so any number may be in one page. The faces go in as they are, the plate and back
 // beside them, and the red fives (Man5-Dora.svg and the like) as `red`. Nothing here runs in CI or is published.
-import { riichiDocLines } from "./design-docs.mjs";
+
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import process from "node:process";
-
 import { optimize } from "svgo";
+import { riichiDocLines } from "./design-docs.mjs";
 
 const from = process.argv[2];
 if (from === undefined) {

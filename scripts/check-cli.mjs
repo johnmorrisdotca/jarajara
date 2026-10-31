@@ -37,16 +37,16 @@ function check(what, args, want, { input, env } = {}) {
 
 const deal = generateAwase(9, "easy", 41);
 check("the version", ["--version"], { code: 0, out: `${version}\n`, err: "" });
-check("help", ["--help"], { code: 0, out: /^jarajara: mahjong tiles[^]*Usage: jarajara/, err: "" });
+check("help", ["--help"], { code: 0, out: /^jarajara: mahjong tiles[\s\S]*Usage: jarajara/, err: "" });
 check("nothing asked for is the help", [], { code: 0, out: /Usage: jarajara/, err: "" });
 check("the layouts", ["layouts"], {
   code: 0,
-  out: /^ 4 {2}tiny {9}8 tiles, 3 layers\n[^]*15 {2}turtle {5}144 tiles, 5 layers\n/,
+  out: /^ 4 {2}tiny {9}8 tiles, 3 layers\n[\s\S]*15 {2}turtle {5}144 tiles, 5 layers\n/,
   err: "",
 });
 check("a seeded deal", ["deal", "--layout", "4", "--seed", "7"], {
   code: 0,
-  out: /^Tiny, 8 tiles, medium, seed 7, usual rule\n\nLayer 1\ns u F F\n[^]*Tiles: suFFmsum\nOne way to clear it: 0704000506010302\n$/,
+  out: /^Tiny, 8 tiles, medium, seed 7, usual rule\n\nLayer 1\ns u F F\n[\s\S]*Tiles: suFFmsum\nOne way to clear it: 0704000506010302\n$/,
   err: "",
 });
 check("no seed: one is drawn and named on standard error", ["deal", "--layout", "4"], {

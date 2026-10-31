@@ -1,6 +1,7 @@
 // The one-tile panel: <jarajara-tile> in any size, back and design, named by its letter.
-import { MAHJONG_FACES, tileName } from "./dist/index.js";
+
 import { TILE_BACKS, TILE_DESIGNS } from "./dist/faces-entry.js";
+import { MAHJONG_FACES, tileName } from "./dist/index.js";
 
 export function initTile(ctx) {
   const tile = document.getElementById("one-tile");

@@ -241,8 +241,11 @@ export function createTileSounds(options: TileSoundsOptions = {}): TileSounds {
         const made: Loaded = {};
         names.forEach((name, at) => {
           const kind = name.replace(/-\d+$/, "") as TileSoundKind;
-          if ((TILE_SOUND_KINDS as readonly string[]).includes(kind))
-            (made[kind] ??= []).push(buffers[at] as AudioBuffer);
+          if ((TILE_SOUND_KINDS as readonly string[]).includes(kind)) {
+            const list = made[kind] ?? [];
+            made[kind] = list;
+            list.push(buffers[at] as AudioBuffer);
+          }
         });
         return Object.keys(made).length > 0 ? made : null;
       } catch {

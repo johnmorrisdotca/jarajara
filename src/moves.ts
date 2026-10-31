@@ -1,8 +1,8 @@
 import { canTake, freePairs, geometryOf } from "./board.ts";
 import { shuffleTiles } from "./deal.ts";
 import { layoutFor } from "./layouts.ts";
+import { bonusRuleOf, EMPTY_SLOT, isFaceCode } from "./tiles.ts";
 import type { MahjongBonusRule, MahjongCells, MahjongMove } from "./types.ts";
-import { EMPTY_SLOT, bonusRuleOf, isFaceCode } from "./tiles.ts";
 
 /**
  * A SOLVE AS IT IS WRITTEN: every move in order, a pair as its two slots in

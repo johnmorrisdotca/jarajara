@@ -1,8 +1,10 @@
-import { freshAwaseSeed, generateAwase } from "../awase.ts";
 import { describeSlot, readSlotKeys, sortSlots } from "../arrange.ts";
-import { canTake, freePairs, geometryOf, isFree, matchesOf, tilesLeft } from "../board.ts";
+import { freshAwaseSeed, generateAwase } from "../awase.ts";
 import { isTileMirror, TILE_MIRRORS, type TileMirror } from "../block.ts";
+import { canTake, freePairs, geometryOf, isFree, matchesOf, tilesLeft } from "../board.ts";
 import {
+  type AwaseOptions,
+  type AwaseRun,
   isAwaseChallenge,
   PURGE_GROUPS,
   readRun,
@@ -15,8 +17,6 @@ import {
   runTick,
   runUndo,
   startRun,
-  type AwaseOptions,
-  type AwaseRun,
 } from "../challenge.ts";
 import type { TileDesign } from "../design.types.ts";
 import { redFiveIndexes } from "../designs.ts";
@@ -24,8 +24,7 @@ import { layoutSvg } from "../draw.ts";
 import { tileFaceSymbols, tileSvg } from "../faces.ts";
 import { layoutFor } from "../layouts.ts";
 import { decodeMoves, encodeMoves } from "../moves.ts";
-import { tileName } from "../names.ts";
-import { groupWords, type TileLanguage } from "../names.ts";
+import { groupWords, type TileLanguage, tileName } from "../names.ts";
 import { bonusRuleOf, isFaceCode, pairPoints } from "../tiles.ts";
 import type { AwaseLevel, MahjongBonusRule, MahjongLayout } from "../types.ts";
 import {
@@ -33,6 +32,8 @@ import {
   CLOTH_STYLE,
   designNamed,
   ElementBase,
+  FRAME_MARGIN,
+  FRAME_STYLE,
   followLanguage,
   isOn,
   languageOf,
@@ -41,8 +42,6 @@ import {
   reflectMethod,
   say,
   wearCloth,
-  FRAME_MARGIN,
-  FRAME_STYLE,
 } from "./elementKit.ts";
 
 /** How many of a thing a game allows: a number, or no limit at all.

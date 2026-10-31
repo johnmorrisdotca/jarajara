@@ -5,7 +5,7 @@ import { at, bare, box, open, sideways, tap } from "./demo.mjs";
 
 const HAND = "FbaBjIcBaGdH";
 const SET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP";
-const rack = '<jarajara-rack id="r" tiles="' + HAND + '" capacity="14" pick></jarajara-rack>';
+const rack = `<jarajara-rack id="r" tiles="${HAND}" capacity="14" pick></jarajara-rack>`;
 
 /** The rack's tiles left to right as the page draws them: [{ code, down }]. */
 const lying = (page, selector = "#r") =>
@@ -213,7 +213,7 @@ test("spins its tiles where they lie and settles, and says nothing of a tile it 
 test("fits a phone: a long rack is drawn smaller, never wider than its room", async ({ page }) => {
   await bare(
     page,
-    '<jarajara-rack id="w" tiles="' + HAND + HAND + '" size="large" group="suit" order="suit"></jarajara-rack>',
+    `<jarajara-rack id="w" tiles="${HAND}${HAND}" size="large" group="suit" order="suit"></jarajara-rack>`,
   );
   const wide = await page.locator("#w").boundingBox();
   const room = await page.evaluate(() => document.documentElement.clientWidth);

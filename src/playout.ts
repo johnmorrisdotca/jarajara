@@ -1,6 +1,6 @@
 import type { Random } from "./random.ts";
-import type { MahjongBonusRule, MahjongGeometry } from "./types.ts";
 import { EMPTY_SLOT, matchClass } from "./tiles.ts";
+import type { MahjongBonusRule, MahjongGeometry } from "./types.ts";
 
 /**
  * PLAYING A DEAL OUT AT RANDOM, the fast way. A player who takes any free pair at random is how a deal is graded
@@ -22,7 +22,11 @@ function underOf(geometry: MahjongGeometry): readonly (readonly number[])[] {
   const known = UNDER.get(geometry);
   if (known !== undefined) return known;
   const under: number[][] = geometry.above.map(() => []);
-  geometry.above.forEach((over, slot) => over.forEach((on) => under[on]!.push(slot)));
+  geometry.above.forEach((over, slot) => {
+    over.forEach((on) => {
+      under[on]!.push(slot);
+    });
+  });
   UNDER.set(geometry, under);
   return under;
 }

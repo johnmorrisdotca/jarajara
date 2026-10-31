@@ -4,18 +4,19 @@
  * `<jarajara-layout>`, `<jarajara-table>`, `<jarajara-group>`, `<jarajara-set>` and `<jarajara-viewer>`. Safe to import
  * on a server, where there is no page: the classes then extend nothing.
  */
-export { JarajaraTile } from "./ui/tileElement.ts";
-export { JarajaraRack } from "./ui/rackElement.ts";
-export type { RackDetail, RackTurnOptions, TileRef } from "./ui/rackElement.ts";
-export { allowanceOf, hintPair, JarajaraLayout } from "./ui/layoutElement.ts";
-export type { Allowance } from "./ui/layoutElement.ts";
-export { JarajaraTable } from "./ui/tableElement.ts";
-export { JarajaraGroup, JarajaraSet, JarajaraViewer } from "./ui/viewerElements.ts";
-export { ELEMENT_SIZES, followLanguage, languageOf, MOST_SOUNDING, setPageSounds } from "./ui/elementKit.ts";
+
 export type { SpinOptions } from "./ui/elementKit.ts";
-export { rackPlaces, rackWidth } from "./ui/rackLayout.ts";
+export { ELEMENT_SIZES, followLanguage, languageOf, MOST_SOUNDING, setPageSounds } from "./ui/elementKit.ts";
+export type { Allowance } from "./ui/layoutElement.ts";
+export { allowanceOf, hintPair, JarajaraLayout } from "./ui/layoutElement.ts";
+export type { RackDetail, RackTurnOptions, TileRef } from "./ui/rackElement.ts";
+export { JarajaraRack } from "./ui/rackElement.ts";
 export type { RackLayoutOptions, RackPlace } from "./ui/rackLayout.ts";
+export { rackPlaces, rackWidth } from "./ui/rackLayout.ts";
 export { STRINGS } from "./ui/strings.ts";
+export { JarajaraTable } from "./ui/tableElement.ts";
+export { JarajaraTile } from "./ui/tileElement.ts";
+export { JarajaraGroup, JarajaraSet, JarajaraViewer } from "./ui/viewerElements.ts";
 
 import { JarajaraRack as Rack } from "./ui/rackElement.ts";
 /** Register a rack under its standard tag or a host's own tag. Safe to call without a browser.

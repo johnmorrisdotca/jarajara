@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isBuiltInBack, tileBackFace, tileBackSvg, TILE_BACKS } from "./backs.ts";
+import { isBuiltInBack, TILE_BACKS, tileBackFace, tileBackSvg } from "./backs.ts";
 import { jarajaraDesign } from "./designs.ts";
 
 const count = (text: string, pattern: RegExp) => (text.match(pattern) ?? []).length;

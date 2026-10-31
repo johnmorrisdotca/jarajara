@@ -123,7 +123,7 @@ test("the demo's game keeps one box when another layout is chosen, and the box f
   const viewport = page.viewportSize();
   // On a desk the board, its status and buttons are all in the first window; on a phone the board fits the width.
   if (viewport.width >= 1000) expect(first.bottom).toBeLessThanOrEqual(viewport.height + 40);
-  else expect(parseInt(first.whole)).toBeLessThanOrEqual(viewport.width);
+  else expect(parseInt(first.whole, 10)).toBeLessThanOrEqual(viewport.width);
   expect(await sideways(page)).toBe(false);
   expect(errors).toEqual([]);
 });
@@ -293,7 +293,12 @@ test("the board can be seen from the other side: only the picture turns, never t
     return { moves: el.moves, seed: el.seed };
   });
   await page.locator("#g").evaluate((el) => el.setAttribute("mirror", "none"));
-  expect(await page.locator("#g").evaluate((el, game) => (el.restore(game.moves), el.moves), moves)).toBe(moves.moves);
+  expect(
+    await page.locator("#g").evaluate((el, game) => {
+      el.restore(game.moves);
+      return el.moves;
+    }, moves),
+  ).toBe(moves.moves);
   expect(errors).toEqual([]);
 });
 

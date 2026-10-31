@@ -1,9 +1,9 @@
 import { freePairs, geometryOf, takePair } from "./board.ts";
 import { layoutFor } from "./layouts.ts";
-import type { MahjongBonusRule, MahjongGeometry } from "./types.ts";
 import { readTable } from "./table.ts";
 import type { AwaseTable, AwaseTableState } from "./table.types.ts";
 import { bonusRuleOf, pairGoesAgain, pairPoints } from "./tiles.ts";
+import type { MahjongBonusRule, MahjongGeometry } from "./types.ts";
 
 /**
  * A COMPUTER AT THE TABLE, in the browser. It looks one turn ahead: every pair

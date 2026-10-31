@@ -1,8 +1,8 @@
-import { canTake, freePairs, geometryOf, hintFor, isCleared, tilesLeft, type HintKind } from "./board.ts";
+import { AWASE_SAME_BLOCK } from "./awase.ts";
+import { canTake, freePairs, geometryOf, type HintKind, hintFor, isCleared, tilesLeft } from "./board.ts";
 import { hashText, shuffleTiles } from "./deal.ts";
 import { ALL_LAYOUTS, layoutFor } from "./layouts.ts";
-import { AWASE_SAME_BLOCK } from "./awase.ts";
-import { EMPTY_SLOT, bonusRuleOf, faceOf, MAHJONG_FACES } from "./tiles.ts";
+import { bonusRuleOf, EMPTY_SLOT, faceOf, MAHJONG_FACES } from "./tiles.ts";
 import type { AwaseLevel, MahjongBonusRule, MahjongCells, MahjongMove } from "./types.ts";
 
 /**

@@ -1,5 +1,5 @@
 // The backs panel: every back drawn, recoloured, marked with a name; and the backs the riichi designs bring.
-import { TILE_BACKS, TILE_DESIGNS, loadTileDesign, tileBackSvg } from "./dist/faces-entry.js";
+import { loadTileDesign, TILE_BACKS, TILE_DESIGNS, tileBackSvg } from "./dist/faces-entry.js";
 
 export function initBacks(ctx) {
   const picks = document.getElementById("back-picks");

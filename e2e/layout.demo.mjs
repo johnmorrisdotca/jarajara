@@ -146,14 +146,12 @@ test("lights the free tiles and rings the matches of the tile chosen", async ({ 
 test("lines the slots up sorted by x, y or z, each tile saying where it lies", async ({ page }) => {
   const errors = await bare(page, '<jarajara-layout id="g" size="8" static view="lined" sort="x"></jarajara-layout>');
   const cells = () =>
-    page
-      .locator("#g")
-      .evaluate((el) =>
-        [...el.shadowRoot.querySelectorAll(".cell")].map((c) => ({
-          slot: Number(c.dataset.slot),
-          where: c.querySelector(".where").textContent,
-        })),
-      );
+    page.locator("#g").evaluate((el) =>
+      [...el.shadowRoot.querySelectorAll(".cell")].map((c) => ({
+        slot: Number(c.dataset.slot),
+        where: c.querySelector(".where").textContent,
+      })),
+    );
   let list = await cells();
   expect(list).toHaveLength(64);
   const xs = list.map((c) => Number(c.where.match(/x ([\d.]+)/)[1]));
@@ -190,15 +188,13 @@ test("the demo's game keeps its layout, level and moves between visits, and its 
   await page.reload();
   await expect(page.locator("#game .board svg").first()).toBeVisible();
   expect(
-    await page
-      .locator(at("game"))
-      .evaluate((el) => ({
-        seed: el.seed,
-        moves: el.moves,
-        cells: el.cells,
-        size: el.getAttribute("size"),
-        level: el.getAttribute("level"),
-      })),
+    await page.locator(at("game")).evaluate((el) => ({
+      seed: el.seed,
+      moves: el.moves,
+      cells: el.cells,
+      size: el.getAttribute("size"),
+      level: el.getAttribute("level"),
+    })),
   ).toEqual({ ...state, size: "8", level: "hard" });
   await tap(page, '[data-cloth="wood"]');
   await expect(page.locator(at("game"))).toHaveAttribute("cloth", "wood");
@@ -240,9 +236,9 @@ test("a table of computers plays to the end, and a person's turn waits for a tap
 
 test("the demo's table panel, its gallery and its looked-over layout work", async ({ page }) => {
   const errors = await open(page);
-  await tap(page, page.locator(at("table-players") + ' [data-value="3"]'));
+  await tap(page, page.locator(`${at("table-players")} [data-value="3"]`));
   await expect(page.locator(at("table-demo"))).toHaveAttribute("players", "3");
-  await expect(page.locator(at("table-demo") + " .seat")).toHaveCount(3);
+  await expect(page.locator(`${at("table-demo")} .seat`)).toHaveCount(3);
   await tap(page, at("sort-xyz"));
   await expect(page.locator(at("inspect-note"))).toContainText("sorted by x y z");
   await page.selectOption(at("inspect-size"), "10");

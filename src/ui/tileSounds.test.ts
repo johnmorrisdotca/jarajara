@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { TILE_SOUND_DATA } from "../sounds.ts";
 import {
-  TILE_SOUND_KINDS,
-  MOST_SOUNDS_AT_ONCE,
   createTileSounds,
+  MOST_SOUNDS_AT_ONCE,
   soundTimes,
+  TILE_SOUND_KINDS,
   type TileSoundData,
 } from "./tileSounds.ts";
 

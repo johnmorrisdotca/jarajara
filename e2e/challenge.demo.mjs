@@ -40,7 +40,7 @@ test("every layout is offered and every one of them plays", async ({ page }) => 
     "Wall",
     "Palace",
   ]);
-  await expect(page.locator(at("gallery") + " .gallery-card")).toHaveCount(13);
+  await expect(page.locator(`${at("gallery")} .gallery-card`)).toHaveCount(13);
   for (const [size, tiles] of [
     [11, 94],
     [12, 116],
@@ -171,14 +171,12 @@ test("blackout draws the covered tiles blank, and only the free ones show what t
     '<jarajara-layout id="g" size="9" seed="31" challenge="blackout" controls></jarajara-layout>',
   );
   const faces = () =>
-    page
-      .locator("#g")
-      .evaluate((el) =>
-        [...el.shadowRoot.querySelectorAll("g[data-slot]")].map((g) => ({
-          free: g.dataset.free === "true",
-          face: g.dataset.face,
-        })),
-      );
+    page.locator("#g").evaluate((el) =>
+      [...el.shadowRoot.querySelectorAll("g[data-slot]")].map((g) => ({
+        free: g.dataset.free === "true",
+        face: g.dataset.face,
+      })),
+    );
   const drawn = await faces();
   expect(drawn.filter((tile) => tile.free).every((tile) => tile.face !== "")).toBe(true);
   expect(drawn.filter((tile) => !tile.free).every((tile) => tile.face === "")).toBe(true);
@@ -208,7 +206,7 @@ test("the demo's challenge buttons set the game's challenge, and today's game is
   page,
 }) => {
   const errors = await open(page);
-  await expect(page.locator(at("challenge-picks") + " button")).toHaveText([
+  await expect(page.locator(`${at("challenge-picks")} button`)).toHaveText([
     "Plain",
     "Gold",
     "Spark",
@@ -218,10 +216,10 @@ test("the demo's challenge buttons set the game's challenge, and today's game is
     "Purge",
     "Blackout",
   ]);
-  await tap(page, page.locator(at("challenge-picks") + " button", { hasText: "Rush" }));
+  await tap(page, page.locator(`${at("challenge-picks")} button`, { hasText: "Rush" }));
   await expect(page.locator(at("game"))).toHaveAttribute("challenge", "rush");
   await expect(page.locator(at("challenge-note"))).toContainText("three minutes");
-  await tap(page, page.locator(at("challenge-picks") + " button", { hasText: "Plain" }));
+  await tap(page, page.locator(`${at("challenge-picks")} button`, { hasText: "Plain" }));
   await expect(page.locator(at("game"))).not.toHaveAttribute("challenge", /./);
   await tap(page, at("daily"));
   const today = await page.evaluate(async () => {
@@ -232,6 +230,6 @@ test("the demo's challenge buttons set the game's challenge, and today's game is
   await expect(page.locator(at("game"))).toHaveAttribute("challenge", today.challenge);
   expect(await page.locator(at("game")).evaluate((el) => el.seed)).toBe(today.seed);
   await expect(page.locator(at("challenge-note"))).toContainText(today.date);
-  await expect(page.locator(at("challenge-list") + " li")).toHaveCount(7);
+  await expect(page.locator(`${at("challenge-list")} li`)).toHaveCount(7);
   await fits(page, errors);
 });

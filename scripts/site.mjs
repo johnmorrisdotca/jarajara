@@ -5,8 +5,8 @@ import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } f
 
 import { API_CSS, apiPage } from "./api.mjs";
 import {
-  FAMILY_SCRIPT,
   FAMILY_EMBED_BUILDER_WORDS,
+  FAMILY_SCRIPT,
   familyEmbedBuilder,
   familyFooter,
   familyHead,
@@ -30,12 +30,12 @@ const uses = [
   `sortSlots(layout, ["x", "y", "z"])  // a layout's slots, by where they lie`,
   `<script type="module" src=".../element-define.js">  then <jarajara-tile>, <jarajara-rack>, <jarajara-layout> ...`,
 ];
-const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escapeHtml = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 /** The page's body: the panels, with the lines of use filled in, and what a release adds in its own place. */
 const body = readFileSync("demo/body.html", "utf8")
   .replace("__UNREVIEWED__", familyUnreviewed({ id }))
-  .replace("__USES__", uses.map((line) => `<li><code>${escape(line)}</code></li>`).join("\n            "))
+  .replace("__USES__", uses.map((line) => `<li><code>${escapeHtml(line)}</code></li>`).join("\n            "))
   .trimEnd();
 
 const page = `<!doctype html>

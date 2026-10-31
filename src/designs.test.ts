@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-
-import { CLOTHS, clothVars, isCloth, JARAJARA_CLOTHS } from "./cloth.ts";
 import { generateAwase } from "./awase.ts";
+import { CLOTHS, clothVars, isCloth, JARAJARA_CLOTHS } from "./cloth.ts";
 import type { TileDesign } from "./design.types.ts";
 import { isTileDesignName, jarajaraDesign, loadTileDesign, redFiveIndexes, TILE_DESIGNS } from "./designs.ts";
 import { layoutSvg } from "./draw.ts";

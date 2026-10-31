@@ -104,9 +104,9 @@ test("the demo's designs panel changes the set and the layout, with red fives an
   await expect(page.locator(at("design-layout"))).toHaveAttribute("red-fives", "");
   await expect(page.locator(at("design-set"))).toHaveAttribute("mode", "tiles");
   await expect(page.locator(at("design-code"))).toContainText('design="riichi-black"');
-  await expect(page.locator(at("back-riichi") + " svg")).toBeVisible();
+  await expect(page.locator(`${at("back-riichi")} svg`)).toBeVisible();
   await tap(page, at("back-riichi-black"));
-  await expect(page.locator(at("back-show") + " svg")).toHaveAttribute("data-back", "riichi-black");
+  await expect(page.locator(`${at("back-show")} svg`)).toHaveAttribute("data-back", "riichi-black");
   expect(errors).toEqual([]);
 });
 

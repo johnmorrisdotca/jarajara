@@ -1,8 +1,8 @@
 // The layouts: one looked over, its slots sorted by x, y and z; and every layout as a deal, to play.
-import { ALL_LAYOUTS as LAYOUTS, layoutExtent } from "./dist/index.js";
+
 import { generateAwase } from "./dist/awase-entry.js";
 import { layoutSvg } from "./dist/faces-entry.js";
-import { readSlotKeys } from "./dist/index.js";
+import { ALL_LAYOUTS as LAYOUTS, layoutExtent, readSlotKeys } from "./dist/index.js";
 
 export function initLayouts(ctx) {
   const inspect = document.getElementById("inspect");

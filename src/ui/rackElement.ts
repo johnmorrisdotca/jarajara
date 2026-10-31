@@ -1,4 +1,3 @@
-import type { TileSoundKind } from "./tileSounds.ts";
 import {
   arrangeIndexes,
   arrangeTiles,
@@ -8,13 +7,13 @@ import {
   type TileGrouping,
   type TileOrder,
 } from "../arrange.ts";
-import { readTiles, tileName } from "../names.ts";
 import { redFiveIndexes } from "../designs.ts";
+import { readTiles, tileName } from "../names.ts";
 import {
-  blockHtml,
-  blockVars,
   BLOCK_STYLE,
   BOX_UNITS,
+  blockHtml,
+  blockVars,
   CLOTH_STYLE,
   designNamed,
   ElementBase,
@@ -22,20 +21,21 @@ import {
   isOn,
   languageOf,
   lessMotion,
-  markerHtml,
   MARKER_STYLE,
+  markerHtml,
   playSound,
   reflectMethod,
+  type SpinOptions,
   say,
   spinElement,
   tileDrawing,
   tileLabel,
-  widthOf,
   wearCloth,
+  widthOf,
   writeElementAttribute,
-  type SpinOptions,
 } from "./elementKit.ts";
-import { RACK_LIFT, rackPlaces, rackWidth, TILE_TALL, type RackPlace } from "./rackLayout.ts";
+import { RACK_LIFT, type RackPlace, rackPlaces, rackWidth, TILE_TALL } from "./rackLayout.ts";
+import type { TileSoundKind } from "./tileSounds.ts";
 
 /** How a rack's tiles are turned face down or face up.
  *
@@ -373,7 +373,10 @@ export class JarajaraRack extends ElementBase {
         if (Number.isInteger(part) && part >= 0 && part < tiles.length) found.add(part);
         continue;
       }
-      for (const code of readTiles(part)) tiles.forEach((tile, at) => tile === code && found.add(at));
+      for (const code of readTiles(part))
+        tiles.forEach((tile, at) => {
+          tile === code && found.add(at);
+        });
     }
     return [...found].sort((a, b) => a - b);
   }
@@ -773,7 +776,8 @@ export class JarajaraRack extends ElementBase {
           pick(event);
         } else if (key === "ArrowRight" || key === "ArrowLeft") {
           const slots = [...(this.#root?.querySelectorAll<HTMLElement>(".slot") ?? [])];
-          const here = slots.findIndex((slot) => slot === this.#root?.activeElement);
+          const active = this.#root?.activeElement;
+          const here = active instanceof HTMLElement ? slots.indexOf(active) : -1;
           slots[Math.max(0, Math.min(slots.length - 1, here + (key === "ArrowRight" ? 1 : -1)))]?.focus();
           event.preventDefault();
         }
@@ -907,13 +911,13 @@ export class JarajaraRack extends ElementBase {
         this.#focus = null;
       }
     };
-    all.forEach((slot, place) =>
+    all.forEach((slot, place) => {
       put(
         slot,
         start[place]!,
         moving ? (this.#seen.get(this.#ids[perm[place]!]!)?.down ?? downIn(perm[place]!)) : downIn(perm[place]!),
-      ),
-    );
+      );
+    });
     if (!moving) {
       finish();
       this.#finish();

@@ -3,14 +3,14 @@
  * element may name (a design fetched the first time one asks), the language an element speaks, the cloth it may be laid
  * on, and the drawing of one tile face up or face down.
  */
-import { backBase, tileBackSvg, isBuiltInBack } from "../backs.ts";
+import { backBase, isBuiltInBack, tileBackSvg } from "../backs.ts";
 import { blockColours, TILE_DEPTH } from "../block.ts";
 import { clothVars, isCloth } from "../cloth.ts";
 import type { TileDesign } from "../design.types.ts";
 import { isTileDesignName, jarajaraDesign, loadTileDesign } from "../designs.ts";
 import { tileSvg } from "../faces.ts";
-import { findFace, tileName, type TileLanguage } from "../names.ts";
-import { STRINGS, fillIn } from "./strings.ts";
+import { findFace, type TileLanguage, tileName } from "../names.ts";
+import { fillIn, STRINGS } from "./strings.ts";
 import { createTileSounds, type PlayTileSoundOptions, type TileSoundKind, type TileSounds } from "./tileSounds.ts";
 
 /** What the elements extend: HTMLElement, or on a server, where there is none, an empty class, so that importing them never throws. */
@@ -37,7 +37,10 @@ export function designNamed(name: string | null): { design: TileDesign | null; r
   if (!loadingDesigns.has(name))
     loadingDesigns.set(
       name,
-      loadTileDesign(name).then((design) => (loadedDesigns.set(name, design), design)),
+      loadTileDesign(name).then((design) => {
+        loadedDesigns.set(name, design);
+        return design;
+      }),
     );
   return { design: null, ready: loadingDesigns.get(name) as Promise<TileDesign | null> };
 }

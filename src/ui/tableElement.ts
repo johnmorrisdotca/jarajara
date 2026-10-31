@@ -8,8 +8,8 @@ import {
   isComputerSeat,
   playAtTable,
   readTable,
-  seatName,
   SEAT_WINDS,
+  seatName,
   startTable,
   tablePlayersAsked,
   tidySeatName,
@@ -21,14 +21,14 @@ import {
   CLOTH_STYLE,
   designNamed,
   ElementBase,
+  FRAME_MARGIN,
+  FRAME_STYLE,
   followLanguage,
   isOn,
   languageOf,
   playSound,
   say,
   wearCloth,
-  FRAME_MARGIN,
-  FRAME_STYLE,
 } from "./elementKit.ts";
 
 const LEVELS: readonly AwaseLevel[] = ["easy", "medium", "hard"];

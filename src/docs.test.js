@@ -1,15 +1,17 @@
-import { FAMILY, familyRepo } from "../scripts/family-template.mjs";
 // The documents and the demo, held to the source. Plain JavaScript, so that reading files needs no Node types.
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import process from "node:process";
-
 import { describe, expect, it } from "vitest";
+import { FAMILY, familyRepo } from "../scripts/family-template.mjs";
 
 import { AWASE_SAME_BLOCK, SEED_MOST } from "./awase.ts";
-import { AWASE_CHALLENGES, AWASE_CHALLENGE_NUMBERS } from "./challenge.ts";
-import { CLI_STRINGS, LAYOUT_NAMES_JA } from "./cliWords.ts";
+import * as awaseEntry from "./awase-entry.ts";
+import { AWASE_CHALLENGE_NUMBERS, AWASE_CHALLENGES } from "./challenge.ts";
 import { runCli } from "./cli.ts";
+import { CLI_STRINGS, LAYOUT_NAMES_JA } from "./cliWords.ts";
+import { JARAJARA_CLOTHS } from "./cloth.ts";
+import * as elementEntry from "./element.ts";
 import {
   JarajaraGroup,
   JarajaraLayout,
@@ -20,20 +22,17 @@ import {
   JarajaraViewer,
   MOST_SOUNDING,
 } from "./element.ts";
-import { JARAJARA_CLOTHS } from "./cloth.ts";
+import * as facesEntry from "./faces-entry.ts";
+import * as everything from "./index.ts";
 import { ALL_LAYOUTS } from "./layouts.ts";
 import { copiesOf, setInventory } from "./names.ts";
 import { AWASE_TABLE } from "./table.ts";
-import { MAHJONG_FACES } from "./tiles.ts";
+import * as tableEntry from "./table-entry.ts";
+import * as tileSoundsEntry from "./tile-sounds.ts";
 import { MOST_SOUNDS_AT_ONCE } from "./tile-sounds.ts";
+import { MAHJONG_FACES } from "./tiles.ts";
 import { STRINGS } from "./ui/strings.ts";
 import { VERSION } from "./version.ts";
-import * as everything from "./index.ts";
-import * as awaseEntry from "./awase-entry.ts";
-import * as tableEntry from "./table-entry.ts";
-import * as facesEntry from "./faces-entry.ts";
-import * as elementEntry from "./element.ts";
-import * as tileSoundsEntry from "./tile-sounds.ts";
 
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 const readme = readFileSync("README.md", "utf8");
@@ -192,7 +191,7 @@ describe("the documents", () => {
     for (const entry of commands) {
       const [first, ...lines] = entry.split("\n");
       const result = runCli(first.split(" "), { env: {} });
-      expect(`${first}\n${lines.join("\n")}`, first).toBe(`${first}\n${result.out}`.replace(/\n$/, "") + "\n");
+      expect(`${first}\n${lines.join("\n")}`, first).toBe(`${`${first}\n${result.out}`.replace(/\n$/, "")}\n`);
     }
     const usage = CLI_STRINGS.en.usage;
     for (const row of rows(text).filter((cells) => /^`[a-z]+( <|`)/.test(cells[0])))

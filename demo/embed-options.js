@@ -1,5 +1,5 @@
-import { findFace, readNotation, isFaceCode } from "./dist/index.js";
-import { TILE_DESIGNS, TILE_BACKS, CLOTHS } from "./dist/faces-entry.js";
+import { CLOTHS, TILE_BACKS, TILE_DESIGNS } from "./dist/faces-entry.js";
+import { findFace, isFaceCode, readNotation } from "./dist/index.js";
 
 // Embeds accept complete valid words; the library's forgiving reader remains unchanged.
 export function validTiles(value) {

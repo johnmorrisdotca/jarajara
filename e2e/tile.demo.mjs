@@ -4,15 +4,13 @@ import { expect, test } from "@playwright/test";
 import { bare, open, tap } from "./demo.mjs";
 
 const inside = (page, selector) =>
-  page
-    .locator(selector)
-    .evaluate((tile) => ({
-      label: tile.getAttribute("aria-label"),
-      role: tile.getAttribute("role"),
-      down: tile.hasAttribute("face-down"),
-      face: tile.shadowRoot.querySelector(".face").innerHTML,
-      back: tile.shadowRoot.querySelector(".back").innerHTML,
-    }));
+  page.locator(selector).evaluate((tile) => ({
+    label: tile.getAttribute("aria-label"),
+    role: tile.getAttribute("role"),
+    down: tile.hasAttribute("face-down"),
+    face: tile.shadowRoot.querySelector(".face").innerHTML,
+    back: tile.shadowRoot.querySelector(".back").innerHTML,
+  }));
 
 test("a tap turns the tile over and back; while it is down its face is not in the page", async ({ page }) => {
   const errors = await bare(page, '<jarajara-tile id="t" code="F" flip></jarajara-tile>');
@@ -66,9 +64,10 @@ test("every size and width, and a back of its own, in a steady box", async ({ pa
   await page.waitForTimeout(100);
   const after = await page.locator("#l").boundingBox();
   expect({ w: after.width, h: after.height }).toEqual({ w: before.width, h: before.height });
-  const back = await page
-    .locator("#l")
-    .evaluate((el) => (el.toggleAttribute("face-down", true), el.shadowRoot.querySelector(".back").innerHTML));
+  const back = await page.locator("#l").evaluate((el) => {
+    el.toggleAttribute("face-down", true);
+    return el.shadowRoot.querySelector(".back").innerHTML;
+  });
   expect(back).toContain("#336699");
   expect(back).toContain(">HI</text>");
 });

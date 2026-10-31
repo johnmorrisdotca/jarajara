@@ -1,3 +1,4 @@
+import { RED_FIVE_CODES, redFiveIndexes } from "../designs.ts";
 import {
   copiesOf,
   countTiles,
@@ -7,12 +8,11 @@ import {
   isNotation,
   isTileGroup,
   readTiles,
-  setInventory,
   SUIT_WORDS,
+  setInventory,
   tileName,
   writeNotation,
 } from "../names.ts";
-import { RED_FIVE_CODES, redFiveIndexes } from "../designs.ts";
 import { faceOf, pairPoints } from "../tiles.ts";
 import {
   CLOTH_STYLE,

@@ -1,5 +1,5 @@
-import type { MahjongBonusRule, MahjongCells, MahjongGeometry, MahjongLayout } from "./types.ts";
 import { EMPTY_SLOT, matchClass } from "./tiles.ts";
+import type { MahjongBonusRule, MahjongCells, MahjongGeometry, MahjongLayout } from "./types.ts";
 
 /**
  * WHAT MAKES A TILE FREE, and the moves that follow from it. Pure: every

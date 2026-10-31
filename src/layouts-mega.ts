@@ -103,7 +103,9 @@ function palace(): MahjongLayout {
     [10, 6],
     [11, 7],
   ];
-  hall.forEach(([x, y], z) => wall.push(...block(z, x, y, across(x), down(y))));
+  hall.forEach(([x, y], z) => {
+    wall.push(...block(z, x, y, across(x), down(y)));
+  });
   return { size: width, key: "palace", slots: inOrder(once(wall)) };
 }
 

@@ -14,9 +14,11 @@ import type { MahjongLayout, MahjongSlot } from "./types.ts";
 /** One layer of a layout as a grid of tiles: a row a string, a column a tile, shifted by `dx` and `dy` half tiles. */
 function layer(z: number, rows: readonly string[], dx = 0, dy = 0): MahjongSlot[] {
   const slots: MahjongSlot[] = [];
-  rows.forEach((row, y) =>
-    [...row].forEach((mark, x) => mark === "X" && slots.push({ x: x * 2 + dx, y: y * 2 + dy, z })),
-  );
+  rows.forEach((row, y) => {
+    [...row].forEach((mark, x) => {
+      mark === "X" && slots.push({ x: x * 2 + dx, y: y * 2 + dy, z });
+    });
+  });
   return slots;
 }
 

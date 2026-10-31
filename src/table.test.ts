@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
-
-import { seededRandom } from "./random.ts";
-import { computerPair } from "./computer.ts";
 import { generateAwase } from "./awase.ts";
+import { computerPair } from "./computer.ts";
 import { MAHJONG_LAYOUTS } from "./layouts.ts";
+import { seededRandom } from "./random.ts";
 import {
   AWASE_TABLE,
   decodeTable,
-  playAtTable,
   encodeTable,
+  playAtTable,
   readTable,
   seatName,
   startTable,

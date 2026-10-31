@@ -4,17 +4,17 @@ import {
   directionOf,
   faceEdgeSvg,
   isTileMirror,
-  shadowSvg,
   SHADOW_LAYERS,
   shadowReach,
+  shadowSvg,
   TILE_DEPTH,
   type TileMirror,
 } from "./block.ts";
-import { isFree, geometryOf } from "./board.ts";
-import { isCloth, JARAJARA_CLOTHS, type Cloth } from "./cloth.ts";
+import { geometryOf, isFree } from "./board.ts";
+import { type Cloth, isCloth, JARAJARA_CLOTHS } from "./cloth.ts";
 import type { TileDesign } from "./design.types.ts";
 import { redFiveIndexes } from "./designs.ts";
-import { faceWords, tileBodySvg, tileColours, TILE_SIZE, tileFaceSymbols } from "./faces.ts";
+import { faceWords, TILE_SIZE, tileBodySvg, tileColours, tileFaceSymbols } from "./faces.ts";
 import { layoutExtent, layoutFor } from "./layouts.ts";
 import { EMPTY_SLOT, faceOf } from "./tiles.ts";
 import type { MahjongSlot } from "./types.ts";

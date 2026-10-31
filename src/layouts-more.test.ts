@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { generateAwase, AWASE_SAME_BLOCK } from "./awase.ts";
+import { AWASE_SAME_BLOCK, generateAwase } from "./awase.ts";
 import { freePairs, geometryOf, overlapsOnLayer } from "./board.ts";
 import { checkAwase } from "./check.ts";
 import { ALL_LAYOUTS, layoutExtent, layoutFor, MAHJONG_LAYOUTS } from "./layouts.ts";

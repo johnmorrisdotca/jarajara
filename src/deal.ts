@@ -1,7 +1,7 @@
-import { seededRandom, shuffled, type Random } from "./random.ts";
 import { isFreeAmong } from "./board.ts";
-import type { MahjongBonusRule, MahjongCells, MahjongGeometry } from "./types.ts";
+import { type Random, seededRandom, shuffled } from "./random.ts";
 import { EMPTY_SLOT, matchClass } from "./tiles.ts";
+import type { MahjongBonusRule, MahjongCells, MahjongGeometry } from "./types.ts";
 
 /**
  * DEALS THAT CAN BE FINISHED, BY LAYING PAIRS IN REVERSE.
@@ -219,6 +219,8 @@ export function shuffleTiles(
   pairs
     .slice(1)
     .flat()
-    .forEach((code, at) => (next[others[at]!] = code));
+    .forEach((code, at) => {
+      next[others[at]!] = code;
+    });
   return next.join("");
 }
