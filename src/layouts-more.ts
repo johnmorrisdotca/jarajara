@@ -14,7 +14,9 @@ import type { MahjongLayout, MahjongSlot } from "./types.ts";
 /** One layer of a layout as a grid of tiles: a row a string, a column a tile, shifted by `dx` and `dy` half tiles. */
 function layer(z: number, rows: readonly string[], dx = 0, dy = 0): MahjongSlot[] {
   const slots: MahjongSlot[] = [];
-  rows.forEach((row, y) => [...row].forEach((mark, x) => mark === "X" && slots.push({ x: x * 2 + dx, y: y * 2 + dy, z })));
+  rows.forEach((row, y) =>
+    [...row].forEach((mark, x) => mark === "X" && slots.push({ x: x * 2 + dx, y: y * 2 + dy, z })),
+  );
   return slots;
 }
 
@@ -45,26 +47,23 @@ const PAGODA = made("pagoda", 11, [
     "..XXXXXXX..",
     "XXXXXXXXXXX",
   ]),
-  layer(1, [
-    ".....X.....",
-    "....XXX....",
-    ".....X.....",
-    "...XXXXX...",
-    ".....X.....",
-    "..XXXXXXX..",
-    ".....X.....",
-    "...XXXXX...",
-  ], 0, 0),
-  layer(2, [
-    ".....X.....",
-    "....XXX....",
-    ".....X.....",
-    "....XXX....",
-  ], 0, 0),
-  layer(3, [
-    ".....X.....",
-    ".....X.....",
-  ], 0, 0),
+  layer(
+    1,
+    [
+      ".....X.....",
+      "....XXX....",
+      ".....X.....",
+      "...XXXXX...",
+      ".....X.....",
+      "..XXXXXXX..",
+      ".....X.....",
+      "...XXXXX...",
+    ],
+    0,
+    0,
+  ),
+  layer(2, [".....X.....", "....XXX....", ".....X.....", "....XXX...."], 0, 0),
+  layer(3, [".....X.....", ".....X....."], 0, 0),
 ]);
 
 /**
@@ -110,24 +109,9 @@ const FORTRESS = made("fortress", 12, [
  * PYRAMID 角錐, thirteen across: five terraces, each a half tile in from the one below, rising to a point.
  */
 const PYRAMID = made("pyramid", 13, [
-  layer(0, [
-    "XXXXXXXXXXXXX",
-    "XXXXXXXXXXXXX",
-    "XXXXXXXXXXXXX",
-    "XXXXXXXXXXXXX",
-    "XXXXXXXXXXXXX",
-    "XXXXXXXXXXXXX",
-  ]),
-  layer(1, [
-    "XXXXXXXXXXX",
-    "XXXXXXXXXXX",
-    "XXXXXXXXXXX",
-    "XXXXXXXXXXX",
-  ], 2, 2),
-  layer(2, [
-    "XXXXXXXXX",
-    "XXXXXXXXX",
-  ], 4, 4),
+  layer(0, ["XXXXXXXXXXXXX", "XXXXXXXXXXXXX", "XXXXXXXXXXXXX", "XXXXXXXXXXXXX", "XXXXXXXXXXXXX", "XXXXXXXXXXXXX"]),
+  layer(1, ["XXXXXXXXXXX", "XXXXXXXXXXX", "XXXXXXXXXXX", "XXXXXXXXXXX"], 2, 2),
+  layer(2, ["XXXXXXXXX", "XXXXXXXXX"], 4, 4),
   layer(3, ["XX"], 11, 5),
 ]);
 
@@ -135,28 +119,10 @@ const PYRAMID = made("pyramid", 13, [
  * BRIDGE 橋, fourteen across: a long deck on three piers, with an arch rising in steps over its middle to a crown.
  */
 const BRIDGE = made("bridge", 14, [
-  layer(0, [
-    "..XX......XX..",
-    "XXXXXXXXXXXXXX",
-    "XXXXXXXXXXXXXX",
-    "..XX..XX..XX..",
-    "..XX..XX..XX..",
-  ]),
-  layer(1, [
-    "..............",
-    "XXXXXXXXXXXXXX",
-    "..XXXXXXXXXX..",
-  ]),
-  layer(2, [
-    "..............",
-    "....XXXXXX....",
-    "....XXXXXX....",
-  ]),
-  layer(3, [
-    "..............",
-    "......XX......",
-    "......XX......",
-  ]),
+  layer(0, ["..XX......XX..", "XXXXXXXXXXXXXX", "XXXXXXXXXXXXXX", "..XX..XX..XX..", "..XX..XX..XX.."]),
+  layer(1, ["..............", "XXXXXXXXXXXXXX", "..XXXXXXXXXX.."]),
+  layer(2, ["..............", "....XXXXXX....", "....XXXXXX...."]),
+  layer(3, ["..............", "......XX......", "......XX......"]),
 ]);
 
 /**
@@ -192,13 +158,7 @@ const BUTTERFLY = made("butterfly", 16, [
     "......XXXX......",
     "......XXXX......",
   ]),
-  layer(3, [
-    "................",
-    "................",
-    "................",
-    "................",
-    ".......XX.......",
-  ]),
+  layer(3, ["................", "................", "................", "................", ".......XX......."]),
 ]);
 
 /**
@@ -232,13 +192,7 @@ const DRAGON = made("dragon", 17, [
     ".....XXXXXXX.....",
     ".....XXXXXXX.....",
   ]),
-  layer(3, [
-    ".................",
-    ".................",
-    ".................",
-    ".................",
-    ".......XX........",
-  ]),
+  layer(3, [".................", ".................", ".................", ".................", ".......XX........"]),
 ]);
 
 /** The additional native stacked layouts and their supported size identifiers.

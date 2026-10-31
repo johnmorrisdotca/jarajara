@@ -1,5 +1,28 @@
 import { isFaceCode } from "../tiles.ts";
-import { blockHtml, blockVars, BLOCK_STYLE, BOX_UNITS, codeOf, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, playSound, reflectMethod, say, spinElement, tileDrawing, tileLabel, TILE_ASPECT, widthOf, type SpinOptions } from "./elementKit.ts";
+import {
+  blockHtml,
+  blockVars,
+  BLOCK_STYLE,
+  BOX_UNITS,
+  codeOf,
+  designNamed,
+  ElementBase,
+  followLanguage,
+  isOn,
+  languageOf,
+  lessMotion,
+  markerHtml,
+  MARKER_STYLE,
+  playSound,
+  reflectMethod,
+  say,
+  spinElement,
+  tileDrawing,
+  tileLabel,
+  TILE_ASPECT,
+  widthOf,
+  type SpinOptions,
+} from "./elementKit.ts";
 
 /**
  * ONE TILE ON ANY PAGE: `<jarajara-tile code="F">`, in any design and with any back, face up or face down, turned over
@@ -36,7 +59,21 @@ import { blockHtml, blockVars, BLOCK_STYLE, BOX_UNITS, codeOf, designNamed, Elem
  */
 export class JarajaraTile extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["code", "design", "back", "back-colour", "mark", "face-down", "flip", "marked", "red", "size", "width", "lang", "sound"];
+    return [
+      "code",
+      "design",
+      "back",
+      "back-colour",
+      "mark",
+      "face-down",
+      "flip",
+      "marked",
+      "red",
+      "size",
+      "width",
+      "lang",
+      "sound",
+    ];
   }
 
   #root: ShadowRoot | null = null;
@@ -64,7 +101,9 @@ export class JarajaraTile extends ElementBase {
     this.#turning = !lessMotion();
     this.faceDown = !this.faceDown;
     playSound(this, "flip");
-    this.dispatchEvent(new CustomEvent("jarajara-flip", { bubbles: true, composed: true, detail: { code, faceDown: this.faceDown } }));
+    this.dispatchEvent(
+      new CustomEvent("jarajara-flip", { bubbles: true, composed: true, detail: { code, faceDown: this.faceDown } }),
+    );
   }
 
   /** Spin the tile where it lies, as a flick sets one turning on a table: fast, then slowing to a stop as it was (`SpinOptions`). */
@@ -129,7 +168,20 @@ export class JarajaraTile extends ElementBase {
       const from = down ? 0 : 180;
       const to = down ? 180 : 0;
       const lift = `calc(var(--u) * 7)`;
-      const animation = typeof turn.animate === "function" ? turn.animate([{ transform: `translateZ(0) rotateY(${from}deg)` }, { transform: `translateZ(${lift}) rotateY(${(from + to) / 2}deg)`, offset: 0.5 }, { transform: `translateZ(0) rotateY(${to}deg)` }], { duration: Number.parseFloat(getComputedStyle(this).getPropertyValue("--jarajara-flip-ms")) || 520, easing: "cubic-bezier(.4, .05, .3, 1)" }) : null;
+      const animation =
+        typeof turn.animate === "function"
+          ? turn.animate(
+              [
+                { transform: `translateZ(0) rotateY(${from}deg)` },
+                { transform: `translateZ(${lift}) rotateY(${(from + to) / 2}deg)`, offset: 0.5 },
+                { transform: `translateZ(0) rotateY(${to}deg)` },
+              ],
+              {
+                duration: Number.parseFloat(getComputedStyle(this).getPropertyValue("--jarajara-flip-ms")) || 520,
+                easing: "cubic-bezier(.4, .05, .3, 1)",
+              },
+            )
+          : null;
       // Once turned, the side that went out of sight is taken out of the page; the timer is for a turn that never reports its end.
       let done = false;
       const settle = () => {

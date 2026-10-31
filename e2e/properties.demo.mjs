@@ -6,7 +6,10 @@ import { expect, test } from "@playwright/test";
 import { bare, tap } from "./demo.mjs";
 
 test("assigning an attribute's name sets the attribute, for the ones that are methods too", async ({ page }) => {
-  const errors = await bare(page, '<jarajara-tile id="t" code="east"></jarajara-tile><jarajara-rack id="r" tiles="123m"></jarajara-rack><jarajara-layout id="g" size="4" level="easy" seed="7"></jarajara-layout>');
+  const errors = await bare(
+    page,
+    '<jarajara-tile id="t" code="east"></jarajara-tile><jarajara-rack id="r" tiles="123m"></jarajara-rack><jarajara-layout id="g" size="4" level="easy" seed="7"></jarajara-layout>',
+  );
   await page.evaluate(() => {
     const [tile, rack, layout] = ["t", "r", "g"].map((id) => document.getElementById(id));
     tile.flip = true;
@@ -42,9 +45,25 @@ test("assigning an attribute's name sets the attribute, for the ones that are me
 });
 
 test("the methods those names also are still work", async ({ page }) => {
-  const errors = await bare(page, '<jarajara-tile id="t" code="east"></jarajara-tile><jarajara-rack id="r" tiles="123m" capacity="3"></jarajara-rack><jarajara-layout id="g" size="4" level="easy" seed="7"></jarajara-layout>');
-  const kinds = await page.evaluate(() => ["t", "r", "g"].map((id) => document.getElementById(id)).flatMap((el) => ["flip", "group", "mark", "undo"].filter((name) => name in el).map((name) => `${el.localName}.${name}:${typeof el[name]}`)));
-  expect(kinds).toEqual(["jarajara-tile.flip:function", "jarajara-rack.group:function", "jarajara-rack.mark:function", "jarajara-layout.undo:function"]);
+  const errors = await bare(
+    page,
+    '<jarajara-tile id="t" code="east"></jarajara-tile><jarajara-rack id="r" tiles="123m" capacity="3"></jarajara-rack><jarajara-layout id="g" size="4" level="easy" seed="7"></jarajara-layout>',
+  );
+  const kinds = await page.evaluate(() =>
+    ["t", "r", "g"]
+      .map((id) => document.getElementById(id))
+      .flatMap((el) =>
+        ["flip", "group", "mark", "undo"]
+          .filter((name) => name in el)
+          .map((name) => `${el.localName}.${name}:${typeof el[name]}`),
+      ),
+  );
+  expect(kinds).toEqual([
+    "jarajara-tile.flip:function",
+    "jarajara-rack.group:function",
+    "jarajara-rack.mark:function",
+    "jarajara-layout.undo:function",
+  ]);
   await page.evaluate(() => document.getElementById("t").flip());
   await expect(page.locator("#t")).toHaveAttribute("aria-label", "tile, face down");
   await page.evaluate(() => document.getElementById("r").group("kind"));

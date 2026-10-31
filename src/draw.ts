@@ -1,4 +1,15 @@
-import { blockColours, blockSvg, directionOf, faceEdgeSvg, isTileMirror, shadowSvg, SHADOW_LAYERS, shadowReach, TILE_DEPTH, type TileMirror } from "./block.ts";
+import {
+  blockColours,
+  blockSvg,
+  directionOf,
+  faceEdgeSvg,
+  isTileMirror,
+  shadowSvg,
+  SHADOW_LAYERS,
+  shadowReach,
+  TILE_DEPTH,
+  type TileMirror,
+} from "./block.ts";
 import { isFree, geometryOf } from "./board.ts";
 import { isCloth, JARAJARA_CLOTHS, type Cloth } from "./cloth.ts";
 import type { TileDesign } from "./design.types.ts";
@@ -31,7 +42,15 @@ export { TILE_DEPTH };
  * console.log(TILE_MARKS);
  * ```
  */
-export const TILE_MARKS = { chosen: "#dbe8d3", chosenRing: "#52664b", hinted: "#9d6c1f", blockedWash: "rgba(34, 35, 31, 0.26)", shadow: "#2a1d0e", gold: "#d4a017", found: "#1c6e8c" } as const;
+export const TILE_MARKS = {
+  chosen: "#dbe8d3",
+  chosenRing: "#52664b",
+  hinted: "#9d6c1f",
+  blockedWash: "rgba(34, 35, 31, 0.26)",
+  shadow: "#2a1d0e",
+  gold: "#d4a017",
+  found: "#1c6e8c",
+} as const;
 
 /** Where a slot's tile face is drawn, raised by its layer along the thickness's direction. With a view that turns the board (`mirror`) the layout's `width` and `height` in half-tiles are needed too.
  *
@@ -49,7 +68,12 @@ export const TILE_MARKS = { chosen: "#dbe8d3", chosenRing: "#52664b", hinted: "#
  * console.log(tileAt(layout.slots[0],layoutExtent(layout).layers));
  * ```
  */
-export function tileAt(slot: MahjongSlot, layers: number, mirror: TileMirror = "none", extent?: { width: number; height: number }): { x: number; y: number } {
+export function tileAt(
+  slot: MahjongSlot,
+  layers: number,
+  mirror: TileMirror = "none",
+  extent?: { width: number; height: number },
+): { x: number; y: number } {
   const direction = directionOf(extent === undefined ? "none" : mirror);
   const across = direction.x < 0 ? (extent as { width: number }).width - 2 - slot.x : slot.x;
   const down = direction.y < 0 ? (extent as { height: number }).height - 2 - slot.y : slot.y;
@@ -74,7 +98,10 @@ export function layoutBox(size: number): { width: number; height: number } | nul
   const layout = layoutFor(size);
   if (layout === null) return null;
   const { width, height, layers } = layoutExtent(layout);
-  return { width: (width * TILE_SIZE.width) / 2 + (layers + 1) * TILE_DEPTH, height: (height * TILE_SIZE.height) / 2 + (layers + 1) * TILE_DEPTH };
+  return {
+    width: (width * TILE_SIZE.width) / 2 + (layers + 1) * TILE_DEPTH,
+    height: (height * TILE_SIZE.height) / 2 + (layers + 1) * TILE_DEPTH,
+  };
 }
 
 /** The drawing's viewBox: where it starts and how large it is, in the face's units.
@@ -109,7 +136,10 @@ export type LayoutFrame = { x: number; y: number; width: number; height: number 
  * console.log(layoutFrame(4,{margin:10}));
  * ```
  */
-export function layoutFrame(size: number, options: { mirror?: TileMirror | string; margin?: number; shadow?: boolean } = {}): LayoutFrame | null {
+export function layoutFrame(
+  size: number,
+  options: { mirror?: TileMirror | string; margin?: number; shadow?: boolean } = {},
+): LayoutFrame | null {
   const layout = layoutFor(size);
   if (layout === null) return null;
   const mirror: TileMirror = isTileMirror(options.mirror) ? options.mirror : "none";
@@ -125,7 +155,13 @@ export function layoutFrame(size: number, options: { mirror?: TileMirror | strin
     const at = tileAt(slot, extent.layers, mirror, extent);
     // What a tile draws, as offsets from its face: the face, the far side of the block, and the widest of its shadows.
     const reach = shadowReach(Math.min(slot.z, 4));
-    const reaches: [number, number][] = [[0, 0], [TILE_DEPTH, 0], ...(options.shadow === true ? SHADOW_LAYERS.map(([along, grow]): [number, number] => [TILE_DEPTH + reach * along, grow]) : [])];
+    const reaches: [number, number][] = [
+      [0, 0],
+      [TILE_DEPTH, 0],
+      ...(options.shadow === true
+        ? SHADOW_LAYERS.map(([along, grow]): [number, number] => [TILE_DEPTH + reach * along, grow])
+        : []),
+    ];
     for (const [along, grow] of reaches) {
       const dx = -direction.x * along;
       const dy = direction.y * along;
@@ -136,7 +172,12 @@ export function layoutFrame(size: number, options: { mirror?: TileMirror | strin
     }
   }
   const round = (value: number) => Math.round(value * 100) / 100;
-  return { x: round(x0 - margin), y: round(y0 - margin), width: round(x1 - x0 + 2 * margin), height: round(y1 - y0 + 2 * margin) };
+  return {
+    x: round(x0 - margin),
+    y: round(y0 - margin),
+    width: round(x1 - x0 + 2 * margin),
+    height: round(y1 - y0 + 2 * margin),
+  };
 }
 
 /** Native tile, highlight, artwork, cloth and layout-view choices for SVG rendering.
@@ -207,7 +248,19 @@ export function layoutSvg(size: number, cells: string, options: LayoutSvgOptions
   const layout = layoutFor(size);
   const box = layoutBox(size);
   if (layout === null || box === null || cells.length !== layout.slots.length) return null;
-  const { chosen = null, hinted = [], matching = [], marked = [], found, showFree = false, hideBlocked = false, prefix = "jarajara", design, redFives = false, symbols = true } = options;
+  const {
+    chosen = null,
+    hinted = [],
+    matching = [],
+    marked = [],
+    found,
+    showFree = false,
+    hideBlocked = false,
+    prefix = "jarajara",
+    design,
+    redFives = false,
+    symbols = true,
+  } = options;
   const mirror: TileMirror = isTileMirror(options.mirror) ? options.mirror : "none";
   const direction = directionOf(mirror);
   const geometry = geometryOf(layout);
@@ -218,11 +271,14 @@ export function layoutSvg(size: number, cells: string, options: LayoutSvgOptions
   const faceColour = tileColours(design).face;
   const hasBody = tileBodySvg(design) !== null;
   const red = redFives && design?.red !== undefined ? redFiveIndexes(options.redFrom ?? cells) : new Set<number>();
-  const order = layout.slots.map((slot, index) => ({ slot, index })).sort((a, b) => a.slot.z - b.slot.z || a.slot.y - b.slot.y || b.slot.x - a.slot.x);
+  const order = layout.slots
+    .map((slot, index) => ({ slot, index }))
+    .sort((a, b) => a.slot.z - b.slot.z || a.slot.y - b.slot.y || b.slot.x - a.slot.x);
   const freeFound = new Set(found?.free ?? []);
   const blockedFound = new Set(found?.blocked ?? []);
   const id = `${prefix}-blk-${design?.name ?? "jarajara"}-${direction.x > 0 ? "r" : "l"}${direction.y > 0 ? "u" : "d"}`;
-  const ring = (inset: number, extra: string) => `<rect x="${inset}" y="${inset}" width="${w - 2 * inset}" height="${h - 2 * inset}" rx="2.5" fill="none" ${extra}/>`;
+  const ring = (inset: number, extra: string) =>
+    `<rect x="${inset}" y="${inset}" width="${w - 2 * inset}" height="${h - 2 * inset}" rx="2.5" fill="none" ${extra}/>`;
   const tiles = order.map(({ slot, index }) => {
     const code = cells[index]!;
     const face = faceOf(code);
@@ -241,10 +297,18 @@ export function layoutSvg(size: number, cells: string, options: LayoutSvgOptions
       `<use href="#${id}-e" pointer-events="none"/>`,
       blank ? "" : `<use href="#${symbol}" width="${w}" height="${h}"/>`,
       showFree && !free ? `<rect x="0" y="0" width="${w}" height="${h}" rx="3" fill="${TILE_MARKS.blockedWash}"/>` : "",
-      matching.includes(index) ? ring(1, `stroke="${TILE_MARKS.chosenRing}" stroke-width="1.4" stroke-dasharray="3 2"`) : "",
-      freeFound.has(index) ? `<rect x="0" y="0" width="${w}" height="${h}" rx="3" fill="${TILE_MARKS.found}" opacity="0.24"/>${ring(1, `stroke="${TILE_MARKS.found}" stroke-width="2.4"`)}` : "",
-      blockedFound.has(index) ? `<rect x="0" y="0" width="${w}" height="${h}" rx="3" fill="${TILE_MARKS.found}" opacity="0.1"/>${ring(1.6, `stroke="${TILE_MARKS.found}" stroke-width="1.3" stroke-dasharray="1.6 1.6"`)}` : "",
-      marked.includes(index) ? `${ring(1, `stroke="${TILE_MARKS.gold}" stroke-width="2"`)}<circle cx="${w - 5}" cy="5" r="3.2" fill="${TILE_MARKS.gold}" stroke="#fff" stroke-width="0.8"/>` : "",
+      matching.includes(index)
+        ? ring(1, `stroke="${TILE_MARKS.chosenRing}" stroke-width="1.4" stroke-dasharray="3 2"`)
+        : "",
+      freeFound.has(index)
+        ? `<rect x="0" y="0" width="${w}" height="${h}" rx="3" fill="${TILE_MARKS.found}" opacity="0.24"/>${ring(1, `stroke="${TILE_MARKS.found}" stroke-width="2.4"`)}`
+        : "",
+      blockedFound.has(index)
+        ? `<rect x="0" y="0" width="${w}" height="${h}" rx="3" fill="${TILE_MARKS.found}" opacity="0.1"/>${ring(1.6, `stroke="${TILE_MARKS.found}" stroke-width="1.3" stroke-dasharray="1.6 1.6"`)}`
+        : "",
+      marked.includes(index)
+        ? `${ring(1, `stroke="${TILE_MARKS.gold}" stroke-width="2"`)}<circle cx="${w - 5}" cy="5" r="3.2" fill="${TILE_MARKS.gold}" stroke="#fff" stroke-width="0.8"/>`
+        : "",
       hinted.includes(index) ? ring(1, `stroke="${TILE_MARKS.hinted}" stroke-width="2.6"`) : "",
       isChosen ? ring(1, `stroke="${TILE_MARKS.chosenRing}" stroke-width="2.6"`) : "",
     ];
@@ -256,7 +320,10 @@ export function layoutSvg(size: number, cells: string, options: LayoutSvgOptions
   const framed = options.margin === undefined ? null : layoutFrame(size, { mirror, margin: options.margin });
   const view = framed ?? { x: 0, y: 0, width: box.width, height: box.height };
   const margin = cloth === null ? 0 : CLOTH_MARGIN;
-  const felt = cloth === null ? "" : `<rect x="${view.x - margin}" y="${view.y - margin}" width="${view.width + 2 * margin}" height="${view.height + 2 * margin}" rx="${margin}" fill="${JARAJARA_CLOTHS[cloth].felt}" data-cloth="${cloth}"/>`;
+  const felt =
+    cloth === null
+      ? ""
+      : `<rect x="${view.x - margin}" y="${view.y - margin}" width="${view.width + 2 * margin}" height="${view.height + 2 * margin}" rx="${margin}" fill="${JARAJARA_CLOTHS[cloth].felt}" data-cloth="${cloth}"/>`;
   const faces = symbols ? tileFaceSymbols(prefix, { design, red: red.size > 0 }) : "";
   // The block, its shadow for each layer in use, and the edge laid over a face are drawn once and placed with a <use>.
   const used = new Set(layout.slots.map((slot) => Math.min(slot.z, 4)));

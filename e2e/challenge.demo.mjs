@@ -20,18 +20,43 @@ async function playOut(page, selector) {
   return taken;
 }
 
-const line = (page, selector, name = ".line") => page.locator(selector).evaluate((el, sel) => el.shadowRoot.querySelector(sel).textContent, name);
+const line = (page, selector, name = ".line") =>
+  page.locator(selector).evaluate((el, sel) => el.shadowRoot.querySelector(sel).textContent, name);
 
 test("every layout is offered and every one of them plays", async ({ page }) => {
   const errors = await open(page);
   const names = await page.locator("#layouts button").allTextContents();
-  expect(names).toEqual(["Torii", "Fuji", "Castle", "Turtle", "Pagoda", "Fortress", "Pyramid", "Bridge", "Butterfly", "Dragon", "Wall", "Palace"]);
+  expect(names).toEqual([
+    "Torii",
+    "Fuji",
+    "Castle",
+    "Turtle",
+    "Pagoda",
+    "Fortress",
+    "Pyramid",
+    "Bridge",
+    "Butterfly",
+    "Dragon",
+    "Wall",
+    "Palace",
+  ]);
   await expect(page.locator(at("gallery") + " .gallery-card")).toHaveCount(13);
-  for (const [size, tiles] of [[11, 94], [12, 116], [13, 142], [14, 84], [16, 112], [17, 142], [20, 288], [26, 576]]) {
+  for (const [size, tiles] of [
+    [11, 94],
+    [12, 116],
+    [13, 142],
+    [14, 84],
+    [16, 112],
+    [17, 142],
+    [20, 288],
+    [26, 576],
+  ]) {
     await tap(page, page.locator(`#layouts [data-value="${size}"]`));
     await expect(page.locator(at("game"))).toHaveAttribute("size", String(size));
     expect(await page.locator(at("game")).evaluate((el) => el.tilesLeft)).toBe(tiles);
-    expect(await page.locator(at("game")).evaluate((el) => el.shadowRoot.querySelectorAll("[data-slot]").length)).toBe(tiles);
+    expect(await page.locator(at("game")).evaluate((el) => el.shadowRoot.querySelectorAll("[data-slot]").length)).toBe(
+      tiles,
+    );
     // A pair can be taken at once.
     const pair = await page.locator(at("game")).evaluate((el) => el.hint());
     expect(pair).not.toBeNull();
@@ -40,7 +65,10 @@ test("every layout is offered and every one of them plays", async ({ page }) => 
 });
 
 test("a new layout is dealt from a seed the same way every time, and cleared by taking pairs", async ({ page }) => {
-  const errors = await bare(page, '<jarajara-layout id="a" size="14" seed="5" level="easy"></jarajara-layout><jarajara-layout id="b" size="14" seed="5" level="easy"></jarajara-layout>');
+  const errors = await bare(
+    page,
+    '<jarajara-layout id="a" size="14" seed="5" level="easy"></jarajara-layout><jarajara-layout id="b" size="14" seed="5" level="easy"></jarajara-layout>',
+  );
   expect(await page.locator("#a").evaluate((el) => el.cells)).toBe(await page.locator("#b").evaluate((el) => el.cells));
   const cleared = [];
   await page.exposeFunction("told", (detail) => cleared.push(detail));
@@ -53,7 +81,10 @@ test("a new layout is dealt from a seed the same way every time, and cleared by 
 });
 
 test("rush is won on the goal number of pairs, with tiles left on the layout", async ({ page }) => {
-  const errors = await bare(page, '<jarajara-layout id="g" size="9" seed="31" challenge="rush" timer controls></jarajara-layout>');
+  const errors = await bare(
+    page,
+    '<jarajara-layout id="g" size="9" seed="31" challenge="rush" timer controls></jarajara-layout>',
+  );
   expect(await line(page, "#g", ".goal")).toBe("0 of 21 pairs");
   expect(await line(page, "#g", ".clock")).toBe("3:00");
   const won = [];
@@ -71,7 +102,10 @@ test("rush is won on the goal number of pairs, with tiles left on the layout", a
 
 test("a clock runs down from the first pair, and a game whose time is up is lost", async ({ page }) => {
   await page.clock.install({ time: new Date("2026-10-01T10:00:00Z") });
-  const errors = await bare(page, '<jarajara-layout id="g" size="4" seed="3" challenge="spark" timer controls></jarajara-layout>');
+  const errors = await bare(
+    page,
+    '<jarajara-layout id="g" size="4" seed="3" challenge="spark" timer controls></jarajara-layout>',
+  );
   // 8 tiles at 2.5 seconds each: twenty seconds, held until the first pair.
   expect(await line(page, "#g", ".clock")).toBe("0:20");
   await page.clock.runFor(5000);
@@ -89,12 +123,19 @@ test("a clock runs down from the first pair, and a game whose time is up is lost
   expect(await line(page, "#g", ".clock")).toBe("0:00");
   // No more pairs, no undo (a spark game has none), and the buttons say so.
   expect(await page.locator("#g").evaluate((el) => el.undo())).toBe(false);
-  expect(await page.locator("#g").evaluate((el) => el.shadowRoot.querySelector('[data-action="undo"]').disabled)).toBe(true);
+  expect(await page.locator("#g").evaluate((el) => el.shadowRoot.querySelector('[data-action="undo"]').disabled)).toBe(
+    true,
+  );
   expect(errors).toEqual([]);
 });
 
-test("the gold pair and the purge's tiles are ringed in gold, and a purge is won when its group is gone", async ({ page }) => {
-  const errors = await bare(page, '<jarajara-layout id="g" size="9" seed="31" challenge="gold"></jarajara-layout><jarajara-layout id="p" size="9" seed="31" challenge="purge"></jarajara-layout>');
+test("the gold pair and the purge's tiles are ringed in gold, and a purge is won when its group is gone", async ({
+  page,
+}) => {
+  const errors = await bare(
+    page,
+    '<jarajara-layout id="g" size="9" seed="31" challenge="gold"></jarajara-layout><jarajara-layout id="p" size="9" seed="31" challenge="purge"></jarajara-layout>',
+  );
   const gold = (id) => page.locator(id).evaluate((el) => el.shadowRoot.querySelectorAll('[stroke="#d4a017"]').length);
   expect(await gold("#g")).toBeGreaterThanOrEqual(2);
   const marked = await gold("#p");
@@ -103,10 +144,16 @@ test("the gold pair and the purge's tiles are ringed in gold, and a purge is won
   for (let guard = 0; guard < 120; guard += 1) {
     const moved = await page.locator("#p").evaluate((el) => {
       if (el.run.over !== null) return "over";
-      const gold = new Set([...el.shadowRoot.querySelectorAll("g[data-slot]")].filter((g) => g.querySelector('[stroke="#d4a017"]')).map((g) => Number(g.dataset.slot)));
+      const gold = new Set(
+        [...el.shadowRoot.querySelectorAll("g[data-slot]")]
+          .filter((g) => g.querySelector('[stroke="#d4a017"]'))
+          .map((g) => Number(g.dataset.slot)),
+      );
       const free = [...el.shadowRoot.querySelectorAll('g[data-free="true"]')].map((g) => Number(g.dataset.slot));
       const cells = el.cells;
-      for (const a of free) for (const b of free) if (a < b && cells[a] === cells[b] && (gold.has(a) || gold.has(b)) && el.take(a, b)) return "taken";
+      for (const a of free)
+        for (const b of free)
+          if (a < b && cells[a] === cells[b] && (gold.has(a) || gold.has(b)) && el.take(a, b)) return "taken";
       const pair = el.hint();
       if (pair !== null) return el.take(pair[0], pair[1]) ? "taken" : "stuck";
       return el.shuffle() ? "shuffled" : "stuck";
@@ -119,13 +166,26 @@ test("the gold pair and the purge's tiles are ringed in gold, and a purge is won
 });
 
 test("blackout draws the covered tiles blank, and only the free ones show what they are", async ({ page }) => {
-  const errors = await bare(page, '<jarajara-layout id="g" size="9" seed="31" challenge="blackout" controls></jarajara-layout>');
-  const faces = () => page.locator("#g").evaluate((el) => [...el.shadowRoot.querySelectorAll("g[data-slot]")].map((g) => ({ free: g.dataset.free === "true", face: g.dataset.face })));
+  const errors = await bare(
+    page,
+    '<jarajara-layout id="g" size="9" seed="31" challenge="blackout" controls></jarajara-layout>',
+  );
+  const faces = () =>
+    page
+      .locator("#g")
+      .evaluate((el) =>
+        [...el.shadowRoot.querySelectorAll("g[data-slot]")].map((g) => ({
+          free: g.dataset.free === "true",
+          face: g.dataset.face,
+        })),
+      );
   const drawn = await faces();
   expect(drawn.filter((tile) => tile.free).every((tile) => tile.face !== "")).toBe(true);
   expect(drawn.filter((tile) => !tile.free).every((tile) => tile.face === "")).toBe(true);
   expect(drawn.filter((tile) => !tile.free).length).toBeGreaterThan(20);
-  expect(await page.locator("#g").evaluate((el) => el.shadowRoot.querySelector('[data-action="undo"]').disabled)).toBe(true);
+  expect(await page.locator("#g").evaluate((el) => el.shadowRoot.querySelector('[data-action="undo"]').disabled)).toBe(
+    true,
+  );
   expect(await line(page, "#g", ".goal")).toBe("Only free tiles show their faces.");
   // Taking pairs uncovers faces.
   await playOut(page, "#g");
@@ -144,9 +204,20 @@ test("sand shows the clock counting down and lets every pair add to it", async (
   expect(await line(page, "#g", ".clock")).toMatch(/^0:4[7-9]$/);
 });
 
-test("the demo's challenge buttons set the game's challenge, and today's game is the same for everybody", async ({ page }) => {
+test("the demo's challenge buttons set the game's challenge, and today's game is the same for everybody", async ({
+  page,
+}) => {
   const errors = await open(page);
-  await expect(page.locator(at("challenge-picks") + " button")).toHaveText(["Plain", "Gold", "Spark", "Rush", "Fortune", "Sand", "Purge", "Blackout"]);
+  await expect(page.locator(at("challenge-picks") + " button")).toHaveText([
+    "Plain",
+    "Gold",
+    "Spark",
+    "Rush",
+    "Fortune",
+    "Sand",
+    "Purge",
+    "Blackout",
+  ]);
   await tap(page, page.locator(at("challenge-picks") + " button", { hasText: "Rush" }));
   await expect(page.locator(at("game"))).toHaveAttribute("challenge", "rush");
   await expect(page.locator(at("challenge-note"))).toContainText("three minutes");

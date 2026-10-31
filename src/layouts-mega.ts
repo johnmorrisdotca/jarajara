@@ -42,7 +42,10 @@ function once(slots: MahjongSlot[]): MahjongSlot[] {
  */
 function greatWall(): MahjongLayout {
   const width = 20;
-  const mirror = (z: number, x0: number, y0: number, x1: number, y1: number) => [...block(z, x0, y0, x1, y1), ...block(z, width - 1 - x1, y0, width - 1 - x0, y1)];
+  const mirror = (z: number, x0: number, y0: number, x1: number, y1: number) => [
+    ...block(z, x0, y0, x1, y1),
+    ...block(z, width - 1 - x1, y0, width - 1 - x0, y1),
+  ];
   const wall = [
     ...block(0, 0, 3, 19, 6),
     ...mirror(0, 1, 1, 4, 8),

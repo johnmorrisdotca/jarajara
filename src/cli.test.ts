@@ -44,12 +44,40 @@ describe("the command line", () => {
   });
 
   it("names every command and option the usage lists", () => {
-    for (const command of ["layouts", "deal", "daily", "check", "play", "tile"]) expect(CLI_STRINGS.en.usage).toContain(`  ${command} `);
-    for (const option of ["--layout", "--level", "--seed", "--rule", "--players", "--date", "--givens", "--stdin", "--json", "--lang", "--help", "--version"]) expect(CLI_STRINGS.en.usage).toContain(option);
+    for (const command of ["layouts", "deal", "daily", "check", "play", "tile"])
+      expect(CLI_STRINGS.en.usage).toContain(`  ${command} `);
+    for (const option of [
+      "--layout",
+      "--level",
+      "--seed",
+      "--rule",
+      "--players",
+      "--date",
+      "--givens",
+      "--stdin",
+      "--json",
+      "--lang",
+      "--help",
+      "--version",
+    ])
+      expect(CLI_STRINGS.en.usage).toContain(option);
   });
 
   it("says a wrong command, option or value with exit code 2 and where to look", () => {
-    for (const args of [["nothing"], ["layouts", "--nope"], ["deal", "--seed"], ["deal", "--seed", "0"], ["deal", "--seed", "2147483648"], ["deal", "--layout", "99"], ["deal", "--level", "hard-ish"], ["deal", "--rule", "other"], ["play", "--players", "5"], ["daily", "--date", "2026-02-30"], ["deal", "--lang", "fr"], ["tile"]]) {
+    for (const args of [
+      ["nothing"],
+      ["layouts", "--nope"],
+      ["deal", "--seed"],
+      ["deal", "--seed", "0"],
+      ["deal", "--seed", "2147483648"],
+      ["deal", "--layout", "99"],
+      ["deal", "--level", "hard-ish"],
+      ["deal", "--rule", "other"],
+      ["play", "--players", "5"],
+      ["daily", "--date", "2026-02-30"],
+      ["deal", "--lang", "fr"],
+      ["tile"],
+    ]) {
       const result = run(...args);
       expect(result.code, args.join(" ")).toBe(2);
       expect(result.out).toBe("");
@@ -60,8 +88,12 @@ describe("the command line", () => {
 
   it("lists every layout by width, with its tiles and layers", () => {
     const layouts = parse("layouts").layouts;
-    expect(layouts.map((layout: { key: string }) => layout.key).sort()).toEqual(ALL_LAYOUTS.map((layout) => layout.key).sort());
-    expect(layouts.map((layout: { size: number }) => layout.size)).toEqual([...layouts.map((layout: { size: number }) => layout.size)].sort((a: number, b: number) => a - b));
+    expect(layouts.map((layout: { key: string }) => layout.key).sort()).toEqual(
+      ALL_LAYOUTS.map((layout) => layout.key).sort(),
+    );
+    expect(layouts.map((layout: { size: number }) => layout.size)).toEqual(
+      [...layouts.map((layout: { size: number }) => layout.size)].sort((a: number, b: number) => a - b),
+    );
     const turtle = layouts.find((layout: { key: string }) => layout.key === "turtle");
     expect(turtle).toMatchObject({ size: 15, name: "Turtle", nameJa: "亀", tiles: 144, layers: 5 });
     expect(run("layouts").out.trim().split("\n")).toHaveLength(ALL_LAYOUTS.length);
@@ -71,7 +103,16 @@ describe("the command line", () => {
   it("makes the deal the package makes, layer by layer, and says its answer", () => {
     const deal = generateAwase(15, "medium", 12345);
     const out = parse("deal", "--seed", "12345");
-    expect(out).toMatchObject({ layout: "turtle", size: 15, level: "medium", seed: 12345, rule: "group", tiles: 144, givens: deal.givens, solution: deal.solution });
+    expect(out).toMatchObject({
+      layout: "turtle",
+      size: 15,
+      level: "medium",
+      seed: 12345,
+      rule: "group",
+      tiles: 144,
+      givens: deal.givens,
+      solution: deal.solution,
+    });
     expect(out.layers).toHaveLength(5);
     // Every tile is on the page exactly once.
     const letters = out.layers.flat().join("").replace(/ /g, "");
@@ -86,7 +127,8 @@ describe("the command line", () => {
 
   it("takes a layout by width, key or Japanese name, and a level", () => {
     const small = generateAwase(8, "hard", 3);
-    for (const layout of ["8", "torii", "Torii", "鳥居"]) expect(parse("deal", "-l", layout, "--level", "hard", "-s", "3").givens).toBe(small.givens);
+    for (const layout of ["8", "torii", "Torii", "鳥居"])
+      expect(parse("deal", "-l", layout, "--level", "hard", "-s", "3").givens).toBe(small.givens);
   });
 
   it("draws a seed when none is given, says so on standard error, and keeps to the rule asked for", () => {
@@ -104,7 +146,13 @@ describe("the command line", () => {
   it("gives the day's game as the package works it out, and the deal command that plays it", () => {
     const day = dailyAwase("2026-10-01");
     const out = parse("daily", "--date", "2026-10-01");
-    expect(out).toMatchObject({ date: "2026-10-01", size: day.size, level: day.level, seed: day.seed, challenge: day.challenge });
+    expect(out).toMatchObject({
+      date: "2026-10-01",
+      size: day.size,
+      level: day.level,
+      seed: day.seed,
+      challenge: day.challenge,
+    });
     const text = run("daily", "--date", "2026-10-01").out;
     expect(text).toContain(`jarajara deal --layout ${day.size} --level ${day.level} --seed ${day.seed}`);
     expect(runCli(["daily"], { today: () => "2026-10-01" }).out).toBe(text);
@@ -126,12 +174,16 @@ describe("the command line", () => {
     expect(parse("check", "0000", "-l", "9", "--givens", deal.givens)).toMatchObject({ ok: false });
     expect(run("check", deal.solution, "-l", "9").code).toBe(2);
     expect(run("check", "-l", "9", "-s", "41").code).toBe(2);
-    expect(runCli(["check", "--stdin", "-l", "9", "--level", "easy", "-s", "41"], { stdin: `${deal.solution}\n` }).code).toBe(0);
+    expect(
+      runCli(["check", "--stdin", "-l", "9", "--level", "easy", "-s", "41"], { stdin: `${deal.solution}\n` }).code,
+    ).toBe(0);
     expect(runCli(["check", "--stdin", "-l", "9", "-s", "41"], { stdin: "" }).code).toBe(2);
   });
 
   it("looks a tile up by name, code or notation, and a hand tile by tile", () => {
-    expect(parse("tile", "three", "circles").tiles).toEqual([{ code: "l", en: "3 of circles", ja: "三筒", suit: "circles", rank: 3, copies: 4, notation: "3p" }]);
+    expect(parse("tile", "three", "circles").tiles).toEqual([
+      { code: "l", en: "3 of circles", ja: "三筒", suit: "circles", rank: 3, copies: 4, notation: "3p" },
+    ]);
     expect(parse("tile", "東").tiles[0].code).toBe("B");
     expect(parse("tile", "plum").tiles[0]).toMatchObject({ copies: 1, notation: "1f" });
     expect(parse("tile", "winds").tiles).toHaveLength(4);
@@ -156,7 +208,9 @@ describe("the command line", () => {
     expect(text).toContain("Awase at a table of 3: Torii, medium, seed 5. 32 pairs taken");
     expect(text).toMatch(/Computer 1: \d+ points, \d+ pairs\n/);
     expect(text).toMatch(/(Winner|Tied): Computer \d/);
-    expect(run("play", "--players", "2", "--layout", "8", "--seed", "5", "--lang", "ja").out).toContain("コンピュータ1");
+    expect(run("play", "--players", "2", "--layout", "8", "--seed", "5", "--lang", "ja").out).toContain(
+      "コンピュータ1",
+    );
     expect(run("play", "-l", "8", "-s", "5").out).toContain("table of 2");
   });
 });

@@ -88,7 +88,10 @@ export type BlockDirection = { x: 1 | -1; y: 1 | -1 };
  * ```
  */
 export function directionOf(mirror: TileMirror | undefined): BlockDirection {
-  return { x: mirror === "horizontal" || mirror === "both" ? -1 : 1, y: mirror === "vertical" || mirror === "both" ? -1 : 1 };
+  return {
+    x: mirror === "horizontal" || mirror === "both" ? -1 : 1,
+    y: mirror === "vertical" || mirror === "both" ? -1 : 1,
+  };
 }
 
 /** The colours a block is drawn in.
@@ -150,7 +153,11 @@ export function blockColours(design?: TileDesign, body?: string): BlockColours {
 }
 
 /** The three layers a shadow is drawn in: how far along its reach each lies, how much wider than the tile, and how dark. */
-export const SHADOW_LAYERS = [[0.35, 1, 0.16], [0.65, 2.2, 0.11], [1, 3.6, 0.07]] as const;
+export const SHADOW_LAYERS = [
+  [0.35, 1, 0.16],
+  [0.65, 2.2, 0.11],
+  [1, 3.6, 0.07],
+] as const;
 
 /** How far past the block's far side a shadow reaches for a tile on a layer: a little for one on the table, more the higher. */
 export function shadowReach(layer: number): number {
@@ -183,7 +190,14 @@ export function shadowSvg(colours: BlockColours, direction: BlockDirection, laye
   const sx = -direction.x;
   const sy = direction.y;
   const reach = shadowReach(layer);
-  return SHADOW_LAYERS.map(([along, grow, opacity]) => slab(sx * (TILE_DEPTH + reach * along), sy * (TILE_DEPTH + reach * along), grow, `fill="${colours.shadow}" opacity="${opacity}"`)).join("");
+  return SHADOW_LAYERS.map(([along, grow, opacity]) =>
+    slab(
+      sx * (TILE_DEPTH + reach * along),
+      sy * (TILE_DEPTH + reach * along),
+      grow,
+      `fill="${colours.shadow}" opacity="${opacity}"`,
+    ),
+  ).join("");
 }
 
 /**
@@ -211,7 +225,12 @@ export function blockSvg(colours: BlockColours, direction: BlockDirection, side:
     // Seen from the face the ivory layer is nearest; seen from the back it is the far one.
     const boundary = side === "face" ? LIP_STEPS : BLOCK_STEPS - LIP_STEPS;
     const lip = side === "face" ? step <= LIP_STEPS : step > boundary;
-    const edge = step === BLOCK_STEPS ? ` stroke="${lip ? colours.lipEdge : colours.bodyEdge}" stroke-width="0.8"` : step === boundary ? ` stroke="${colours.lipEdge}" stroke-width="0.5"` : "";
+    const edge =
+      step === BLOCK_STEPS
+        ? ` stroke="${lip ? colours.lipEdge : colours.bodyEdge}" stroke-width="0.8"`
+        : step === boundary
+          ? ` stroke="${colours.lipEdge}" stroke-width="0.5"`
+          : "";
     parts.push(slab(sx * at, sy * at, 0, `fill="${lip ? colours.lip : colours.body}"${edge}`));
   }
   // The sides' shading: a quad along each visible side, from the face's edge to the far side.
@@ -220,9 +239,32 @@ export function blockSvg(colours: BlockColours, direction: BlockDirection, side:
   const dy = sy * TILE_DEPTH;
   const vx = sx < 0 ? 0 : 30;
   const hy = sy > 0 ? 40 : 0;
-  const quad = (points: [number, number][], fill: string, opacity: number) => `<polygon points="${points.map(([x, y]) => `${num(x)},${num(y)}`).join(" ")}" fill="${fill}" opacity="${opacity}"/>`;
-  parts.push(quad([[vx, r], [vx + dx, r + dy], [vx + dx, 40 - r + dy], [vx, 40 - r]], sx < 0 ? "#ffffff" : "#000000", sx < 0 ? 0.1 : 0.16));
-  parts.push(quad([[r, hy], [r + dx, hy + dy], [30 - r + dx, hy + dy], [30 - r, hy]], sy > 0 ? "#000000" : "#ffffff", sy > 0 ? 0.24 : 0.1));
+  const quad = (points: [number, number][], fill: string, opacity: number) =>
+    `<polygon points="${points.map(([x, y]) => `${num(x)},${num(y)}`).join(" ")}" fill="${fill}" opacity="${opacity}"/>`;
+  parts.push(
+    quad(
+      [
+        [vx, r],
+        [vx + dx, r + dy],
+        [vx + dx, 40 - r + dy],
+        [vx, 40 - r],
+      ],
+      sx < 0 ? "#ffffff" : "#000000",
+      sx < 0 ? 0.1 : 0.16,
+    ),
+  );
+  parts.push(
+    quad(
+      [
+        [r, hy],
+        [r + dx, hy + dy],
+        [30 - r + dx, hy + dy],
+        [30 - r, hy],
+      ],
+      sy > 0 ? "#000000" : "#ffffff",
+      sy > 0 ? 0.24 : 0.1,
+    ),
+  );
   return parts.join("");
 }
 

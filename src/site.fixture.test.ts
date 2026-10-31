@@ -31,7 +31,10 @@ describe("the deals and games itsutsu.com made", () => {
   it("plays every recorded table of computers to the same end, the same scores and the same winners", () => {
     for (const was of fixture.tables) {
       const deal = generateAwase(was.size, "medium", was.seed);
-      let table = startTable(deal, Array.from({ length: was.seats }, () => ({ name: "", computer: true as const })));
+      let table = startTable(
+        deal,
+        Array.from({ length: was.seats }, () => ({ name: "", computer: true as const })),
+      );
       for (let step = 0; step < 400; step += 1) {
         const pair = computerPair(table);
         if (pair === null) break;
@@ -48,8 +51,22 @@ describe("the deals and games itsutsu.com made", () => {
   }, 600_000);
 
   it("keeps the set, every face's scoring and matching, and every layout's tiles", () => {
-    for (const was of fixture.sets) expect(setPairs(was.rule as "group" | "same", seededRandom(42)).map((pair) => pair.join("")).join(" ")).toBe(was.pairs);
-    expect(MAHJONG_FACES.map((face) => ({ ...face, points: pairPoints(face.code), group: matchClass(face.code, "group"), same: matchClass(face.code, "same") }))).toEqual(fixture.faces);
-    expect(MAHJONG_LAYOUTS.map((layout) => ({ size: layout.size, key: layout.key, slots: layout.slots.length }))).toEqual(fixture.layouts);
+    for (const was of fixture.sets)
+      expect(
+        setPairs(was.rule as "group" | "same", seededRandom(42))
+          .map((pair) => pair.join(""))
+          .join(" "),
+      ).toBe(was.pairs);
+    expect(
+      MAHJONG_FACES.map((face) => ({
+        ...face,
+        points: pairPoints(face.code),
+        group: matchClass(face.code, "group"),
+        same: matchClass(face.code, "same"),
+      })),
+    ).toEqual(fixture.faces);
+    expect(
+      MAHJONG_LAYOUTS.map((layout) => ({ size: layout.size, key: layout.key, slots: layout.slots.length })),
+    ).toEqual(fixture.layouts);
   });
 });

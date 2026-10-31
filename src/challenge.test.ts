@@ -1,7 +1,26 @@
 import { describe, expect, it } from "vitest";
 
 import { AWASE_SAME_BLOCK, bonusRuleOfSeed, generateAwase } from "./awase.ts";
-import { AWASE_CHALLENGE_NUMBERS, AWASE_CHALLENGES, awaseRules, dailyAwase, isAwaseChallenge, PURGE_GROUPS, readRun, runHint, runMarked, runPairs, runRemaining, runShuffle, runStart, runTake, runTick, runUndo, startRun, type AwaseRun } from "./challenge.ts";
+import {
+  AWASE_CHALLENGE_NUMBERS,
+  AWASE_CHALLENGES,
+  awaseRules,
+  dailyAwase,
+  isAwaseChallenge,
+  PURGE_GROUPS,
+  readRun,
+  runHint,
+  runMarked,
+  runPairs,
+  runRemaining,
+  runShuffle,
+  runStart,
+  runTake,
+  runTick,
+  runUndo,
+  startRun,
+  type AwaseRun,
+} from "./challenge.ts";
 import { layoutFor } from "./layouts.ts";
 import { seededRandom } from "./random.ts";
 import { EMPTY_SLOT, faceOf } from "./tiles.ts";
@@ -30,23 +49,55 @@ function playOut(start: AwaseRun, step: number, at = 0): AwaseRun {
 
 describe("the rules a game is played by", () => {
   it("are plain Awase without a challenge: no clock, no goal, everything allowed", () => {
-    expect(awaseRules(100)).toEqual({ challenge: null, hints: null, shuffles: null, undo: true, timeMs: null, reserveMs: null, pairBonusMs: 0, sparkBonusMs: 0, comboBonusMs: 0, goalPairs: null, goalScore: null, hideBlocked: false });
+    expect(awaseRules(100)).toEqual({
+      challenge: null,
+      hints: null,
+      shuffles: null,
+      undo: true,
+      timeMs: null,
+      reserveMs: null,
+      pairBonusMs: 0,
+      sparkBonusMs: 0,
+      comboBonusMs: 0,
+      goalPairs: null,
+      goalScore: null,
+      hideBlocked: false,
+    });
   });
 
   it("lay the options over what a challenge allows, and a challenge's take-aways stay taken", () => {
-    expect(awaseRules(100, { hints: 3, shuffles: 0, undo: false })).toMatchObject({ hints: 3, shuffles: 0, undo: false });
+    expect(awaseRules(100, { hints: 3, shuffles: 0, undo: false })).toMatchObject({
+      hints: 3,
+      shuffles: 0,
+      undo: false,
+    });
     expect(awaseRules(100, { challenge: "spark", undo: true }).undo).toBe(false);
-    expect(awaseRules(100, { challenge: "blackout", undo: true })).toMatchObject({ undo: false, hideBlocked: true, timeMs: null });
+    expect(awaseRules(100, { challenge: "blackout", undo: true })).toMatchObject({
+      undo: false,
+      hideBlocked: true,
+      timeMs: null,
+    });
     expect(awaseRules(100, { challenge: "gold" })).toMatchObject({ undo: true, timeMs: null });
   });
 
   it("scale a challenge's clock and goal to the layout", () => {
     const n = AWASE_CHALLENGE_NUMBERS;
-    expect(awaseRules(144, { challenge: "spark" })).toMatchObject({ timeMs: 144 * n.sparkMsPerTile, sparkBonusMs: 20_000 });
+    expect(awaseRules(144, { challenge: "spark" })).toMatchObject({
+      timeMs: 144 * n.sparkMsPerTile,
+      sparkBonusMs: 20_000,
+    });
     expect(awaseRules(144, { challenge: "rush" })).toMatchObject({ timeMs: 180_000, goalPairs: 30 });
     expect(awaseRules(8, { challenge: "rush" }).goalPairs).toBe(2);
-    expect(awaseRules(144, { challenge: "fortune" })).toMatchObject({ goalScore: 10_800, timeMs: 144 * n.fortuneMsPerTile });
-    expect(awaseRules(100, { challenge: "sand" })).toMatchObject({ timeMs: 45_000, reserveMs: 60_000, pairBonusMs: 5000, comboBonusMs: 1000 });
+    expect(awaseRules(144, { challenge: "fortune" })).toMatchObject({
+      goalScore: 10_800,
+      timeMs: 144 * n.fortuneMsPerTile,
+    });
+    expect(awaseRules(100, { challenge: "sand" })).toMatchObject({
+      timeMs: 45_000,
+      reserveMs: 60_000,
+      pairBonusMs: 5000,
+      comboBonusMs: 1000,
+    });
     expect(AWASE_CHALLENGES).toHaveLength(7);
     expect(isAwaseChallenge("sand")).toBe(true);
     expect(isAwaseChallenge("nonsense")).toBe(false);
@@ -74,7 +125,9 @@ describe("starting a game", () => {
     expect(runMarked(gold).length).toBeGreaterThanOrEqual(2);
     const purge = startRun(d, { challenge: "purge" });
     const group = PURGE_GROUPS.find((one) => one.key === purge.purge)!;
-    expect(runMarked(purge).every((slot) => (group.suits as readonly string[]).includes(faceOf(d.givens[slot]!)!.suit))).toBe(true);
+    expect(
+      runMarked(purge).every((slot) => (group.suits as readonly string[]).includes(faceOf(d.givens[slot]!)!.suit)),
+    ).toBe(true);
     expect(runMarked(purge).length).toBeGreaterThanOrEqual(8);
     expect(runMarked(startRun(d))).toEqual([]);
   });
@@ -103,7 +156,13 @@ describe("playing a game", () => {
     expect(run.score).toBeGreaterThan(32 * 100);
     expect(run.history).toHaveLength(run.moves.length);
     expect(runPairs(run)).toEqual([]);
-    expect(readRun(run, 0)).toMatchObject({ state: "won", because: "cleared", tilesLeft: 0, remainingMs: null, goal: null });
+    expect(readRun(run, 0)).toMatchObject({
+      state: "won",
+      because: "cleared",
+      tilesLeft: 0,
+      remainingMs: null,
+      goal: null,
+    });
   });
 
   it("refuses what the rules refuse, and a move after the end", () => {
@@ -293,7 +352,8 @@ describe("the challenges", () => {
     for (let guard = 0; guard < 80 && run.over === null; guard += 1) {
       const pairs = runPairs(run);
       const marked = new Set(runMarked(run));
-      const [a, b] = pairs.find(([x, y]) => marked.has(x) && marked.has(y)) ?? pairs.find(([x]) => marked.has(x)) ?? pairs[0]!;
+      const [a, b] =
+        pairs.find(([x, y]) => marked.has(x) && marked.has(y)) ?? pairs.find(([x]) => marked.has(x)) ?? pairs[0]!;
       run = runTake(run, a, b, guard * 100)!;
     }
     expect(run.over).toBe("won");

@@ -21,7 +21,10 @@ export function initDesigns(ctx) {
     set.setAttribute("captions", "off");
     red.setAttribute("aria-pressed", String(reds));
     for (const button of picks.children) button.setAttribute("aria-pressed", String(button.dataset.design === chosen));
-    ctx.show("design-code", `<jarajara-tile code="F" design="${chosen}"></jarajara-tile>\n<jarajara-layout size="8" design="${chosen}"${reds ? " red-fives" : ""} static></jarajara-layout>\n\nimport { loadTileDesign, tileSvg } from "@johnmorrisdotca/jarajara/faces";\ntileSvg("F", { design: await loadTileDesign("${chosen}") });`);
+    ctx.show(
+      "design-code",
+      `<jarajara-tile code="F" design="${chosen}"></jarajara-tile>\n<jarajara-layout size="8" design="${chosen}"${reds ? " red-fives" : ""} static></jarajara-layout>\n\nimport { loadTileDesign, tileSvg } from "@johnmorrisdotca/jarajara/faces";\ntileSvg("F", { design: await loadTileDesign("${chosen}") });`,
+    );
   };
   picks.replaceChildren(
     ...TILE_DESIGNS.map((name) => {

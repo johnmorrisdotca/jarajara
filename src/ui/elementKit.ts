@@ -14,11 +14,13 @@ import { STRINGS, fillIn } from "./strings.ts";
 import { createTileSounds, type PlayTileSoundOptions, type TileSoundKind, type TileSounds } from "./tileSounds.ts";
 
 /** What the elements extend: HTMLElement, or on a server, where there is none, an empty class, so that importing them never throws. */
-export const ElementBase: typeof HTMLElement = typeof HTMLElement === "undefined" ? (class {} as unknown as typeof HTMLElement) : HTMLElement;
+export const ElementBase: typeof HTMLElement =
+  typeof HTMLElement === "undefined" ? (class {} as unknown as typeof HTMLElement) : HTMLElement;
 
 /** Define an element's tag unless it is already defined, or there is no page to define it on. */
 export function defineElement(tag: string, element: CustomElementConstructor): void {
-  if (typeof customElements !== "undefined" && customElements.get(tag) === undefined) customElements.define(tag, element);
+  if (typeof customElements !== "undefined" && customElements.get(tag) === undefined)
+    customElements.define(tag, element);
 }
 
 const loadedDesigns = new Map<string, TileDesign | null>();
@@ -32,7 +34,11 @@ export function designNamed(name: string | null): { design: TileDesign | null; r
   if (name === null || name === "jarajara" || !isTileDesignName(name)) return { design: jarajaraDesign(), ready: null };
   const loaded = loadedDesigns.get(name);
   if (loaded !== undefined && loaded !== null) return { design: loaded, ready: null };
-  if (!loadingDesigns.has(name)) loadingDesigns.set(name, loadTileDesign(name).then((design) => (loadedDesigns.set(name, design), design)));
+  if (!loadingDesigns.has(name))
+    loadingDesigns.set(
+      name,
+      loadTileDesign(name).then((design) => (loadedDesigns.set(name, design), design)),
+    );
   return { design: null, ready: loadingDesigns.get(name) as Promise<TileDesign | null> };
 }
 
@@ -50,7 +56,9 @@ export function designNamed(name: string | null): { design: TileDesign | null; r
  * ```
  */
 export function languageOf(element: Element): TileLanguage {
-  const tag = element.closest("[lang]")?.getAttribute("lang") ?? (typeof document === "undefined" ? "" : document.documentElement.lang);
+  const tag =
+    element.closest("[lang]")?.getAttribute("lang") ??
+    (typeof document === "undefined" ? "" : document.documentElement.lang);
   return String(tag).toLowerCase().startsWith("ja") ? "ja" : "en";
 }
 
@@ -144,7 +152,10 @@ export function followLanguage(redraw: () => void): () => void {
 }
 
 /** The back an element draws: the one named by `back`, or the design's own (jade for Jarajara's), with the colour and mark it was given. */
-export function backFor(element: Element, design: TileDesign | null): { name: string; design?: TileDesign; colour?: string; mark?: string } {
+export function backFor(
+  element: Element,
+  design: TileDesign | null,
+): { name: string; design?: TileDesign; colour?: string; mark?: string } {
   const asked = element.getAttribute("back");
   const colour = element.getAttribute("back-colour") ?? undefined;
   const mark = element.getAttribute("mark") ?? undefined;
@@ -165,7 +176,13 @@ export function tileLabel(code: string, faceDown: boolean, language: TileLanguag
 }
 
 /** One tile's drawing as an element puts it in the page: its face, or its back, alone (`bare`), for the element's block to give it thickness. Decoration: the element names it. */
-export function tileDrawing(code: string, faceDown: boolean, element: Element, design: TileDesign | null, red = false): string {
+export function tileDrawing(
+  code: string,
+  faceDown: boolean,
+  element: Element,
+  design: TileDesign | null,
+  red = false,
+): string {
   if (faceDown) {
     const back = backFor(element, design);
     return tileBackSvg(back.name, { ...back, title: "", bare: true }) ?? "";
@@ -178,7 +195,8 @@ export function tileDrawing(code: string, faceDown: boolean, element: Element, d
 /** Lay an element on its cloth: the custom properties of the cloth named by `cloth`, and none, so the page's own, for no cloth. */
 export function wearCloth(element: HTMLElement): void {
   const name = element.getAttribute("cloth");
-  for (const property of ["--jarajara-felt", "--jarajara-felt-deep", "--jarajara-felt-ink"]) element.style.removeProperty(property);
+  for (const property of ["--jarajara-felt", "--jarajara-felt-deep", "--jarajara-felt-ink"])
+    element.style.removeProperty(property);
   for (const [property, value] of Object.entries(clothVars(name))) element.style.setProperty(property, value);
   element.toggleAttribute("data-cloth", isCloth(name));
   if (isCloth(name)) element.dataset.cloth = name;
@@ -190,11 +208,20 @@ export const FRAME_MARGIN = 3;
 /** A `box` attribute as a CSS aspect ratio: `3/2`, `1.5`, or a name; null for nothing (the board then takes the height its layout gives it). */
 export function boxOf(text: string | null): string | null {
   if (text === null) return null;
-  const named = { landscape: "3 / 2", portrait: "2 / 3", square: "1 / 1" }[text.trim().toLowerCase() as "landscape" | "portrait" | "square"];
+  const named = { landscape: "3 / 2", portrait: "2 / 3", square: "1 / 1" }[
+    text.trim().toLowerCase() as "landscape" | "portrait" | "square"
+  ];
   if (named !== undefined) return named;
   const parts = text.split("/").map((part) => Number(part.trim()));
   const [across, down = 1] = parts;
-  return parts.length <= 2 && across !== undefined && Number.isFinite(across) && across > 0 && Number.isFinite(down) && down > 0 ? `${across} / ${down}` : null;
+  return parts.length <= 2 &&
+    across !== undefined &&
+    Number.isFinite(across) &&
+    across > 0 &&
+    Number.isFinite(down) &&
+    down > 0
+    ? `${across} / ${down}`
+    : null;
 }
 
 /**
@@ -256,7 +283,11 @@ export function spinElement(element: HTMLElement, options: SpinOptions = {}, del
   const turns = Math.min(20, Math.max(1, Math.round(Number.isFinite(options.turns) ? (options.turns as number) : 3)));
   const sign = options.direction === "anticlockwise" ? -1 : 1;
   const ms = Number.isFinite(options.ms) && (options.ms as number) > 0 ? (options.ms as number) : 700 + 420 * turns;
-  const run = element.animate([{ transform: "rotate(0deg)" }, { transform: `rotate(${sign * 360 * turns}deg)` }], { duration: ms, delay, easing: "cubic-bezier(.06, .72, .2, 1)" });
+  const run = element.animate([{ transform: "rotate(0deg)" }, { transform: `rotate(${sign * 360 * turns}deg)` }], {
+    duration: ms,
+    delay,
+    easing: "cubic-bezier(.06, .72, .2, 1)",
+  });
   return run.finished.then(
     () => undefined,
     () => undefined,
@@ -373,7 +404,10 @@ export function playSound(element: Element, kind: TileSoundKind, options?: PlayT
   for (let at = playing.length - 1; at >= 0; at -= 1) if (playing[at]!.until <= now) playing.splice(at, 1);
   const heard = Math.min(options?.count ?? 1, 8);
   if (playing.reduce((sum, one) => sum + one.heard, 0) + heard > MOST_SOUNDING) return;
-  playing.push({ heard, until: now + (options?.delay ?? 0) + Math.max(0, (options?.count ?? 1) - 1) * (options?.gap ?? 85) + SOUND_TAIL_MS });
+  playing.push({
+    heard,
+    until: now + (options?.delay ?? 0) + Math.max(0, (options?.count ?? 1) - 1) * (options?.gap ?? 85) + SOUND_TAIL_MS,
+  });
   pageSounds().play(kind, options);
 }
 

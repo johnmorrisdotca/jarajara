@@ -64,7 +64,13 @@ export type AwaseTable = {
  * console.log(value);
  * ```
  */
-export type AwaseTake = { seat: number; pair: readonly [number, number]; codes: readonly [string, string]; points: number; again: boolean };
+export type AwaseTake = {
+  seat: number;
+  pair: readonly [number, number];
+  codes: readonly [string, string];
+  points: number;
+  again: boolean;
+};
 
 /** Where a game at the table stands, read from its pairs.
  *

@@ -3,7 +3,9 @@
 // A test fails if the two fall out of step.
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 
-const files = readdirSync("sounds").filter((name) => name.endsWith(".m4a")).sort();
+const files = readdirSync("sounds")
+  .filter((name) => name.endsWith(".m4a"))
+  .sort();
 const entry = (name) => `  "${name.replace(".m4a", "")}":\n    "${readFileSync(`sounds/${name}`).toString("base64")}",`;
 const lines = [
   "/**",
@@ -15,7 +17,7 @@ const lines = [
   " *",
   " * @example",
   " * ```ts",
-  " * import { TILE_SOUND_DATA } from \"@johnmorrisdotca/jarajara/sounds\";",
+  ' * import { TILE_SOUND_DATA } from "@johnmorrisdotca/jarajara/sounds";',
   " * console.log(Object.keys(TILE_SOUND_DATA));",
   " * ```",
   " */",
@@ -26,8 +28,8 @@ const lines = [
   "/** The name of one recording: its kind of sound and a number, such as `pick-1`.",
   " * @example",
   " * ```ts",
-  " * import type { TileSoundFile } from \"@johnmorrisdotca/jarajara/sounds\";",
-  " * const file: TileSoundFile = \"pick-1\";",
+  ' * import type { TileSoundFile } from "@johnmorrisdotca/jarajara/sounds";',
+  ' * const file: TileSoundFile = "pick-1";',
   " * console.log(file);",
   " * ```",
   " */",
@@ -35,4 +37,6 @@ const lines = [
   "",
 ];
 writeFileSync("src/sounds.ts", lines.join("\n"));
-console.log(`src/sounds.ts: ${files.length} recordings, ${files.reduce((sum, name) => sum + readFileSync(`sounds/${name}`).length, 0)} bytes of audio.`);
+console.log(
+  `src/sounds.ts: ${files.length} recordings, ${files.reduce((sum, name) => sum + readFileSync(`sounds/${name}`).length, 0)} bytes of audio.`,
+);

@@ -136,7 +136,20 @@ export const SUIT_WORDS: Readonly<Record<MahjongSuit, { en: string; ja: string }
  * console.log(TILE_GROUPS);
  * ```
  */
-export const TILE_GROUPS = ["characters", "circles", "bamboo", "winds", "dragons", "flowers", "seasons", "numbers", "honours", "bonus", "terminals", "simples"] as const;
+export const TILE_GROUPS = [
+  "characters",
+  "circles",
+  "bamboo",
+  "winds",
+  "dragons",
+  "flowers",
+  "seasons",
+  "numbers",
+  "honours",
+  "bonus",
+  "terminals",
+  "simples",
+] as const;
 
 /** A group's name.
  *
@@ -267,33 +280,111 @@ export function countTiles(codes: Iterable<string>): Map<string, number> {
   return counts;
 }
 
-const WORD_NUMBERS: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9 };
-const SUIT_WORDS_IN: Record<string, MahjongSuit> = {
-  characters: "characters", character: "characters", man: "characters", wan: "characters", 萬: "characters", 萬子: "characters", 万: "characters",
-  circles: "circles", circle: "circles", dots: "circles", dot: "circles", coins: "circles", pin: "circles", 筒: "circles", 筒子: "circles",
-  bamboo: "bamboo", bamboos: "bamboo", sticks: "bamboo", sou: "bamboo", 索: "bamboo", 索子: "bamboo",
+const WORD_NUMBERS: Record<string, number> = {
+  one: 1,
+  two: 2,
+  three: 3,
+  four: 4,
+  five: 5,
+  six: 6,
+  seven: 7,
+  eight: 8,
+  nine: 9,
 };
-const NOTATION_SUITS: Record<string, MahjongSuit> = { m: "characters", p: "circles", s: "bamboo", z: "winds", f: "flowers", t: "seasons" };
+const SUIT_WORDS_IN: Record<string, MahjongSuit> = {
+  characters: "characters",
+  character: "characters",
+  man: "characters",
+  wan: "characters",
+  萬: "characters",
+  萬子: "characters",
+  万: "characters",
+  circles: "circles",
+  circle: "circles",
+  dots: "circles",
+  dot: "circles",
+  coins: "circles",
+  pin: "circles",
+  筒: "circles",
+  筒子: "circles",
+  bamboo: "bamboo",
+  bamboos: "bamboo",
+  sticks: "bamboo",
+  sou: "bamboo",
+  索: "bamboo",
+  索子: "bamboo",
+};
+const NOTATION_SUITS: Record<string, MahjongSuit> = {
+  m: "characters",
+  p: "circles",
+  s: "bamboo",
+  z: "winds",
+  f: "flowers",
+  t: "seasons",
+};
 
-const faceBy = (suit: MahjongSuit, rank: number): MahjongFace | null => MAHJONG_FACES.find((face) => face.suit === suit && face.rank === rank) ?? null;
+const faceBy = (suit: MahjongSuit, rank: number): MahjongFace | null =>
+  MAHJONG_FACES.find((face) => face.suit === suit && face.rank === rank) ?? null;
 
 /** The names the honours and bonus tiles go by besides their English ones: Japanese readings and the kanji. */
 const ALIASES: Record<string, [MahjongSuit, number]> = {
-  east: ["winds", 1], "east wind": ["winds", 1], ton: ["winds", 1], 東: ["winds", 1],
-  south: ["winds", 2], "south wind": ["winds", 2], nan: ["winds", 2], 南: ["winds", 2],
-  west: ["winds", 3], "west wind": ["winds", 3], shaa: ["winds", 3], sha: ["winds", 3], 西: ["winds", 3],
-  north: ["winds", 4], "north wind": ["winds", 4], pei: ["winds", 4], 北: ["winds", 4],
-  red: ["dragons", 1], "red dragon": ["dragons", 1], chun: ["dragons", 1], 中: ["dragons", 1],
-  green: ["dragons", 2], "green dragon": ["dragons", 2], hatsu: ["dragons", 2], 發: ["dragons", 2], 発: ["dragons", 2],
-  white: ["dragons", 3], "white dragon": ["dragons", 3], haku: ["dragons", 3], 白: ["dragons", 3],
-  plum: ["flowers", 1], "plum flower": ["flowers", 1], "plum blossom": ["flowers", 1], 梅: ["flowers", 1],
-  orchid: ["flowers", 2], "orchid flower": ["flowers", 2], 蘭: ["flowers", 2],
-  chrysanthemum: ["flowers", 3], "chrysanthemum flower": ["flowers", 3], mum: ["flowers", 3], 菊: ["flowers", 3],
-  "bamboo flower": ["flowers", 4], "flower bamboo": ["flowers", 4], 竹: ["flowers", 4],
-  spring: ["seasons", 1], "spring season": ["seasons", 1], 春: ["seasons", 1],
-  summer: ["seasons", 2], "summer season": ["seasons", 2], 夏: ["seasons", 2],
-  autumn: ["seasons", 3], fall: ["seasons", 3], "autumn season": ["seasons", 3], 秋: ["seasons", 3],
-  winter: ["seasons", 4], "winter season": ["seasons", 4], 冬: ["seasons", 4],
+  east: ["winds", 1],
+  "east wind": ["winds", 1],
+  ton: ["winds", 1],
+  東: ["winds", 1],
+  south: ["winds", 2],
+  "south wind": ["winds", 2],
+  nan: ["winds", 2],
+  南: ["winds", 2],
+  west: ["winds", 3],
+  "west wind": ["winds", 3],
+  shaa: ["winds", 3],
+  sha: ["winds", 3],
+  西: ["winds", 3],
+  north: ["winds", 4],
+  "north wind": ["winds", 4],
+  pei: ["winds", 4],
+  北: ["winds", 4],
+  red: ["dragons", 1],
+  "red dragon": ["dragons", 1],
+  chun: ["dragons", 1],
+  中: ["dragons", 1],
+  green: ["dragons", 2],
+  "green dragon": ["dragons", 2],
+  hatsu: ["dragons", 2],
+  發: ["dragons", 2],
+  発: ["dragons", 2],
+  white: ["dragons", 3],
+  "white dragon": ["dragons", 3],
+  haku: ["dragons", 3],
+  白: ["dragons", 3],
+  plum: ["flowers", 1],
+  "plum flower": ["flowers", 1],
+  "plum blossom": ["flowers", 1],
+  梅: ["flowers", 1],
+  orchid: ["flowers", 2],
+  "orchid flower": ["flowers", 2],
+  蘭: ["flowers", 2],
+  chrysanthemum: ["flowers", 3],
+  "chrysanthemum flower": ["flowers", 3],
+  mum: ["flowers", 3],
+  菊: ["flowers", 3],
+  "bamboo flower": ["flowers", 4],
+  "flower bamboo": ["flowers", 4],
+  竹: ["flowers", 4],
+  spring: ["seasons", 1],
+  "spring season": ["seasons", 1],
+  春: ["seasons", 1],
+  summer: ["seasons", 2],
+  "summer season": ["seasons", 2],
+  夏: ["seasons", 2],
+  autumn: ["seasons", 3],
+  fall: ["seasons", 3],
+  "autumn season": ["seasons", 3],
+  秋: ["seasons", 3],
+  winter: ["seasons", 4],
+  "winter season": ["seasons", 4],
+  冬: ["seasons", 4],
 };
 
 /** A number in a tile's name: a digit, an English word, or a kanji numeral. */
@@ -326,7 +417,13 @@ export function findFace(text: string): MahjongFace | null {
   const raw = text.trim();
   if (raw.length === 0) return null;
   if (raw.length === 1 && isFaceCode(raw)) return faceOf(raw);
-  const lower = raw.toLowerCase().replace(/[-_()]+/g, " ").replace(/\s+/g, " ").replace(/\b(tiles?|of the|the)\b/g, " ").replace(/\s+/g, " ").trim();
+  const lower = raw
+    .toLowerCase()
+    .replace(/[-_()]+/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/\b(tiles?|of the|the)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
   const alias = ALIASES[lower] ?? ALIASES[raw];
   if (alias !== undefined) return faceBy(alias[0], alias[1]);
   // The notation: a digit and a suit letter.
@@ -334,11 +431,19 @@ export function findFace(text: string): MahjongFace | null {
   if (note !== null) {
     const rank = Number(note[1]) === 0 ? 5 : Number(note[1]);
     const suit = NOTATION_SUITS[note[2]!]!;
-    if (suit === "winds") return rank <= 4 ? faceBy("winds", rank) : rank <= 7 ? faceBy("dragons", ({ 5: 3, 6: 2, 7: 1 } as Record<number, number>)[rank]!) : null;
+    if (suit === "winds")
+      return rank <= 4
+        ? faceBy("winds", rank)
+        : rank <= 7
+          ? faceBy("dragons", ({ 5: 3, 6: 2, 7: 1 } as Record<number, number>)[rank]!)
+          : null;
     return faceBy(suit, rank);
   }
   // A number and a suit, either way round, with or without "of".
-  const tokens = lower.replace(/\bof\b/g, " ").split(/\s+/).filter(Boolean);
+  const tokens = lower
+    .replace(/\bof\b/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
   const spaced = tokens.length === 1 ? raw.match(/^([一二三四五六七八九1-9])\s*(萬子?|万|筒子?|索子?)$/) : null;
   const parts = spaced === null ? tokens : [spaced[1]!, spaced[2]!];
   if (parts.length === 2) {
@@ -367,9 +472,28 @@ export function findFace(text: string): MahjongFace | null {
 export function findFaces(text: string): MahjongFace[] {
   const one = findFace(text);
   if (one !== null) return [one];
-  const name = typeof text === "string" ? text.trim().toLowerCase().replace(/[-_\s]+/g, " ") : "";
+  const name =
+    typeof text === "string"
+      ? text
+          .trim()
+          .toLowerCase()
+          .replace(/[-_\s]+/g, " ")
+      : "";
   if (isTileGroup(name)) return groupFaces(name);
-  const singular: Record<string, TileGroup> = { wind: "winds", dragon: "dragons", flower: "flowers", season: "seasons", honour: "honours", honor: "honours", honors: "honours", circle: "circles", character: "characters", terminal: "terminals", simple: "simples", number: "numbers" };
+  const singular: Record<string, TileGroup> = {
+    wind: "winds",
+    dragon: "dragons",
+    flower: "flowers",
+    season: "seasons",
+    honour: "honours",
+    honor: "honours",
+    honors: "honours",
+    circle: "circles",
+    character: "characters",
+    terminal: "terminals",
+    simple: "simples",
+    number: "numbers",
+  };
   return singular[name] === undefined ? [] : groupFaces(singular[name]!);
 }
 

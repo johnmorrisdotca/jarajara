@@ -13,7 +13,13 @@ export function rgbOf(text: string): [number, number, number] | null {
 
 /** `share` of the way from one colour to another, as `#rrggbb`. */
 export function mixColours(from: [number, number, number], to: [number, number, number], share: number): string {
-  return `#${from.map((value, at) => Math.round(value + (to[at]! - value) * share).toString(16).padStart(2, "0")).join("")}`;
+  return `#${from
+    .map((value, at) =>
+      Math.round(value + (to[at]! - value) * share)
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")}`;
 }
 
 /** How light a colour is, 0 (black) to 1 (white). A text that is no colour counts as middling. */

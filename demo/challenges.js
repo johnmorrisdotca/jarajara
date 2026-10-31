@@ -19,5 +19,8 @@ export function initChallenges(ctx) {
   };
   paint();
   ctx.onLang(paint);
-  ctx.show("challenge-code", `<jarajara-layout size="15" challenge="spark" hints="3" shuffles="1" timer controls></jarajara-layout>\n\nimport { startRun, runHint, runTake, readRun, dailyAwase } from "@johnmorrisdotca/jarajara/awase";\n\nlet run = startRun(deal, { challenge: "rush", hints: 3, undo: false });\nrun = runTake(run, a, b, Date.now());   // the new game, or null where the rules say no\nreadRun(run, Date.now());                // { state, remainingMs, goal, ... }\ndailyAwase("2026-10-01");                // the day's layout, level, seed and challenge`);
+  ctx.show(
+    "challenge-code",
+    `<jarajara-layout size="15" challenge="spark" hints="3" shuffles="1" timer controls></jarajara-layout>\n\nimport { startRun, runHint, runTake, readRun, dailyAwase } from "@johnmorrisdotca/jarajara/awase";\n\nlet run = startRun(deal, { challenge: "rush", hints: 3, undo: false });\nrun = runTake(run, a, b, Date.now());   // the new game, or null where the rules say no\nreadRun(run, Date.now());                // { state, remainingMs, goal, ... }\ndailyAwase("2026-10-01");                // the day's layout, level, seed and challenge`,
+  );
 }

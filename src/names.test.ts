@@ -1,6 +1,23 @@
 import { describe, expect, it } from "vitest";
 
-import { copiesOf, countTiles, faceWords, faceWordsJa, findFace, findFaces, groupFaces, groupWords, isNotation, readNotation, readTiles, setInventory, TILE_GROUPS, tileName, writeNotation, writeTiles } from "./names.ts";
+import {
+  copiesOf,
+  countTiles,
+  faceWords,
+  faceWordsJa,
+  findFace,
+  findFaces,
+  groupFaces,
+  groupWords,
+  isNotation,
+  readNotation,
+  readTiles,
+  setInventory,
+  TILE_GROUPS,
+  tileName,
+  writeNotation,
+  writeTiles,
+} from "./names.ts";
 import { MAHJONG_FACES } from "./tiles.ts";
 
 describe("names", () => {
@@ -21,11 +38,35 @@ describe("names", () => {
       expect(findFace(faceWords(face))?.code, faceWords(face)).toBe(face.code);
       expect(findFace(faceWordsJa(face))?.code, faceWordsJa(face)).toBe(face.code);
     }
-    for (const text of ["3 of circles", "circles 3", "three circles", "3-circles", "Circles-3", "3p", "3 pin", "三筒"]) expect(findFace(text)?.code, text).toBe("l");
-    for (const [text, code] of [["east", "B"], ["East Wind", "B"], ["ton", "B"], ["1z", "B"], ["4z", "E"], ["red", "F"], ["7z", "F"], ["6z", "G"], ["hatsu", "G"], ["white dragon", "H"], ["5z", "H"], ["haku", "H"], ["plum", "I"], ["bamboo flower", "L"], ["1f", "I"], ["spring", "M"], ["4t", "P"], ["flower 2", "J"], ["0m", "e"], ["0p", "n"], ["0s", "w"]] as const) {
+    for (const text of ["3 of circles", "circles 3", "three circles", "3-circles", "Circles-3", "3p", "3 pin", "三筒"])
+      expect(findFace(text)?.code, text).toBe("l");
+    for (const [text, code] of [
+      ["east", "B"],
+      ["East Wind", "B"],
+      ["ton", "B"],
+      ["1z", "B"],
+      ["4z", "E"],
+      ["red", "F"],
+      ["7z", "F"],
+      ["6z", "G"],
+      ["hatsu", "G"],
+      ["white dragon", "H"],
+      ["5z", "H"],
+      ["haku", "H"],
+      ["plum", "I"],
+      ["bamboo flower", "L"],
+      ["1f", "I"],
+      ["spring", "M"],
+      ["4t", "P"],
+      ["flower 2", "J"],
+      ["0m", "e"],
+      ["0p", "n"],
+      ["0s", "w"],
+    ] as const) {
       expect(findFace(text)?.code, text).toBe(code);
     }
-    for (const text of ["", "  ", "nothing", "8z", "10p", "3", "bamboo", "circles"]) expect(findFace(text), text).toBeNull();
+    for (const text of ["", "  ", "nothing", "8z", "10p", "3", "bamboo", "circles"])
+      expect(findFace(text), text).toBeNull();
   });
 
   it("finds a group's tiles by its name", () => {
@@ -39,7 +80,20 @@ describe("names", () => {
 
   it("splits the 144 tiles into groups that add up", () => {
     const sizes = Object.fromEntries(TILE_GROUPS.map((group) => [group, groupFaces(group).length]));
-    expect(sizes).toMatchObject({ characters: 9, circles: 9, bamboo: 9, winds: 4, dragons: 3, flowers: 4, seasons: 4, numbers: 27, honours: 7, bonus: 8, terminals: 6, simples: 21 });
+    expect(sizes).toMatchObject({
+      characters: 9,
+      circles: 9,
+      bamboo: 9,
+      winds: 4,
+      dragons: 3,
+      flowers: 4,
+      seasons: 4,
+      numbers: 27,
+      honours: 7,
+      bonus: 8,
+      terminals: 6,
+      simples: 21,
+    });
     for (const group of TILE_GROUPS) expect(groupWords(group, "en").length).toBeGreaterThan(2);
     expect(groupWords("winds", "ja")).toBe("風牌");
   });
@@ -51,7 +105,11 @@ describe("names", () => {
     expect(copiesOf("a")).toBe(4);
     expect(copiesOf("I")).toBe(1);
     expect(copiesOf("?")).toBe(0);
-    expect([...countTiles("aabF?").entries()]).toEqual([["a", 2], ["b", 1], ["F", 1]]);
+    expect([...countTiles("aabF?").entries()]).toEqual([
+      ["a", 2],
+      ["b", 1],
+      ["F", 1],
+    ]);
   });
 
   it("writes hands as notation and reads them back", () => {

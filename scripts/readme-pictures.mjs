@@ -24,7 +24,10 @@ const take = (pairs) => (page) =>
     }
   }, pairs);
 
-const scrollTo = (selector) => (page) => page.locator(selector).evaluate((element) => window.scrollTo(0, element.getBoundingClientRect().top + window.scrollY - 16));
+const scrollTo = (selector) => (page) =>
+  page
+    .locator(selector)
+    .evaluate((element) => window.scrollTo(0, element.getBoundingClientRect().top + window.scrollY - 16));
 
 /** Open one of the page's tabs, and wait for its panel to show. */
 const tab = (name) => async (page) => {
@@ -44,7 +47,13 @@ await takePictures({
       height: 1000,
       async prepare(page, { view }) {
         if (view === "phone") {
-          await page.addInitScript((keep) => localStorage.setItem("jarajara.page", JSON.stringify(keep)), { size: 9, level: "easy", seed: 2026, moves: "", showFree: true });
+          await page.addInitScript((keep) => localStorage.setItem("jarajara.page", JSON.stringify(keep)), {
+            size: 9,
+            level: "easy",
+            seed: 2026,
+            moves: "",
+            showFree: true,
+          });
           await page.goto("http://jarajara.test/?lang=ja&help=off");
           await page.waitForSelector(READY);
           await take(8)(page);
@@ -56,11 +65,34 @@ await takePictures({
       },
     },
     // Awase on the Turtle: the free tiles lit, and the buttons and the line that says how the game stands.
-    { subject: "awase", views: ["desk"], url: "/?lang=en&help=off", ...kept({ size: 15, showFree: true }), ready: READY, target: "#game", prepare: take(6) },
+    {
+      subject: "awase",
+      views: ["desk"],
+      url: "/?lang=en&help=off",
+      ...kept({ size: 15, showFree: true }),
+      ready: READY,
+      target: "#game",
+      prepare: take(6),
+    },
     // A game with a clock: the Spark challenge on the Torii.
-    { subject: "challenge", views: ["desk"], url: "/?lang=en&help=off", ...kept({ size: 8, extra: { challenge: "spark" } }), ready: READY, target: "#game", prepare: take(3) },
+    {
+      subject: "challenge",
+      views: ["desk"],
+      url: "/?lang=en&help=off",
+      ...kept({ size: 8, extra: { challenge: "spark" } }),
+      ready: READY,
+      target: "#game",
+      prepare: take(3),
+    },
     // One tile, face up, with the backs to choose from.
-    { subject: "tiles", views: ["desk"], url: "/?lang=en&help=off", ...kept({ size: 8 }), ready: READY, target: "#pane-tiles" },
+    {
+      subject: "tiles",
+      views: ["desk"],
+      url: "/?lang=en&help=off",
+      ...kept({ size: 8 }),
+      ready: READY,
+      target: "#pane-tiles",
+    },
     // A hand in a rack, sorted and grouped.
     {
       subject: "rack",
@@ -76,12 +108,44 @@ await takePictures({
       },
     },
     // The whole set: 42 faces and how many of each.
-    { subject: "set", views: ["desk"], url: "/?lang=en&help=off", ...kept({ size: 8 }), ready: READY, target: "#pane-set", prepare: tab("set") },
+    {
+      subject: "set",
+      views: ["desk"],
+      url: "/?lang=en&help=off",
+      ...kept({ size: 8 }),
+      ready: READY,
+      target: "#pane-set",
+      prepare: tab("set"),
+    },
     // The thirteen layouts.
-    { subject: "layouts", views: ["desk"], url: "/?lang=en&help=off", ...kept({ size: 8 }), ready: READY, target: "#pane-layouts", prepare: tab("layouts") },
+    {
+      subject: "layouts",
+      views: ["desk"],
+      url: "/?lang=en&help=off",
+      ...kept({ size: 8 }),
+      ready: READY,
+      target: "#pane-layouts",
+      prepare: tab("layouts"),
+    },
     // Awase at a table of two, with a computer.
-    { subject: "table", views: ["desk"], url: "/?lang=en&help=off", ...kept({ size: 8 }), ready: READY, target: "#pane-table", prepare: tab("table") },
+    {
+      subject: "table",
+      views: ["desk"],
+      url: "/?lang=en&help=off",
+      ...kept({ size: 8 }),
+      ready: READY,
+      target: "#pane-table",
+      prepare: tab("table"),
+    },
     // The designs: Jarajara's own and the riichi tiles, regular and black.
-    { subject: "designs", views: ["desk"], url: "/?lang=en&help=off", ...kept({ size: 8 }), ready: READY, target: "#pane-designs", prepare: tab("designs") },
+    {
+      subject: "designs",
+      views: ["desk"],
+      url: "/?lang=en&help=off",
+      ...kept({ size: 8 }),
+      ready: READY,
+      target: "#pane-designs",
+      prepare: tab("designs"),
+    },
   ],
 });

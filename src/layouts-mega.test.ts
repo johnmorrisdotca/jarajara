@@ -31,7 +31,9 @@ describe("the mega layouts", () => {
       expect(keys, layout.key).toEqual([...keys].sort((a, b) => a - b));
       for (const slot of layout.slots.filter((one) => one.z > 0)) {
         expect(
-          layout.slots.some((below) => below.z === slot.z - 1 && Math.abs(below.x - slot.x) < 2 && Math.abs(below.y - slot.y) < 2),
+          layout.slots.some(
+            (below) => below.z === slot.z - 1 && Math.abs(below.x - slot.x) < 2 && Math.abs(below.y - slot.y) < 2,
+          ),
           `${layout.key} ${slot.x},${slot.y},${slot.z}`,
         ).toBe(true);
       }
@@ -89,7 +91,9 @@ describe("a deal of more than one set", () => {
       for (const level of ["easy", "medium", "hard"] as const) {
         for (const seed of [1, 2, 99, 20261005, 1_234_567_890, AWASE_SAME_BLOCK.from + 5, AWASE_SAME_BLOCK.from + 77]) {
           const deal = generateAwase(layout.size, level, seed);
-          expect(checkAwase(layout.size, deal.givens, deal.solution), `${layout.key} ${level} ${seed}`).toEqual({ ok: true });
+          expect(checkAwase(layout.size, deal.givens, deal.solution), `${layout.key} ${level} ${seed}`).toEqual({
+            ok: true,
+          });
           expect(bonusRuleOf(deal.givens), `${layout.key} ${level} ${seed}`).toBe(bonusRuleOfSeed(seed));
         }
       }
@@ -107,7 +111,9 @@ describe("a deal of more than one set", () => {
   it("starts with pairs to take", () => {
     for (const layout of MEGA_LAYOUTS) {
       const deal = generateAwase(layout.size, "medium", 4242);
-      expect(freePairs(geometryOf(layout), deal.givens, bonusRuleOf(deal.givens)).length, layout.key).toBeGreaterThan(5);
+      expect(freePairs(geometryOf(layout), deal.givens, bonusRuleOf(deal.givens)).length, layout.key).toBeGreaterThan(
+        5,
+      );
     }
   });
 
@@ -130,7 +136,10 @@ describe("a deal of more than one set", () => {
 
   it("is played at a table: a computer takes a pair of the Palace's first turn in a moment", () => {
     for (const layout of MEGA_LAYOUTS) {
-      const table = startTable(generateAwase(layout.size, "medium", 3), [{ name: "", computer: true }, { name: "", computer: true }]);
+      const table = startTable(generateAwase(layout.size, "medium", 3), [
+        { name: "", computer: true },
+        { name: "", computer: true },
+      ]);
       const started = performance.now();
       expect(computerPair(table), layout.key).not.toBeNull();
       expect(performance.now() - started, layout.key).toBeLessThan(1500);

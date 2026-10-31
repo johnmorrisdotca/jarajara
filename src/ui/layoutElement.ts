@@ -2,7 +2,22 @@ import { freshAwaseSeed, generateAwase } from "../awase.ts";
 import { describeSlot, readSlotKeys, sortSlots } from "../arrange.ts";
 import { canTake, freePairs, geometryOf, isFree, matchesOf, tilesLeft } from "../board.ts";
 import { isTileMirror, TILE_MIRRORS, type TileMirror } from "../block.ts";
-import { isAwaseChallenge, PURGE_GROUPS, readRun, runHint, runMarked, runPairs, runShuffle, runStart, runTake, runTick, runUndo, startRun, type AwaseOptions, type AwaseRun } from "../challenge.ts";
+import {
+  isAwaseChallenge,
+  PURGE_GROUPS,
+  readRun,
+  runHint,
+  runMarked,
+  runPairs,
+  runShuffle,
+  runStart,
+  runTake,
+  runTick,
+  runUndo,
+  startRun,
+  type AwaseOptions,
+  type AwaseRun,
+} from "../challenge.ts";
 import type { TileDesign } from "../design.types.ts";
 import { redFiveIndexes } from "../designs.ts";
 import { layoutSvg } from "../draw.ts";
@@ -13,7 +28,22 @@ import { tileName } from "../names.ts";
 import { groupWords, type TileLanguage } from "../names.ts";
 import { bonusRuleOf, isFaceCode, pairPoints } from "../tiles.ts";
 import type { AwaseLevel, MahjongBonusRule, MahjongLayout } from "../types.ts";
-import { boxOf, CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, playSound, reflectMethod, say, wearCloth, FRAME_MARGIN, FRAME_STYLE } from "./elementKit.ts";
+import {
+  boxOf,
+  CLOTH_STYLE,
+  designNamed,
+  ElementBase,
+  followLanguage,
+  isOn,
+  languageOf,
+  lessMotion,
+  playSound,
+  reflectMethod,
+  say,
+  wearCloth,
+  FRAME_MARGIN,
+  FRAME_STYLE,
+} from "./elementKit.ts";
 
 /** How many of a thing a game allows: a number, or no limit at all.
  *
@@ -136,7 +166,32 @@ function clockOf(ms: number): string {
  */
 export class JarajaraLayout extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["size", "level", "seed", "cells", "show-free", "show-matching", "hints", "shuffles", "undo", "challenge", "timer", "controls", "view", "sort", "static", "design", "red-fives", "lang", "cloth", "sound", "find", "mirror", "flippable", "box"];
+    return [
+      "size",
+      "level",
+      "seed",
+      "cells",
+      "show-free",
+      "show-matching",
+      "hints",
+      "shuffles",
+      "undo",
+      "challenge",
+      "timer",
+      "controls",
+      "view",
+      "sort",
+      "static",
+      "design",
+      "red-fives",
+      "lang",
+      "cloth",
+      "sound",
+      "find",
+      "mirror",
+      "flippable",
+      "box",
+    ];
   }
 
   #root: ShadowRoot | null = null;
@@ -224,8 +279,18 @@ export class JarajaraLayout extends ElementBase {
       this.#dealtFrom = asked;
     } else this.#seed = freshAwaseSeed("group");
     const own = this.getAttribute("cells");
-    if (own !== null && own.length === this.#layout().slots.length && [...own].every((code) => code === "." || isFaceCode(code))) this.#givens = own;
-    else this.#givens = generateAwase(this.#size, level !== null && LEVELS.includes(level) ? level : "medium", this.#seed).givens;
+    if (
+      own !== null &&
+      own.length === this.#layout().slots.length &&
+      [...own].every((code) => code === "." || isFaceCode(code))
+    )
+      this.#givens = own;
+    else
+      this.#givens = generateAwase(
+        this.#size,
+        level !== null && LEVELS.includes(level) ? level : "medium",
+        this.#seed,
+      ).givens;
     this.#run = startRun({ size: this.#size, seed: this.#seed, givens: this.#givens }, this.#options());
     this.#chosen = null;
     this.#hinted = [];
@@ -234,7 +299,13 @@ export class JarajaraLayout extends ElementBase {
     this.#seconds = null;
     this.#stopClock();
     this.#draw();
-    this.dispatchEvent(new CustomEvent("jarajara-deal", { bubbles: true, composed: true, detail: { size: this.#size, level: this.getAttribute("level") ?? "medium", seed: this.#seed } }));
+    this.dispatchEvent(
+      new CustomEvent("jarajara-deal", {
+        bubbles: true,
+        composed: true,
+        detail: { size: this.#size, level: this.getAttribute("level") ?? "medium", seed: this.#seed },
+      }),
+    );
   }
 
   /**
@@ -246,7 +317,11 @@ export class JarajaraLayout extends ElementBase {
     const decoded = decodeMoves(moves, this.#layout().slots.length);
     if (decoded === null || this.#run === null) return false;
     const now = Date.now();
-    let run: AwaseRun | null = startRun({ size: this.#size, seed: this.#seed, givens: this.#givens }, this.#options(), now);
+    let run: AwaseRun | null = startRun(
+      { size: this.#size, seed: this.#seed, givens: this.#givens },
+      this.#options(),
+      now,
+    );
     for (const move of decoded) {
       if (run === null) break;
       run = "shuffle" in move ? runShuffle(run, now) : runTake(run, move.pair[0], move.pair[1], now);
@@ -290,9 +365,28 @@ export class JarajaraLayout extends ElementBase {
     this.#hinted = [];
     this.#note = "";
     playSound(this, next.over === "won" ? "win" : "pair");
-    this.dispatchEvent(new CustomEvent("jarajara-take", { bubbles: true, composed: true, detail: { pair: [a, b], codes: [before[a], before[b]], points: pairPoints(before[a]!), score: next.score, tilesLeft: tilesLeft(next.cells) } }));
+    this.dispatchEvent(
+      new CustomEvent("jarajara-take", {
+        bubbles: true,
+        composed: true,
+        detail: {
+          pair: [a, b],
+          codes: [before[a], before[b]],
+          points: pairPoints(before[a]!),
+          score: next.score,
+          tilesLeft: tilesLeft(next.cells),
+        },
+      }),
+    );
     this.#finish(next, run);
-    if (next.over === null && runPairs(next).length === 0) this.dispatchEvent(new CustomEvent("jarajara-stuck", { bubbles: true, composed: true, detail: { tilesLeft: tilesLeft(next.cells) } }));
+    if (next.over === null && runPairs(next).length === 0)
+      this.dispatchEvent(
+        new CustomEvent("jarajara-stuck", {
+          bubbles: true,
+          composed: true,
+          detail: { tilesLeft: tilesLeft(next.cells) },
+        }),
+      );
     this.#draw();
     return true;
   }
@@ -302,8 +396,18 @@ export class JarajaraLayout extends ElementBase {
     if (next.over === null || before.over !== null) return;
     this.#seconds = this.#elapsed();
     this.#stopClock();
-    if (next.over === "won") this.dispatchEvent(new CustomEvent("jarajara-clear", { bubbles: true, composed: true, detail: { moves: this.moves, seconds: this.#seconds, score: next.score, because: next.because } }));
-    else this.dispatchEvent(new CustomEvent("jarajara-lost", { bubbles: true, composed: true, detail: { because: next.because } }));
+    if (next.over === "won")
+      this.dispatchEvent(
+        new CustomEvent("jarajara-clear", {
+          bubbles: true,
+          composed: true,
+          detail: { moves: this.moves, seconds: this.#seconds, score: next.score, because: next.because },
+        }),
+      );
+    else
+      this.dispatchEvent(
+        new CustomEvent("jarajara-lost", { bubbles: true, composed: true, detail: { because: next.because } }),
+      );
   }
 
   /**
@@ -332,7 +436,13 @@ export class JarajaraLayout extends ElementBase {
       this.#note = hint.found === "other" ? say(languageOf(this), "noFreeMatch") : "";
     }
     playSound(this, "pick");
-    this.dispatchEvent(new CustomEvent("jarajara-hint", { bubbles: true, composed: true, detail: { pair: hint.pair, found: hint.found } }));
+    this.dispatchEvent(
+      new CustomEvent("jarajara-hint", {
+        bubbles: true,
+        composed: true,
+        detail: { pair: hint.pair, found: hint.found },
+      }),
+    );
     this.#draw();
     return hint.pair;
   }
@@ -355,7 +465,9 @@ export class JarajaraLayout extends ElementBase {
     this.#hinted = [];
     this.#note = "";
     playSound(this, "shuffle");
-    this.dispatchEvent(new CustomEvent("jarajara-shuffle", { bubbles: true, composed: true, detail: { shuffles: next.shuffles } }));
+    this.dispatchEvent(
+      new CustomEvent("jarajara-shuffle", { bubbles: true, composed: true, detail: { shuffles: next.shuffles } }),
+    );
     this.#finish(next, run);
     this.#draw();
     return true;
@@ -376,7 +488,9 @@ export class JarajaraLayout extends ElementBase {
       this.#startClock();
     }
     playSound(this, "place");
-    this.dispatchEvent(new CustomEvent("jarajara-undo", { bubbles: true, composed: true, detail: { moves: this.moves } }));
+    this.dispatchEvent(
+      new CustomEvent("jarajara-undo", { bubbles: true, composed: true, detail: { moves: this.moves } }),
+    );
     this.#draw();
     return true;
   }
@@ -408,7 +522,8 @@ export class JarajaraLayout extends ElementBase {
   #startClock(): void {
     if (this.#startedAt === null) this.#startedAt = Date.now();
     if (this.#run !== null) this.#run = runStart(this.#run, Date.now());
-    if ((isOn(this, "timer") || this.#run?.rules.timeMs != null) && this.#ticker === null && this.#run?.over === null) this.#ticker = setInterval(() => this.#tick(), 250);
+    if ((isOn(this, "timer") || this.#run?.rules.timeMs != null) && this.#ticker === null && this.#run?.over === null)
+      this.#ticker = setInterval(() => this.#tick(), 250);
   }
 
   #stopClock(): void {
@@ -476,7 +591,10 @@ export class JarajaraLayout extends ElementBase {
     if (["hints", "shuffles", "undo"].includes(name) && this.#run !== null) {
       const options = this.#options();
       const rules = startRun({ size: this.#size, seed: this.#seed, givens: this.#givens }, options).rules;
-      this.#run = { ...this.#run, rules: { ...this.#run.rules, hints: rules.hints, shuffles: rules.shuffles, undo: rules.undo } };
+      this.#run = {
+        ...this.#run,
+        rules: { ...this.#run.rules, hints: rules.hints, shuffles: rules.shuffles, undo: rules.undo },
+      };
     }
     if (name === "timer") {
       if (isOn(this, "timer") && this.#startedAt !== null && this.#seconds === null) this.#startClock();
@@ -487,7 +605,9 @@ export class JarajaraLayout extends ElementBase {
 
   #clicked(event: Event): void {
     const path = event.composedPath();
-    const button = path.find((one): one is HTMLElement => one instanceof HTMLElement && one.dataset.action !== undefined);
+    const button = path.find(
+      (one): one is HTMLElement => one instanceof HTMLElement && one.dataset.action !== undefined,
+    );
     if (button !== undefined) {
       const action = button.dataset.action;
       if (action === "new") {
@@ -528,7 +648,9 @@ export class JarajaraLayout extends ElementBase {
 
   #pointed(event: PointerEvent): void {
     if (event.pointerType !== "mouse" || !isOn(this, "find")) return;
-    const tile = event.composedPath().find((one): one is Element => one instanceof Element && one.hasAttribute("data-slot"));
+    const tile = event
+      .composedPath()
+      .find((one): one is Element => one instanceof Element && one.hasAttribute("data-slot"));
     this.#point(tile === undefined ? null : Number(tile.getAttribute("data-slot")));
   }
 
@@ -543,7 +665,15 @@ export class JarajaraLayout extends ElementBase {
     const tile = this.#root?.querySelector(`[data-slot="${slot}"]`);
     if (tile === null || tile === undefined || lessMotion() || typeof tile.animate !== "function") return;
     const at = tile.getAttribute("transform") ?? "";
-    tile.animate([{ transform: at }, { transform: `${at} translate(-2.5 0)` }, { transform: `${at} translate(2.5 0)` }, { transform: at }], { duration: 220 });
+    tile.animate(
+      [
+        { transform: at },
+        { transform: `${at} translate(-2.5 0)` },
+        { transform: `${at} translate(2.5 0)` },
+        { transform: at },
+      ],
+      { duration: 220 },
+    );
   }
 
   /** What the challenge asks, in words: the gold tile, the group to purge, the pairs or points to reach. */
@@ -555,10 +685,15 @@ export class JarajaraLayout extends ElementBase {
     if (goal?.kind === "score") return say(language, "fortune", { score: goal.done, goal: goal.of });
     if (goal?.kind === "purge") {
       const group = PURGE_GROUPS.find((one) => one.key === run.purge);
-      return say(language, "purge", { suit: group === undefined ? "" : groupWords(group.key === "honours" ? "honours" : group.key, language), done: goal.done, goal: goal.of });
+      return say(language, "purge", {
+        suit: group === undefined ? "" : groupWords(group.key === "honours" ? "honours" : group.key, language),
+        done: goal.done,
+        goal: goal.of,
+      });
     }
     if (run.rules.challenge === "gold") return say(language, "gold");
-    if (run.rules.challenge === "spark") return say(language, "spark", { tile: run.spark === null ? "" : tileName(run.spark, language) });
+    if (run.rules.challenge === "spark")
+      return say(language, "spark", { tile: run.spark === null ? "" : tileName(run.spark, language) });
     if (run.rules.challenge === "sand") return say(language, "sand");
     if (run.rules.challenge === "blackout") return say(language, "blackout");
     return "";
@@ -568,11 +703,19 @@ export class JarajaraLayout extends ElementBase {
   #status(language: TileLanguage): string {
     const run = this.#run;
     if (run === null) return "";
-    if (run.over === "won") return run.because === "cleared" ? say(language, "cleared", { seconds: this.#seconds ?? this.#elapsed() }) : say(language, "won", { score: run.score });
+    if (run.over === "won")
+      return run.because === "cleared"
+        ? say(language, "cleared", { seconds: this.#seconds ?? this.#elapsed() })
+        : say(language, "won", { score: run.score });
     if (run.over === "lost") return say(language, run.because === "time" ? "timeUp" : "lost");
     const pairs = runPairs(run).length;
-    if (pairs === 0) return say(language, run.rules.shuffles !== null && run.shuffles >= run.rules.shuffles ? "lost" : "stuck");
-    return say(language, "left", { tiles: tilesLeft(run.cells), pairs, pairsWord: say(language, pairs === 1 ? "pair" : "pairs") });
+    if (pairs === 0)
+      return say(language, run.rules.shuffles !== null && run.shuffles >= run.rules.shuffles ? "lost" : "stuck");
+    return say(language, "left", {
+      tiles: tilesLeft(run.cells),
+      pairs,
+      pairsWord: say(language, pairs === 1 ? "pair" : "pairs"),
+    });
   }
 
   /** What the elements keeps of the skeleton: when it changes the whole of it is made again, otherwise only its parts are brought up to date. */
@@ -603,13 +746,24 @@ export class JarajaraLayout extends ElementBase {
     if (key !== this.#built) {
       this.#built = key;
       const symbols = design === null ? "" : tileFaceSymbols("jjl", { design, red: reds });
-      const buttons = controls ? `<div class="controls" part="controls">${["new", "undo", "hint", "shuffle", ...(flippable ? ["flip"] : [])].map((action) => `<button type="button" part="button" data-action="${action}"></button>`).join("")}</div>` : "";
-      const lines = status ? `<div class="status" part="status" aria-live="polite"><span class="goal"></span><span class="clock" part="clock"></span><span class="line"></span><span class="note"></span></div>` : "";
+      const buttons = controls
+        ? `<div class="controls" part="controls">${["new", "undo", "hint", "shuffle", ...(flippable ? ["flip"] : [])].map((action) => `<button type="button" part="button" data-action="${action}"></button>`).join("")}</div>`
+        : "";
+      const lines = status
+        ? `<div class="status" part="status" aria-live="polite"><span class="goal"></span><span class="clock" part="clock"></span><span class="line"></span><span class="note"></span></div>`
+        : "";
       root.innerHTML = `<style>${LAYOUT_STYLE}</style><svg class="defs" width="0" height="0" aria-hidden="true">${symbols}</svg><div class="frame" part="frame"><div class="board" part="board"></div></div>${lines}${buttons}`;
     }
     const target = isOn(this, "find") ? (this.#chosen ?? this.#hover) : null;
     const found = target === null ? undefined : matchesOf(geometry, cells, rule, target);
-    const matching = this.#chosen !== null && isOn(this, "show-matching") ? [...cells].flatMap((code, at) => (at !== this.#chosen && code !== "." && canTake(geometry, cells, rule, this.#chosen as number, at) ? [at] : [])) : [];
+    const matching =
+      this.#chosen !== null && isOn(this, "show-matching")
+        ? [...cells].flatMap((code, at) =>
+            at !== this.#chosen && code !== "." && canTake(geometry, cells, rule, this.#chosen as number, at)
+              ? [at]
+              : [],
+          )
+        : [];
     const lined = this.getAttribute("view") === "lined";
     const board = root.querySelector(".board") as HTMLElement;
     board.dataset.view = lined ? "lined" : "stack";
@@ -617,7 +771,27 @@ export class JarajaraLayout extends ElementBase {
     board.style.aspectRatio = ratio === null ? "" : `var(--jarajara-box, ${ratio})`;
     board.dataset.box = ratio === null ? "none" : "fixed";
     board.dataset.playable = String(playable);
-    board.innerHTML = design === null ? "" : lined ? this.#lined(layout, cells, design, reds, language) : (layoutSvg(this.#size, cells, { chosen: this.#chosen, hinted: this.#hinted, matching, marked: runMarked(run), showFree: isOn(this, "show-free"), hideBlocked: run.rules.hideBlocked && run.over === null, design, redFives, prefix: "jjl", symbols: false, redFrom: this.#epoch(), found, mirror: this.mirror, margin: FRAME_MARGIN }) ?? "");
+    board.innerHTML =
+      design === null
+        ? ""
+        : lined
+          ? this.#lined(layout, cells, design, reds, language)
+          : (layoutSvg(this.#size, cells, {
+              chosen: this.#chosen,
+              hinted: this.#hinted,
+              matching,
+              marked: runMarked(run),
+              showFree: isOn(this, "show-free"),
+              hideBlocked: run.rules.hideBlocked && run.over === null,
+              design,
+              redFives,
+              prefix: "jjl",
+              symbols: false,
+              redFrom: this.#epoch(),
+              found,
+              mirror: this.mirror,
+              margin: FRAME_MARGIN,
+            }) ?? "");
     const hintsLeft = run.rules.hints === null ? null : Math.max(0, run.rules.hints - run.hintsUsed);
     const shufflesLeft = run.rules.shuffles === null ? null : Math.max(0, run.rules.shuffles - run.shuffles);
     const set = (selector: string, text: string) => {
@@ -632,9 +806,24 @@ export class JarajaraLayout extends ElementBase {
         found.disabled = disabled;
       };
       button("new", say(language, "newDeal"), false);
-      button("undo", say(language, "undo"), isOn(this, "static") || run.history.length === 0 || !run.rules.undo || (run.over === "lost" && run.because === "time"));
-      button("hint", `${say(language, "hint")}${hintsLeft === null ? "" : ` (${hintsLeft})`}`, !playable || pairs === 0 || hintsLeft === 0);
-      button("shuffle", `${say(language, "shuffle")}${shufflesLeft === null ? "" : ` (${shufflesLeft})`}`, !playable || pairs > 0 || shufflesLeft === 0);
+      button(
+        "undo",
+        say(language, "undo"),
+        isOn(this, "static") ||
+          run.history.length === 0 ||
+          !run.rules.undo ||
+          (run.over === "lost" && run.because === "time"),
+      );
+      button(
+        "hint",
+        `${say(language, "hint")}${hintsLeft === null ? "" : ` (${hintsLeft})`}`,
+        !playable || pairs === 0 || hintsLeft === 0,
+      );
+      button(
+        "shuffle",
+        `${say(language, "shuffle")}${shufflesLeft === null ? "" : ` (${shufflesLeft})`}`,
+        !playable || pairs > 0 || shufflesLeft === 0,
+      );
       button("flip", say(language, "flip"), lined);
     }
     if (status) {
@@ -644,18 +833,30 @@ export class JarajaraLayout extends ElementBase {
       set(".note", this.#note);
     }
     this.setAttribute("role", "group");
-    this.setAttribute("aria-label", say(language, lined ? "layoutLined" : "layoutLabel", { n: left, keys: readSlotKeys(this.getAttribute("sort")).join(" ") || "z y x" }));
+    this.setAttribute(
+      "aria-label",
+      say(language, lined ? "layoutLined" : "layoutLabel", {
+        n: left,
+        keys: readSlotKeys(this.getAttribute("sort")).join(" ") || "z y x",
+      }),
+    );
   }
 
   /** The tiles lined up in the order the sort keys give, each with where its slot lies. */
   #lined(layout: MahjongLayout, cells: string, design: TileDesign, reds: boolean, language: TileLanguage): string {
-    const order = sortSlots(layout, readSlotKeys(this.getAttribute("sort")).length === 0 ? ["z", "y", "x"] : readSlotKeys(this.getAttribute("sort")));
+    const order = sortSlots(
+      layout,
+      readSlotKeys(this.getAttribute("sort")).length === 0 ? ["z", "y", "x"] : readSlotKeys(this.getAttribute("sort")),
+    );
     const redSet = reds ? redFiveIndexes(this.#epoch()) : new Set<number>();
     const geometry = geometryOf(layout);
     const items = order.map((index) => {
       const code = cells[index]!;
       const at = describeSlot(layout, index)!;
-      const picture = code === "." ? `<span class="gone"></span>` : (tileSvg(code, { design, red: redSet.has(index), title: tileName(code, language) }) ?? "");
+      const picture =
+        code === "."
+          ? `<span class="gone"></span>`
+          : (tileSvg(code, { design, red: redSet.has(index), title: tileName(code, language) }) ?? "");
       return `<li class="cell" data-slot="${index}" data-free="${isFree(geometry, cells, index)}"><span class="tile">${picture}</span><span class="where">x ${at.x} y ${at.y} z ${at.z}</span></li>`;
     });
     return `<ol class="lined">${items.join("")}</ol>`;

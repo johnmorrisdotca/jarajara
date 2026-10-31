@@ -1,8 +1,40 @@
 import type { TileSoundKind } from "./tileSounds.ts";
-import { arrangeIndexes, arrangeTiles, groupStarts, mixTiles, TILE_ORDERS, type TileGrouping, type TileOrder } from "../arrange.ts";
+import {
+  arrangeIndexes,
+  arrangeTiles,
+  groupStarts,
+  mixTiles,
+  TILE_ORDERS,
+  type TileGrouping,
+  type TileOrder,
+} from "../arrange.ts";
 import { readTiles, tileName } from "../names.ts";
 import { redFiveIndexes } from "../designs.ts";
-import { blockHtml, blockVars, BLOCK_STYLE, BOX_UNITS, CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, lessMotion, markerHtml, MARKER_STYLE, playSound, reflectMethod, say, spinElement, tileDrawing, tileLabel, widthOf, wearCloth, writeElementAttribute, type SpinOptions } from "./elementKit.ts";
+import {
+  blockHtml,
+  blockVars,
+  BLOCK_STYLE,
+  BOX_UNITS,
+  CLOTH_STYLE,
+  designNamed,
+  ElementBase,
+  followLanguage,
+  isOn,
+  languageOf,
+  lessMotion,
+  markerHtml,
+  MARKER_STYLE,
+  playSound,
+  reflectMethod,
+  say,
+  spinElement,
+  tileDrawing,
+  tileLabel,
+  widthOf,
+  wearCloth,
+  writeElementAttribute,
+  type SpinOptions,
+} from "./elementKit.ts";
 import { RACK_LIFT, rackPlaces, rackWidth, TILE_TALL, type RackPlace } from "./rackLayout.ts";
 
 /** How a rack's tiles are turned face down or face up.
@@ -46,12 +78,24 @@ export type TileRef = number | string | readonly (number | string)[];
  * console.log(value);
  * ```
  */
-export type RackDetail = { tiles: string[]; faceDown: boolean; turned: number[]; lifted: number[]; marked: number[]; order: TileOrder; group: TileGrouping | null };
+export type RackDetail = {
+  tiles: string[];
+  faceDown: boolean;
+  turned: number[];
+  lifted: number[];
+  marked: number[];
+  order: TileOrder;
+  group: TileGrouping | null;
+};
 
 const TOSS_MS = 300;
 const MOVE_MS = 460;
 
-const numbersIn = (text: string | null): number[] => (text ?? "").split(/[\s,]+/).filter((word) => /^\d+$/.test(word)).map(Number);
+const numbersIn = (text: string | null): number[] =>
+  (text ?? "")
+    .split(/[\s,]+/)
+    .filter((word) => /^\d+$/.test(word))
+    .map(Number);
 const writeNumbers = (list: Iterable<number>): string => [...new Set(list)].sort((a, b) => a - b).join(" ");
 
 /**
@@ -93,84 +137,182 @@ const writeNumbers = (list: Iterable<number>): string => [...new Set(list)].sort
  */
 export class JarajaraRack extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["tiles", "order", "group", "face-down", "turned", "lifted", "marked", "pick", "capacity", "red-fives", "design", "back", "back-colour", "mark", "size", "width", "lang", "cloth", "sound", "theme", "label"];
+    return [
+      "tiles",
+      "order",
+      "group",
+      "face-down",
+      "turned",
+      "lifted",
+      "marked",
+      "pick",
+      "capacity",
+      "red-fives",
+      "design",
+      "back",
+      "back-colour",
+      "mark",
+      "size",
+      "width",
+      "lang",
+      "cloth",
+      "sound",
+      "theme",
+      "label",
+    ];
   }
 
   /** The `order` attribute, reflected without conversion. */
-  get order(): string | null { return this.getAttribute("order"); }
-  set order(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "order", value); }
+  get order(): string | null {
+    return this.getAttribute("order");
+  }
+  set order(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "order", value);
+  }
 
   /** The `face-down` attribute, reflected without conversion. */
-  get "face-down"(): string | null { return this.getAttribute("face-down"); }
-  set "face-down"(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "face-down", value); }
+  get "face-down"(): string | null {
+    return this.getAttribute("face-down");
+  }
+  set "face-down"(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "face-down", value);
+  }
 
   /** Property spelling of `face-down`. */
-  get faceDown(): string | null { return this.getAttribute("face-down"); }
-  set faceDown(value: string | number | boolean | null | undefined) { writeElementAttribute(this, "face-down", value); }
+  get faceDown(): string | null {
+    return this.getAttribute("face-down");
+  }
+  set faceDown(value: string | number | boolean | null | undefined) {
+    writeElementAttribute(this, "face-down", value);
+  }
 
   /** The `turned` attribute, reflected without conversion. */
-  get turned(): string | null { return this.getAttribute("turned"); }
-  set turned(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "turned", value); }
+  get turned(): string | null {
+    return this.getAttribute("turned");
+  }
+  set turned(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "turned", value);
+  }
 
   /** The `marked` attribute, reflected without conversion. */
-  get marked(): string | null { return this.getAttribute("marked"); }
-  set marked(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "marked", value); }
+  get marked(): string | null {
+    return this.getAttribute("marked");
+  }
+  set marked(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "marked", value);
+  }
 
   /** The `pick` attribute, reflected without conversion. */
-  get pick(): string | null { return this.getAttribute("pick"); }
-  set pick(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "pick", value); }
+  get pick(): string | null {
+    return this.getAttribute("pick");
+  }
+  set pick(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "pick", value);
+  }
 
   /** The `capacity` attribute, reflected without conversion. */
-  get capacity(): string | null { return this.getAttribute("capacity"); }
-  set capacity(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "capacity", value); }
+  get capacity(): string | null {
+    return this.getAttribute("capacity");
+  }
+  set capacity(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "capacity", value);
+  }
 
   /** The `red-fives` attribute, reflected without conversion. */
-  get "red-fives"(): string | null { return this.getAttribute("red-fives"); }
-  set "red-fives"(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "red-fives", value); }
+  get "red-fives"(): string | null {
+    return this.getAttribute("red-fives");
+  }
+  set "red-fives"(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "red-fives", value);
+  }
 
   /** Property spelling of `red-fives`. */
-  get redFives(): string | null { return this.getAttribute("red-fives"); }
-  set redFives(value: string | number | boolean | null | undefined) { writeElementAttribute(this, "red-fives", value); }
+  get redFives(): string | null {
+    return this.getAttribute("red-fives");
+  }
+  set redFives(value: string | number | boolean | null | undefined) {
+    writeElementAttribute(this, "red-fives", value);
+  }
 
   /** The `design` attribute, reflected without conversion. */
-  get design(): string | null { return this.getAttribute("design"); }
-  set design(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "design", value); }
+  get design(): string | null {
+    return this.getAttribute("design");
+  }
+  set design(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "design", value);
+  }
 
   /** The `back` attribute, reflected without conversion. */
-  get back(): string | null { return this.getAttribute("back"); }
-  set back(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "back", value); }
+  get back(): string | null {
+    return this.getAttribute("back");
+  }
+  set back(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "back", value);
+  }
 
   /** The `back-colour` attribute, reflected without conversion. */
-  get "back-colour"(): string | null { return this.getAttribute("back-colour"); }
-  set "back-colour"(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "back-colour", value); }
+  get "back-colour"(): string | null {
+    return this.getAttribute("back-colour");
+  }
+  set "back-colour"(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "back-colour", value);
+  }
 
   /** Property spelling of `back-colour`. */
-  get backColour(): string | null { return this.getAttribute("back-colour"); }
-  set backColour(value: string | number | boolean | null | undefined) { writeElementAttribute(this, "back-colour", value); }
+  get backColour(): string | null {
+    return this.getAttribute("back-colour");
+  }
+  set backColour(value: string | number | boolean | null | undefined) {
+    writeElementAttribute(this, "back-colour", value);
+  }
 
   /** The `size` attribute, reflected without conversion. */
-  get size(): string | null { return this.getAttribute("size"); }
-  set size(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "size", value); }
+  get size(): string | null {
+    return this.getAttribute("size");
+  }
+  set size(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "size", value);
+  }
 
   /** The `width` attribute, reflected without conversion. */
-  get width(): string | null { return this.getAttribute("width"); }
-  set width(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "width", value); }
+  get width(): string | null {
+    return this.getAttribute("width");
+  }
+  set width(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "width", value);
+  }
 
   /** The `cloth` attribute, reflected without conversion. */
-  get cloth(): string | null { return this.getAttribute("cloth"); }
-  set cloth(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "cloth", value); }
+  get cloth(): string | null {
+    return this.getAttribute("cloth");
+  }
+  set cloth(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "cloth", value);
+  }
 
   /** The `sound` attribute, reflected without conversion. */
-  get sound(): string | null { return this.getAttribute("sound"); }
-  set sound(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "sound", value); }
+  get sound(): string | null {
+    return this.getAttribute("sound");
+  }
+  set sound(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "sound", value);
+  }
 
   /** The `theme` attribute, reflected without conversion. */
-  get theme(): string | null { return this.getAttribute("theme"); }
-  set theme(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "theme", value); }
+  get theme(): string | null {
+    return this.getAttribute("theme");
+  }
+  set theme(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "theme", value);
+  }
 
   /** The `label` attribute, reflected without conversion. */
-  get label(): string | null { return this.getAttribute("label"); }
-  set label(value: string | number | boolean | readonly number[] | null | undefined) { writeElementAttribute(this, "label", value); }
+  get label(): string | null {
+    return this.getAttribute("label");
+  }
+  set label(value: string | number | boolean | readonly number[] | null | undefined) {
+    writeElementAttribute(this, "label", value);
+  }
 
   #root: ShadowRoot | null = null;
   #forget: (() => void) | null = null;
@@ -248,18 +390,28 @@ export class JarajaraRack extends ElementBase {
 
   /** Turn every tile face down where it lies: all at once, or one after another. */
   hide(options: RackTurnOptions = {}): Promise<void> {
-    return this.#change(() => {
-      this.toggleAttribute("face-down", true);
-      this.removeAttribute("turned");
-    }, options, false, "flip");
+    return this.#change(
+      () => {
+        this.toggleAttribute("face-down", true);
+        this.removeAttribute("turned");
+      },
+      options,
+      false,
+      "flip",
+    );
   }
 
   /** Turn every tile face up again. */
   show(options: RackTurnOptions = {}): Promise<void> {
-    return this.#change(() => {
-      this.toggleAttribute("face-down", false);
-      this.removeAttribute("turned");
-    }, options, false, "flip");
+    return this.#change(
+      () => {
+        this.toggleAttribute("face-down", false);
+        this.removeAttribute("turned");
+      },
+      options,
+      false,
+      "flip",
+    );
   }
 
   /**
@@ -270,32 +422,47 @@ export class JarajaraRack extends ElementBase {
     const count = this.tiles.length;
     const named = tiles === undefined ? Array.from({ length: count }, (_, at) => at) : this.#indexes(tiles);
     if (named.length === 0) return Promise.resolve();
-    return this.#change(() => {
-      const turned = this.#state().turned;
-      for (const at of named) {
-        if (turned.has(at)) turned.delete(at);
-        else turned.add(at);
-      }
-      // Every tile turned the other way is the whole rack turned: written as the rack's own side.
-      if (turned.size === count) {
-        this.toggleAttribute("face-down", !isOn(this, "face-down"));
-        this.removeAttribute("turned");
-      } else if (turned.size === 0) this.removeAttribute("turned");
-      else this.setAttribute("turned", writeNumbers(turned));
-    }, options, false, { kind: "flip", count: named.length });
+    return this.#change(
+      () => {
+        const turned = this.#state().turned;
+        for (const at of named) {
+          if (turned.has(at)) turned.delete(at);
+          else turned.add(at);
+        }
+        // Every tile turned the other way is the whole rack turned: written as the rack's own side.
+        if (turned.size === count) {
+          this.toggleAttribute("face-down", !isOn(this, "face-down"));
+          this.removeAttribute("turned");
+        } else if (turned.size === 0) this.removeAttribute("turned");
+        else this.setAttribute("turned", writeNumbers(turned));
+      },
+      options,
+      false,
+      { kind: "flip", count: named.length },
+    );
   }
 
   /** Put the tiles in order, sliding to their places: `suit` (unless said), `rank`, `kind` or `code`. */
   sort(order: TileOrder = "suit"): Promise<void> {
-    return this.#change(() => (order === "dealt" ? this.removeAttribute("order") : this.setAttribute("order", order)), {}, false, "place");
+    return this.#change(
+      () => (order === "dealt" ? this.removeAttribute("order") : this.setAttribute("order", order)),
+      {},
+      false,
+      "place",
+    );
   }
 
   /** Put the tiles in order by suit or kind (`suit` unless said) and set each group apart with a gap. */
   group(by: TileGrouping = "suit"): Promise<void> {
-    return this.#change(() => {
-      this.setAttribute("order", by === "kind" ? "kind" : "suit");
-      this.setAttribute("group", by === "kind" ? "kind" : "suit");
-    }, {}, false, "place");
+    return this.#change(
+      () => {
+        this.setAttribute("order", by === "kind" ? "kind" : "suit");
+        this.setAttribute("group", by === "kind" ? "kind" : "suit");
+      },
+      {},
+      false,
+      "place",
+    );
   }
 
   /** Close the gaps up again; the tiles stay in the order they were put in. */
@@ -305,28 +472,38 @@ export class JarajaraRack extends ElementBase {
 
   /** Lay the tiles out in the order they were dealt, with no gaps. */
   unsort(): Promise<void> {
-    return this.#change(() => {
-      this.removeAttribute("order");
-      this.removeAttribute("group");
-    }, {}, false, "place");
+    return this.#change(
+      () => {
+        this.removeAttribute("order");
+        this.removeAttribute("group");
+      },
+      {},
+      false,
+      "place",
+    );
   }
 
   /** Mix the tiles up: the same tiles in another order, each sliding to its new place. Where `seed` is given, the same mix every time. */
   mixUp(seed?: number): Promise<void> {
     const tiles = this.tiles;
     if (new Set(tiles).size < 2) return Promise.resolve();
-    return this.#change(() => {
-      const mixed = mixTiles(tiles, seed);
-      // Each tile keeps its id, state and place in the new order: find which old tile went where.
-      const taken = new Set<number>();
-      const to = mixed.map((code) => {
-        const old = tiles.findIndex((tile, at) => tile === code && !taken.has(at));
-        taken.add(old);
-        return old;
-      });
-      this.#reorder(to);
-      this.setAttribute("tiles", mixed.join(""));
-    }, {}, true, "shuffle");
+    return this.#change(
+      () => {
+        const mixed = mixTiles(tiles, seed);
+        // Each tile keeps its id, state and place in the new order: find which old tile went where.
+        const taken = new Set<number>();
+        const to = mixed.map((code) => {
+          const old = tiles.findIndex((tile, at) => tile === code && !taken.has(at));
+          taken.add(old);
+          return old;
+        });
+        this.#reorder(to);
+        this.setAttribute("tiles", mixed.join(""));
+      },
+      {},
+      true,
+      "shuffle",
+    );
   }
 
   /** Move the ids and the state of each tile with it to its new place: `to[new]` is the old place. */
@@ -373,11 +550,17 @@ export class JarajaraRack extends ElementBase {
     const slot = lessMotion() ? null : this.#slotOf(at);
     playSound(this, "pick");
     const remove = () =>
-      this.#change(() => {
-        this.#close(at);
-        this.setAttribute("tiles", this.tiles.filter((_, one) => one !== at).join(""));
-      }, {}, true).then(() => {
-        this.dispatchEvent(new CustomEvent("jarajara-take", { bubbles: true, composed: true, detail: { code, index: at } }));
+      this.#change(
+        () => {
+          this.#close(at);
+          this.setAttribute("tiles", this.tiles.filter((_, one) => one !== at).join(""));
+        },
+        {},
+        true,
+      ).then(() => {
+        this.dispatchEvent(
+          new CustomEvent("jarajara-take", { bubbles: true, composed: true, detail: { code, index: at } }),
+        );
         return code;
       });
     if (slot === null) return remove();
@@ -393,12 +576,18 @@ export class JarajaraRack extends ElementBase {
     const code = readTiles(tile)[0];
     if (code === undefined) return Promise.resolve();
     const tiles = this.tiles;
-    const place = at === "front" ? 0 : at === "end" ? tiles.length : Math.max(0, Math.min(tiles.length, Math.floor(at)));
-    return this.#change(() => {
-      const id = this.#open(place);
-      this.#fresh.add(id);
-      this.setAttribute("tiles", [...tiles.slice(0, place), code, ...tiles.slice(place)].join(""));
-    }, {}, true, "place");
+    const place =
+      at === "front" ? 0 : at === "end" ? tiles.length : Math.max(0, Math.min(tiles.length, Math.floor(at)));
+    return this.#change(
+      () => {
+        const id = this.#open(place);
+        this.#fresh.add(id);
+        this.setAttribute("tiles", [...tiles.slice(0, place), code, ...tiles.slice(place)].join(""));
+      },
+      {},
+      true,
+      "place",
+    );
   }
 
   /** Take a tile out and put another in its stead, at the end unless `at` says. */
@@ -493,7 +682,12 @@ export class JarajaraRack extends ElementBase {
   }
 
   /** Make a change to the attributes as one change that is drawn and told once, and settles when the tiles have stopped moving. */
-  #change(apply: () => void, options: RackTurnOptions, always = false, sound: TileSoundKind | { kind: TileSoundKind; count: number } | null = null): Promise<void> {
+  #change(
+    apply: () => void,
+    options: RackTurnOptions,
+    always = false,
+    sound: TileSoundKind | { kind: TileSoundKind; count: number } | null = null,
+  ): Promise<void> {
     const before = this.#signature();
     this.#stagger = options.oneByOne === true ? Math.max(0, options.gap ?? 90) : 0;
     this.#moving = !lessMotion();
@@ -511,7 +705,15 @@ export class JarajaraRack extends ElementBase {
         const kind = typeof sound === "string" ? sound : sound.kind;
         const count = typeof sound === "string" ? this.tiles.length : sound.count;
         // Tiles turning make one click each, in step with each turning (a turn one by one keeps its own gap); the rest are a few clicks as the tiles settle.
-        playSound(this, kind, kind === "flip" ? { count, gap: this.#stagger || 25 } : kind === "place" || kind === "pick" ? { count: Math.min(count, 4), gap: 60 } : {});
+        playSound(
+          this,
+          kind,
+          kind === "flip"
+            ? { count, gap: this.#stagger || 25 }
+            : kind === "place" || kind === "pick"
+              ? { count: Math.min(count, 4), gap: 60 }
+              : {},
+        );
       }
       if (!changed) this.#finish();
     });
@@ -519,7 +721,9 @@ export class JarajaraRack extends ElementBase {
 
   #signature(): string {
     // A switch such as `face-down` is an attribute with no value, so presence has to be told from absence: "" is not "not there".
-    return ["tiles", "order", "group", "face-down", "turned", "lifted", "marked"].map((name) => (this.hasAttribute(name) ? `=${this.getAttribute(name)}` : "-")).join("|");
+    return ["tiles", "order", "group", "face-down", "turned", "lifted", "marked"]
+      .map((name) => (this.hasAttribute(name) ? `=${this.getAttribute(name)}` : "-"))
+      .join("|");
   }
 
   #finish(): void {
@@ -542,7 +746,9 @@ export class JarajaraRack extends ElementBase {
       this.#root = this.attachShadow({ mode: "open" });
       const pick = (event: Event) => {
         if (!isOn(this, "pick")) return;
-        const slot = event.composedPath().find((one): one is HTMLElement => one instanceof HTMLElement && one.classList.contains("slot"));
+        const slot = event
+          .composedPath()
+          .find((one): one is HTMLElement => one instanceof HTMLElement && one.classList.contains("slot"));
         if (slot === undefined) return;
         const at = Number(slot.dataset.index);
         const was = this.#state().lifted.has(at);
@@ -551,7 +757,13 @@ export class JarajaraRack extends ElementBase {
           this.#set("lifted", () => (was ? new Set() : new Set([at])));
           playSound(this, was ? "place" : "pick");
         } else this.liftToggle(at);
-        this.dispatchEvent(new CustomEvent("jarajara-pick", { bubbles: true, composed: true, detail: { index: at, code: this.tiles[at], lifted: !was } }));
+        this.dispatchEvent(
+          new CustomEvent("jarajara-pick", {
+            bubbles: true,
+            composed: true,
+            detail: { index: at, code: this.tiles[at], lifted: !was },
+          }),
+        );
       };
       this.#root.addEventListener("click", pick);
       this.#root.addEventListener("keydown", (event) => {
@@ -604,14 +816,27 @@ export class JarajaraRack extends ElementBase {
     const perm = arrangeIndexes(tiles, order);
     const shown = perm.map((at) => tiles[at]!);
     const breaks = grouping === null ? [] : groupStarts(shown, grouping);
-    const places = rackPlaces(shown.length, { breaks, lifted: perm.map((at, place) => (state.lifted.has(at) ? place : -1)).filter((place) => place >= 0) });
+    const places = rackPlaces(shown.length, {
+      breaks,
+      lifted: perm.map((at, place) => (state.lifted.has(at) ? place : -1)).filter((place) => place >= 0),
+    });
     // ONE FRAME FOR EVERY STATE: the rack keeps the room its widest arrangement takes (grouped by suit), or the room of
     // `capacity` tiles, so grouping, closing the groups up and sorting never change its size, and each state lies in the middle.
     const capacity = Math.max(shown.length, Math.floor(Number(this.getAttribute("capacity")) || 0));
     // With a capacity, the room of that many tiles and the most gaps a set of seven suits can need; without, what these tiles take at most.
-    const roomy = Math.floor(Number(this.getAttribute("capacity")) || 0) > 0 ? rackWidth(rackPlaces(capacity, { breaks: [1, 2, 3, 4, 5, 6].filter((at) => at < capacity) })) : 0;
-    const widest = Math.max(rackWidth(places), rackWidth(rackPlaces(shown.length, { breaks: groupStarts(arrangeTiles(tiles, "suit"), "suit") })), roomy);
-    const centred = (place: RackPlace, width: number): RackPlace => ({ x: Math.round((place.x + (widest - width) / 2) * 1000) / 1000, y: place.y });
+    const roomy =
+      Math.floor(Number(this.getAttribute("capacity")) || 0) > 0
+        ? rackWidth(rackPlaces(capacity, { breaks: [1, 2, 3, 4, 5, 6].filter((at) => at < capacity) }))
+        : 0;
+    const widest = Math.max(
+      rackWidth(places),
+      rackWidth(rackPlaces(shown.length, { breaks: groupStarts(arrangeTiles(tiles, "suit"), "suit") })),
+      roomy,
+    );
+    const centred = (place: RackPlace, width: number): RackPlace => ({
+      x: Math.round((place.x + (widest - width) / 2) * 1000) / 1000,
+      y: place.y,
+    });
     const width = rackWidth(places);
     const end = places.map((place) => centred(place, width));
     const moving = this.#moving && this.#seen.size > 0;
@@ -624,7 +849,18 @@ export class JarajaraRack extends ElementBase {
     // What a screen reader hears: the tiles, or that they are face down and how many.
     const allDown = shown.length > 0 && perm.every((at) => downIn(at));
     this.setAttribute("role", "group");
-    this.setAttribute("aria-label", this.getAttribute("label") ?? (shown.length === 0 ? say(language, "rackEmpty") : allDown && state.marked.size === 0 ? say(language, "rackFaceDown", { n: shown.length }) : say(language, "rackLabel", { n: shown.length, tiles: perm.map((at) => tileLabel(tiles[at]!, downIn(at), language)).join(", ") })));
+    this.setAttribute(
+      "aria-label",
+      this.getAttribute("label") ??
+        (shown.length === 0
+          ? say(language, "rackEmpty")
+          : allDown && state.marked.size === 0
+            ? say(language, "rackFaceDown", { n: shown.length })
+            : say(language, "rackLabel", {
+                n: shown.length,
+                tiles: perm.map((at) => tileLabel(tiles[at]!, downIn(at), language)).join(", "),
+              })),
+    );
     const reds = isOn(this, "red-fives") && design?.red !== undefined ? redFiveIndexes(shown) : new Set<number>();
     const start = perm.map((at, place) => {
       const id = this.#ids[at]!;
@@ -645,7 +881,11 @@ export class JarajaraRack extends ElementBase {
       const lifted = state.lifted.has(at);
       const picks = isOn(this, "pick");
       const label = tileLabel(code, down, language);
-      const said = marked ? say(language, "tileMarked", { tile: label }) : lifted ? say(language, "tileLifted", { tile: label }) : label;
+      const said = marked
+        ? say(language, "tileMarked", { tile: label })
+        : lifted
+          ? say(language, "tileLifted", { tile: label })
+          : label;
       return `<div class="slot" part="tile" style="${blockVars(this, design)}" data-id="${id}" data-index="${at}" data-place="${place}" data-down="${before}" data-lifted="${lifted}" aria-label="${said}"${picks ? ` role="button" tabindex="0" aria-pressed="${lifted}"` : ` role="img"`}><div class="spin"><div class="tile">${blockHtml(face, back)}</div>${markerHtml(marked)}</div></div>`;
     });
     const across = Math.round((widest + 0.1) * 1000) / 1000;
@@ -667,7 +907,13 @@ export class JarajaraRack extends ElementBase {
         this.#focus = null;
       }
     };
-    all.forEach((slot, place) => put(slot, start[place]!, moving ? (this.#seen.get(this.#ids[perm[place]!]!)?.down ?? downIn(perm[place]!)) : downIn(perm[place]!)));
+    all.forEach((slot, place) =>
+      put(
+        slot,
+        start[place]!,
+        moving ? (this.#seen.get(this.#ids[perm[place]!]!)?.down ?? downIn(perm[place]!)) : downIn(perm[place]!),
+      ),
+    );
     if (!moving) {
       finish();
       this.#finish();
@@ -693,7 +939,15 @@ export class JarajaraRack extends ElementBase {
 
   #detail(): RackDetail {
     const state = this.#state();
-    return { tiles: this.tiles, faceDown: state.down, turned: [...state.turned].sort((a, b) => a - b), lifted: [...state.lifted].sort((a, b) => a - b), marked: [...state.marked].sort((a, b) => a - b), order: this.#order(), group: this.#grouping() };
+    return {
+      tiles: this.tiles,
+      faceDown: state.down,
+      turned: [...state.turned].sort((a, b) => a - b),
+      lifted: [...state.lifted].sort((a, b) => a - b),
+      marked: [...state.marked].sort((a, b) => a - b),
+      order: this.#order(),
+      group: this.#grouping(),
+    };
   }
 
   /** Tell the page of a change, once, and of the first drawing not at all. */
@@ -712,7 +966,10 @@ export class JarajaraRack extends ElementBase {
     const language = languageOf(this);
     const tiles = this.arranged;
     if (tiles.length === 0) return say(language, "rackEmpty");
-    return say(language, "rackLabel", { n: tiles.length, tiles: tiles.map((code) => tileName(code, language)).join(", ") });
+    return say(language, "rackLabel", {
+      n: tiles.length,
+      tiles: tiles.map((code) => tileName(code, language)).join(", "),
+    });
   }
 }
 

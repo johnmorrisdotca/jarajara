@@ -4,7 +4,19 @@ import { seededRandom } from "./random.ts";
 import { computerPair } from "./computer.ts";
 import { generateAwase } from "./awase.ts";
 import { MAHJONG_LAYOUTS } from "./layouts.ts";
-import { AWASE_TABLE, decodeTable, playAtTable, encodeTable, readTable, seatName, startTable, tablePairs, tablePlayersAsked, takeAtTable, undoAtTable } from "./table.ts";
+import {
+  AWASE_TABLE,
+  decodeTable,
+  playAtTable,
+  encodeTable,
+  readTable,
+  seatName,
+  startTable,
+  tablePairs,
+  tablePlayersAsked,
+  takeAtTable,
+  undoAtTable,
+} from "./table.ts";
 import type { AwaseTable } from "./table.types.ts";
 import { pairGoesAgain, pairPoints } from "./tiles.ts";
 
@@ -23,7 +35,10 @@ function dealOf(size: number, seed: number) {
 
 function table(size: number, players: number, seed: number): AwaseTable {
   const deal = dealOf(size, seed);
-  return startTable(deal, Array.from({ length: players }, (_, at) => ({ name: at === 0 ? "Aiko" : "" })));
+  return startTable(
+    deal,
+    Array.from({ length: players }, (_, at) => ({ name: at === 0 ? "Aiko" : "" })),
+  );
 }
 
 describe("a game at the table", () => {
@@ -31,7 +46,11 @@ describe("a game at the table", () => {
     expect(tablePlayersAsked("3")).toBe(3);
     expect(tablePlayersAsked("5")).toBe(1);
     expect(tablePlayersAsked(undefined)).toBe(1);
-    const game = startTable(generateAwase(4, "easy", 1), [{ name: "  Aiko  " }, { name: "", computer: true }, { name: "" }]);
+    const game = startTable(generateAwase(4, "easy", 1), [
+      { name: "  Aiko  " },
+      { name: "", computer: true },
+      { name: "" },
+    ]);
     expect(game.seats).toHaveLength(3);
     expect(seatName(game.seats, 0)).toBe("Aiko");
     expect(seatName(game.seats, 1)).toBe("Computer 1");
@@ -87,28 +106,34 @@ describe("a game at the table", () => {
 describe("the table plays out", () => {
   const offered = MAHJONG_LAYOUTS.filter((layout) => layout.size !== 4);
 
-  it.each(offered.map((layout) => [layout.key, layout.size] as const))("at the %s: every game ends, names its winners, and every seat wins some", (_, size) => {
-    for (let players = AWASE_TABLE.least; players <= AWASE_TABLE.most; players += 1) {
-      const wins = new Array<number>(players).fill(0);
-      for (let game = 0; game < 12; game += 1) {
-        const random = seededRandom(size * 1000 + players * 100 + game);
-        let current = table(size, players, game % 4);
-        let state = readTable(current)!;
-        for (let step = 0; step < 400 && !state.over; step += 1) {
-          const pairs = tablePairs(current, state);
-          expect(pairs.length, "a game that is not over offers a pair").toBeGreaterThan(0);
-          const [a, b] = pairs[Math.floor(random() * pairs.length)]!;
-          ({ table: current, state } = playAtTable(current, a, b, state)!);
+  it.each(offered.map((layout) => [layout.key, layout.size] as const))(
+    "at the %s: every game ends, names its winners, and every seat wins some",
+    (_, size) => {
+      for (let players = AWASE_TABLE.least; players <= AWASE_TABLE.most; players += 1) {
+        const wins = new Array<number>(players).fill(0);
+        for (let game = 0; game < 12; game += 1) {
+          const random = seededRandom(size * 1000 + players * 100 + game);
+          let current = table(size, players, game % 4);
+          let state = readTable(current)!;
+          for (let step = 0; step < 400 && !state.over; step += 1) {
+            const pairs = tablePairs(current, state);
+            expect(pairs.length, "a game that is not over offers a pair").toBeGreaterThan(0);
+            const [a, b] = pairs[Math.floor(random() * pairs.length)]!;
+            ({ table: current, state } = playAtTable(current, a, b, state)!);
+          }
+          expect(state.over).toBe(true);
+          expect(tablePairs(current, state)).toEqual([]);
+          expect(state.winners.length).toBeGreaterThan(0);
+          expect(state.pairs.reduce((sum, count) => sum + count, 0)).toBe(state.taken.length);
+          for (const seat of state.winners) wins[seat]! += 1;
         }
-        expect(state.over).toBe(true);
-        expect(tablePairs(current, state)).toEqual([]);
-        expect(state.winners.length).toBeGreaterThan(0);
-        expect(state.pairs.reduce((sum, count) => sum + count, 0)).toBe(state.taken.length);
-        for (const seat of state.winners) wins[seat]! += 1;
+        expect(
+          wins.every((count) => count > 0),
+          `${players} players at ${size}: ${wins.join(" ")}`,
+        ).toBe(true);
       }
-      expect(wins.every((count) => count > 0), `${players} players at ${size}: ${wins.join(" ")}`).toBe(true);
-    }
-  });
+    },
+  );
 
   it("a computer beats a player who takes pairs at random, more often than not", () => {
     let computerWins = 0;

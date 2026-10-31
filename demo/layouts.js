@@ -13,15 +13,27 @@ export function initLayouts(ctx) {
   let keys = "z y x";
 
   const fill = () => {
-    sizeSelect.replaceChildren(...LAYOUTS.map((layout) => Object.assign(document.createElement("option"), { value: String(layout.size), textContent: `${layoutName(layout)} (${layout.size})`, selected: layout.size === size })));
-    for (const button of document.querySelectorAll("[data-sort]")) button.setAttribute("aria-pressed", String(button.dataset.sort === keys));
+    sizeSelect.replaceChildren(
+      ...LAYOUTS.map((layout) =>
+        Object.assign(document.createElement("option"), {
+          value: String(layout.size),
+          textContent: `${layoutName(layout)} (${layout.size})`,
+          selected: layout.size === size,
+        }),
+      ),
+    );
+    for (const button of document.querySelectorAll("[data-sort]"))
+      button.setAttribute("aria-pressed", String(button.dataset.sort === keys));
   };
   const draw = () => {
     inspect.setAttribute("size", String(size));
     inspect.setAttribute("sort", keys);
     const layout = LAYOUTS.find((one) => one.size === size);
     note.textContent = ctx.word("inspectNote")(layout.slots.length, readSlotKeys(keys).join(" "));
-    ctx.show("inspect-code", `<jarajara-layout size="${size}" view="lined" sort="${keys}" static></jarajara-layout>\n\nimport { sortSlots } from "@johnmorrisdotca/jarajara";\nsortSlots(layout, ${JSON.stringify(readSlotKeys(keys))});   // the slots, in that order`);
+    ctx.show(
+      "inspect-code",
+      `<jarajara-layout size="${size}" view="lined" sort="${keys}" static></jarajara-layout>\n\nimport { sortSlots } from "@johnmorrisdotca/jarajara";\nsortSlots(layout, ${JSON.stringify(readSlotKeys(keys))});   // the slots, in that order`,
+    );
     fill();
   };
   sizeSelect.addEventListener("change", () => {

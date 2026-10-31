@@ -3,7 +3,11 @@ export function initTable(ctx) {
   const table = document.getElementById("table-demo");
   const players = document.getElementById("table-players");
   let count = 2;
-  const code = () => ctx.show("table-code", `<jarajara-table players="${count}" people="1" size="8" cloth="green" box="landscape"></jarajara-table>\n\ntable.deal();   // deal again\ntable.addEventListener("jarajara-table", (event) => event.detail.scores);`);
+  const code = () =>
+    ctx.show(
+      "table-code",
+      `<jarajara-table players="${count}" people="1" size="8" cloth="green" box="landscape"></jarajara-table>\n\ntable.deal();   // deal again\ntable.addEventListener("jarajara-table", (event) => event.detail.scores);`,
+    );
   const paint = () => {
     players.replaceChildren(
       ...[2, 3, 4].map((value) => {

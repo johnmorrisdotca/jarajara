@@ -3,7 +3,16 @@ import { expect, test } from "@playwright/test";
 
 import { bare, open, tap } from "./demo.mjs";
 
-const inside = (page, selector) => page.locator(selector).evaluate((tile) => ({ label: tile.getAttribute("aria-label"), role: tile.getAttribute("role"), down: tile.hasAttribute("face-down"), face: tile.shadowRoot.querySelector(".face").innerHTML, back: tile.shadowRoot.querySelector(".back").innerHTML }));
+const inside = (page, selector) =>
+  page
+    .locator(selector)
+    .evaluate((tile) => ({
+      label: tile.getAttribute("aria-label"),
+      role: tile.getAttribute("role"),
+      down: tile.hasAttribute("face-down"),
+      face: tile.shadowRoot.querySelector(".face").innerHTML,
+      back: tile.shadowRoot.querySelector(".back").innerHTML,
+    }));
 
 test("a tap turns the tile over and back; while it is down its face is not in the page", async ({ page }) => {
   const errors = await bare(page, '<jarajara-tile id="t" code="F" flip></jarajara-tile>');
@@ -22,12 +31,18 @@ test("a tap turns the tile over and back; while it is down its face is not in th
   await page.locator("#t").focus();
   await page.keyboard.press("Enter");
   await expect(page.locator("#t")).toHaveAttribute("aria-label", "red dragon");
-  expect(turns).toEqual([{ code: "F", faceDown: true }, { code: "F", faceDown: false }]);
+  expect(turns).toEqual([
+    { code: "F", faceDown: true },
+    { code: "F", faceDown: false },
+  ]);
   expect(errors).toEqual([]);
 });
 
 test("a tile is named by its letter or any name it goes by, and in Japanese on a Japanese page", async ({ page }) => {
-  const errors = await bare(page, '<jarajara-tile id="a" code="east"></jarajara-tile><jarajara-tile id="b" code="3p"></jarajara-tile><jarajara-tile id="c" code="nothing"></jarajara-tile><jarajara-tile id="d" code="五萬" lang="ja" face-down></jarajara-tile>');
+  const errors = await bare(
+    page,
+    '<jarajara-tile id="a" code="east"></jarajara-tile><jarajara-tile id="b" code="3p"></jarajara-tile><jarajara-tile id="c" code="nothing"></jarajara-tile><jarajara-tile id="d" code="五萬" lang="ja" face-down></jarajara-tile>',
+  );
   await expect(page.locator("#a")).toHaveAttribute("aria-label", "east wind");
   await expect(page.locator("#b")).toHaveAttribute("aria-label", "3 of circles");
   await expect(page.locator("#c")).toHaveAttribute("aria-label", "");
@@ -39,7 +54,10 @@ test("a tile is named by its letter or any name it goes by, and in Japanese on a
 });
 
 test("every size and width, and a back of its own, in a steady box", async ({ page }) => {
-  await bare(page, '<jarajara-tile id="s" code="a" size="small"></jarajara-tile><jarajara-tile id="m" code="a"></jarajara-tile><jarajara-tile id="l" code="a" size="large" face-down back="bamboo" mark="HI" back-colour="#336699" flip></jarajara-tile><jarajara-tile id="w" code="a" width="100"></jarajara-tile>');
+  await bare(
+    page,
+    '<jarajara-tile id="s" code="a" size="small"></jarajara-tile><jarajara-tile id="m" code="a"></jarajara-tile><jarajara-tile id="l" code="a" size="large" face-down back="bamboo" mark="HI" back-colour="#336699" flip></jarajara-tile><jarajara-tile id="w" code="a" width="100"></jarajara-tile>',
+  );
   const width = (id) => page.locator(id).evaluate((el) => Math.round(el.getBoundingClientRect().width));
   expect([await width("#s"), await width("#m"), await width("#l"), await width("#w")]).toEqual([32, 48, 72, 100]);
   const before = await page.locator("#l").boundingBox();
@@ -48,7 +66,9 @@ test("every size and width, and a back of its own, in a steady box", async ({ pa
   await page.waitForTimeout(100);
   const after = await page.locator("#l").boundingBox();
   expect({ w: after.width, h: after.height }).toEqual({ w: before.width, h: before.height });
-  const back = await page.locator("#l").evaluate((el) => (el.toggleAttribute("face-down", true), el.shadowRoot.querySelector(".back").innerHTML));
+  const back = await page
+    .locator("#l")
+    .evaluate((el) => (el.toggleAttribute("face-down", true), el.shadowRoot.querySelector(".back").innerHTML));
   expect(back).toContain("#336699");
   expect(back).toContain(">HI</text>");
 });

@@ -10,13 +10,23 @@ const rack = '<jarajara-rack id="r" tiles="' + HAND + '" capacity="14" pick></ja
 /** The rack's tiles left to right as the page draws them: [{ code, down }]. */
 const lying = (page, selector = "#r") =>
   page.locator(selector).evaluate((el) => {
-    const slots = [...el.shadowRoot.querySelectorAll(".slot")].sort((a, b) => Number(a.style.getPropertyValue("--x")) - Number(b.style.getPropertyValue("--x")));
-    return slots.map((slot) => ({ index: Number(slot.dataset.index), down: slot.dataset.down === "true", lifted: slot.dataset.lifted === "true", face: slot.querySelector(".face svg")?.getAttribute("data-face") ?? null }));
+    const slots = [...el.shadowRoot.querySelectorAll(".slot")].sort(
+      (a, b) => Number(a.style.getPropertyValue("--x")) - Number(b.style.getPropertyValue("--x")),
+    );
+    return slots.map((slot) => ({
+      index: Number(slot.dataset.index),
+      down: slot.dataset.down === "true",
+      lifted: slot.dataset.lifted === "true",
+      face: slot.querySelector(".face svg")?.getAttribute("data-face") ?? null,
+    }));
   });
 const order = async (page, selector) => (await lying(page, selector)).map((one) => HAND[one.index]).join("");
 
 test("lines the tiles up as they were written, in codes, names or notation", async ({ page }) => {
-  const errors = await bare(page, `${rack}<jarajara-rack id="n" tiles="east red-dragon 3p"></jarajara-rack><jarajara-rack id="h" tiles="123m11z"></jarajara-rack>`);
+  const errors = await bare(
+    page,
+    `${rack}<jarajara-rack id="n" tiles="east red-dragon 3p"></jarajara-rack><jarajara-rack id="h" tiles="123m11z"></jarajara-rack>`,
+  );
   expect(await order(page)).toBe(HAND);
   await expect(page.locator("#r")).toHaveAttribute("aria-label", /^12 tiles: red dragon, 2 of characters/);
   expect((await lying(page, "#n")).map((one) => one.face)).toEqual(["B", "F", "l"]);
@@ -25,7 +35,9 @@ test("lines the tiles up as they were written, in codes, names or notation", asy
   expect(errors).toEqual([]);
 });
 
-test("turns every tile over, one by one, or only the ones named, and a tile face down has no face in the page", async ({ page }) => {
+test("turns every tile over, one by one, or only the ones named, and a tile face down has no face in the page", async ({
+  page,
+}) => {
   const errors = await bare(page, rack);
   const events = [];
   await page.exposeFunction("told", (detail) => events.push(detail));
@@ -42,7 +54,13 @@ test("turns every tile over, one by one, or only the ones named, and a tile face
   slots = await lying(page);
   expect(slots.filter((one) => one.down).map((one) => one.index)).toEqual([0, 3]);
   await page.locator("#r").evaluate((el) => el.toggle("B"));
-  expect((await lying(page)).filter((one) => one.down).map((one) => HAND[one.index]).sort().join("")).toBe("BF");
+  expect(
+    (await lying(page))
+      .filter((one) => one.down)
+      .map((one) => HAND[one.index])
+      .sort()
+      .join(""),
+  ).toBe("BF");
   // Turning them all turns the whole rack the other way about.
   await page.locator("#r").evaluate((el) => el.toggle());
   expect((await lying(page)).filter((one) => one.down).length).toBe(10);
@@ -51,16 +69,28 @@ test("turns every tile over, one by one, or only the ones named, and a tile face
   expect(errors).toEqual([]);
 });
 
-test("sorts, groups by suit or kind, closes the groups and unsorts, never changing the rack's box", async ({ page }) => {
+test("sorts, groups by suit or kind, closes the groups and unsorts, never changing the rack's box", async ({
+  page,
+}) => {
   const errors = await bare(page, rack);
   const was = await box(page, "#r");
   await page.locator("#r").evaluate((el) => el.sort());
-  expect(await order(page)).toBe(HAND.split("").sort((x, y) => SET.indexOf(x) - SET.indexOf(y)).join(""));
+  expect(await order(page)).toBe(
+    HAND.split("")
+      .sort((x, y) => SET.indexOf(x) - SET.indexOf(y))
+      .join(""),
+  );
   expect(await box(page, "#r")).toEqual(was);
-  const gaps = () => page.locator("#r").evaluate((el) => {
-    const xs = [...el.shadowRoot.querySelectorAll(".slot")].map((s) => Number(s.style.getPropertyValue("--x"))).sort((a, b) => a - b);
-    return xs.slice(1).map((x, i) => Math.round((x - xs[i]) * 100) / 100).filter((d) => d > 1.1).length;
-  });
+  const gaps = () =>
+    page.locator("#r").evaluate((el) => {
+      const xs = [...el.shadowRoot.querySelectorAll(".slot")]
+        .map((s) => Number(s.style.getPropertyValue("--x")))
+        .sort((a, b) => a - b);
+      return xs
+        .slice(1)
+        .map((x, i) => Math.round((x - xs[i]) * 100) / 100)
+        .filter((d) => d > 1.1).length;
+    });
   expect(await gaps()).toBe(0);
   await page.locator("#r").evaluate((el) => el.group("suit"));
   // Characters, circles, winds, dragons, flowers: a gap before each group after the first.
@@ -115,7 +145,9 @@ test("takes a tile out and puts one in, and a rack with a capacity keeps its siz
   expect(errors).toEqual([]);
 });
 
-test("a tap raises a tile and a second puts it down; marks follow a tile through a sort and a turn", async ({ page }) => {
+test("a tap raises a tile and a second puts it down; marks follow a tile through a sort and a turn", async ({
+  page,
+}) => {
   const errors = await bare(page, rack);
   const picks = [];
   await page.exposeFunction("picked", (detail) => picks.push(detail));
@@ -124,7 +156,10 @@ test("a tap raises a tile and a second puts it down; marks follow a tile through
   await tap(page, slot(2));
   expect(picks).toEqual([{ index: 2, code: "a", lifted: true }]);
   await expect(page.locator("#r")).toHaveAttribute("lifted", "2");
-  const top = (index) => page.locator("#r").evaluate((el, i) => el.shadowRoot.querySelector(`.slot[data-index="${i}"]`).getBoundingClientRect().top, index);
+  const top = (index) =>
+    page
+      .locator("#r")
+      .evaluate((el, i) => el.shadowRoot.querySelector(`.slot[data-index="${i}"]`).getBoundingClientRect().top, index);
   expect(await top(2)).toBeLessThan(await top(1));
   await tap(page, slot(2));
   await expect(page.locator("#r")).not.toHaveAttribute("lifted", /./);
@@ -137,21 +172,32 @@ test("a tap raises a tile and a second puts it down; marks follow a tile through
   await page.locator("#r").evaluate((el) => el.mark(4));
   await page.locator("#r").evaluate((el) => el.sort());
   await page.locator("#r").evaluate((el) => el.hide());
-  const marked = await page.locator("#r").evaluate((el) => [...el.shadowRoot.querySelectorAll(".slot")].filter((s) => s.querySelector(".marker")).map((s) => Number(s.dataset.index)));
+  const marked = await page
+    .locator("#r")
+    .evaluate((el) =>
+      [...el.shadowRoot.querySelectorAll(".slot")]
+        .filter((s) => s.querySelector(".marker"))
+        .map((s) => Number(s.dataset.index)),
+    );
   expect(marked).toEqual([4]);
   await page.locator("#r").evaluate((el) => el.unmark());
   expect(await page.locator("#r").evaluate((el) => el.shadowRoot.querySelectorAll(".marker").length)).toBe(0);
   expect(errors).toEqual([]);
 });
 
-test("a tile taken out is not the tile that was marked: the marks and turns shift with the places", async ({ page }) => {
+test("a tile taken out is not the tile that was marked: the marks and turns shift with the places", async ({
+  page,
+}) => {
   await bare(page, rack);
   await page.locator("#r").evaluate(async (el) => {
     el.mark(5);
     el.toggle(6);
     await el.take(0);
   });
-  expect(await page.locator("#r").evaluate((el) => [el.getAttribute("marked"), el.getAttribute("turned")])).toEqual(["4", "5"]);
+  expect(await page.locator("#r").evaluate((el) => [el.getAttribute("marked"), el.getAttribute("turned")])).toEqual([
+    "4",
+    "5",
+  ]);
 });
 
 test("spins its tiles where they lie and settles, and says nothing of a tile it does not hold", async ({ page }) => {
@@ -165,7 +211,10 @@ test("spins its tiles where they lie and settles, and says nothing of a tile it 
 });
 
 test("fits a phone: a long rack is drawn smaller, never wider than its room", async ({ page }) => {
-  await bare(page, '<jarajara-rack id="w" tiles="' + HAND + HAND + '" size="large" group="suit" order="suit"></jarajara-rack>');
+  await bare(
+    page,
+    '<jarajara-rack id="w" tiles="' + HAND + HAND + '" size="large" group="suit" order="suit"></jarajara-rack>',
+  );
   const wide = await page.locator("#w").boundingBox();
   const room = await page.evaluate(() => document.documentElement.clientWidth);
   expect(wide.width).toBeLessThanOrEqual(room);

@@ -4,10 +4,19 @@
 import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 
 import { API_CSS, apiPage } from "./api.mjs";
-import { FAMILY_SCRIPT, FAMILY_EMBED_BUILDER_WORDS, familyEmbedBuilder, familyFooter, familyHead, familyHeader, familyUnreviewed } from "./family-template.mjs";
+import {
+  FAMILY_SCRIPT,
+  FAMILY_EMBED_BUILDER_WORDS,
+  familyEmbedBuilder,
+  familyFooter,
+  familyHead,
+  familyHeader,
+  familyUnreviewed,
+} from "./family-template.mjs";
 
 const id = "jarajara";
-const ICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232f5d4a'/%3E%3Crect x='24' y='12' width='52' height='72' rx='7' fill='%23d9c59b'/%3E%3Crect x='28' y='10' width='50' height='70' rx='7' fill='%23fffdf6'/%3E%3Ctext x='53' y='62' font-size='42' font-weight='700' text-anchor='middle' fill='%23b2302f'%3E中%3C/text%3E%3C/svg%3E";
+const ICON =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232f5d4a'/%3E%3Crect x='24' y='12' width='52' height='72' rx='7' fill='%23d9c59b'/%3E%3Crect x='28' y='10' width='50' height='70' rx='7' fill='%23fffdf6'/%3E%3Ctext x='53' y='62' font-size='42' font-weight='700' text-anchor='middle' fill='%23b2302f'%3E中%3C/text%3E%3C/svg%3E";
 
 const uses = [
   `import { generateAwase } from "@johnmorrisdotca/jarajara/awase";`,
@@ -35,9 +44,11 @@ const page = `<!doctype html>
     ${familyHead({
       id,
       title: "Jarajara ジャラジャラ — Mahjong tiles and mahjong solitaire",
-      description: "Play Awase, the mahjong matching solitaire, and see the tiles, racks, layouts and tables Jarajara draws on any page. Jarajara is the open-source mahjong tile library it is built on, in English and Japanese.",
+      description:
+        "Play Awase, the mahjong matching solitaire, and see the tiles, racks, layouts and tables Jarajara draws on any page. Jarajara is the open-source mahjong tile library it is built on, in English and Japanese.",
       ogTitle: "Jarajara ジャラジャラ — Mahjong tiles and mahjong solitaire",
-      ogDescription: "Take the tiles away two at a time, two that match and that are both free, until the layout is clear.",
+      ogDescription:
+        "Take the tiles away two at a time, two that match and that are both free, until the layout is clear.",
     })}
     <link rel="icon" href="${ICON}" />
     <link rel="stylesheet" href="family.css" />
@@ -45,7 +56,13 @@ const page = `<!doctype html>
   </head>
   <body>
     <main>
-      ${familyHeader({ id, links: [{ href: "docs/index.html", say: "pageDocs" }, { href: "api.html", say: "pageApi" }] })}
+      ${familyHeader({
+        id,
+        links: [
+          { href: "docs/index.html", say: "pageDocs" },
+          { href: "api.html", say: "pageApi" },
+        ],
+      })}
 ${body}
       ${familyFooter({ id })}
     </main>
@@ -57,7 +74,8 @@ ${body}
 
 rmSync("site", { recursive: true, force: true });
 mkdirSync("site", { recursive: true });
-for (const file of readdirSync("demo").filter((name) => /\.(css|js)$/.test(name))) cpSync(`demo/${file}`, `site/${file}`);
+for (const file of readdirSync("demo").filter((name) => /\.(css|js)$/.test(name)))
+  cpSync(`demo/${file}`, `site/${file}`);
 cpSync("dist", "site/dist", { recursive: true });
 writeFileSync("site/index.html", page);
 // The API reference, made from the source: every export of every entry point.
@@ -66,10 +84,29 @@ writeFileSync("site/api.html", apiPage({ id, name: "Jarajara", icon: ICON }));
 console.log("site/ is ready: serve it, or let the Pages workflow publish it.");
 
 cpSync("demo/embed", "site/embed", { recursive: true });
-writeFileSync("site/family-embed-builder.js", `export const FAMILY_EMBED_BUILDER_WORDS = ${JSON.stringify(FAMILY_EMBED_BUILDER_WORDS)};\nexport ${familyEmbedBuilder.toString()};\n`);
+writeFileSync(
+  "site/family-embed-builder.js",
+  `export const FAMILY_EMBED_BUILDER_WORDS = ${JSON.stringify(FAMILY_EMBED_BUILDER_WORDS)};\nexport ${familyEmbedBuilder.toString()};\n`,
+);
 const builderParts = {
-  builderHead: familyHead({ id, title: "Jarajara · build a rack of tiles", description: "Arrange mahjong tiles, preview them and copy the embed code." }),
-  builderHeader: familyHeader({ id, links: [{ href: "./", say: "toGallery" }, { href: "docs/index.html", say: "pageDocs" }, { href: "api.html", say: "pageApi" }] }),
-  unreviewed: familyUnreviewed({ id }), footer: familyFooter({ id }), script: `<script>${FAMILY_SCRIPT}</script>`,
+  builderHead: familyHead({
+    id,
+    title: "Jarajara · build a rack of tiles",
+    description: "Arrange mahjong tiles, preview them and copy the embed code.",
+  }),
+  builderHeader: familyHeader({
+    id,
+    links: [
+      { href: "./", say: "toGallery" },
+      { href: "docs/index.html", say: "pageDocs" },
+      { href: "api.html", say: "pageApi" },
+    ],
+  }),
+  unreviewed: familyUnreviewed({ id }),
+  footer: familyFooter({ id }),
+  script: `<script>${FAMILY_SCRIPT}</script>`,
 };
-writeFileSync("site/builder.html", readFileSync("demo/builder.html", "utf8").replace(/<!-- family:([A-Za-z]+) -->/g, (_match, key) => builderParts[key]));
+writeFileSync(
+  "site/builder.html",
+  readFileSync("demo/builder.html", "utf8").replace(/<!-- family:([A-Za-z]+) -->/g, (_match, key) => builderParts[key]),
+);

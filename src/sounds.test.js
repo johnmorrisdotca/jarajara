@@ -6,7 +6,9 @@ import { TILE_SOUND_DATA } from "./sounds.ts";
 /** The recordings in sounds/ are what src/sounds.ts holds, and each is credited. */
 describe("the recordings", () => {
   it("are every file in sounds/, each named in CREDITS.md, and src/sounds.ts is made from them", () => {
-    const files = readdirSync("sounds").filter((name) => name.endsWith(".m4a")).sort();
+    const files = readdirSync("sounds")
+      .filter((name) => name.endsWith(".m4a"))
+      .sort();
     expect(files.map((name) => name.replace(".m4a", ""))).toEqual(Object.keys(TILE_SOUND_DATA).sort());
     const credits = readFileSync("CREDITS.md", "utf8");
     for (const name of files) {

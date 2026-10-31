@@ -196,11 +196,25 @@ export function awaseRules(tiles: number, options: AwaseOptions = {}): AwaseRule
     case "spark":
       return { ...rules, undo: false, timeMs: n.sparkMsPerTile * tiles, sparkBonusMs: n.sparkBonusMs };
     case "rush":
-      return { ...rules, timeMs: n.rushMs, goalPairs: Math.min(n.rushPairs, Math.max(2, Math.round(tiles / 2 * 0.42))) };
+      return {
+        ...rules,
+        timeMs: n.rushMs,
+        goalPairs: Math.min(n.rushPairs, Math.max(2, Math.round((tiles / 2) * 0.42))),
+      };
     case "fortune":
-      return { ...rules, timeMs: n.fortuneMsPerTile * tiles, goalScore: Math.round(((tiles / 2) * n.fortunePointsPerPair) / 100) * 100 };
+      return {
+        ...rules,
+        timeMs: n.fortuneMsPerTile * tiles,
+        goalScore: Math.round(((tiles / 2) * n.fortunePointsPerPair) / 100) * 100,
+      };
     case "sand":
-      return { ...rules, timeMs: n.sandStartMs, reserveMs: n.sandReserveMs, pairBonusMs: n.sandPairMs, comboBonusMs: n.sandComboMs };
+      return {
+        ...rules,
+        timeMs: n.sandStartMs,
+        reserveMs: n.sandReserveMs,
+        pairBonusMs: n.sandPairMs,
+        comboBonusMs: n.sandComboMs,
+      };
     case "purge":
       // The clock is worked out from the group when the run starts: it depends on how many tiles the group has.
       return { ...rules, timeMs: 0 };
@@ -212,7 +226,18 @@ export function awaseRules(tiles: number, options: AwaseOptions = {}): AwaseRule
 }
 
 /** Where a game stood before a move, so it can be taken back. */
-type Snapshot = { cells: MahjongCells; shuffles: number; pairs: number; score: number; combo: number; lastPairAt: number | null; bank: number | null; bankAt: number | null; spark: string | null; moves: number };
+type Snapshot = {
+  cells: MahjongCells;
+  shuffles: number;
+  pairs: number;
+  score: number;
+  combo: number;
+  lastPairAt: number | null;
+  bank: number | null;
+  bankAt: number | null;
+  spark: string | null;
+  moves: number;
+};
 
 /** A game of Awase, and what the challenge it is played as asks of it.
  *
@@ -297,15 +322,41 @@ function pickBy<T>(list: readonly T[], seed: number, words: string): T | null {
  * console.log(startRun(deal,{},0).cells.length);
  * ```
  */
-export function startRun(deal: { size: number; seed: number; givens: string }, options: AwaseOptions = {}, at: number | null = null): AwaseRun {
+export function startRun(
+  deal: { size: number; seed: number; givens: string },
+  options: AwaseOptions = {},
+  at: number | null = null,
+): AwaseRun {
   const layout = layoutFor(deal.size);
   if (layout === null) throw new Error(`no Mahjong layout ${deal.size} across`);
   const rules = awaseRules(deal.givens.length, options);
   const faces = fullFaces(deal.givens);
-  const group = rules.challenge === "purge" ? pickBy(PURGE_GROUPS.filter((one) => inPurge(deal.givens, one.key) >= 8), deal.seed, "purge")?.key ?? "characters" : null;
+  const group =
+    rules.challenge === "purge"
+      ? (pickBy(
+          PURGE_GROUPS.filter((one) => inPurge(deal.givens, one.key) >= 8),
+          deal.seed,
+          "purge",
+        )?.key ?? "characters")
+      : null;
   const targets = group === null ? 0 : inPurge(deal.givens, group);
-  const timed = rules.challenge === "purge" ? { ...rules, timeMs: AWASE_CHALLENGE_NUMBERS.purgeMsPerTile * deal.givens.length + AWASE_CHALLENGE_NUMBERS.purgeMsPerTarget * targets } : rules;
-  const gold = rules.challenge === "gold" ? pickBy(faces.filter((code) => [...deal.givens].filter((one) => one === code).length >= 2), deal.seed, "gold") : null;
+  const timed =
+    rules.challenge === "purge"
+      ? {
+          ...rules,
+          timeMs:
+            AWASE_CHALLENGE_NUMBERS.purgeMsPerTile * deal.givens.length +
+            AWASE_CHALLENGE_NUMBERS.purgeMsPerTarget * targets,
+        }
+      : rules;
+  const gold =
+    rules.challenge === "gold"
+      ? pickBy(
+          faces.filter((code) => [...deal.givens].filter((one) => one === code).length >= 2),
+          deal.seed,
+          "gold",
+        )
+      : null;
   const spark = rules.challenge === "spark" ? pickBy(faces, deal.seed, "spark") : null;
   const run: AwaseRun = {
     size: deal.size,
@@ -441,7 +492,18 @@ export function runMarked(run: AwaseRun): number[] {
 }
 
 function snapshot(run: AwaseRun): Snapshot {
-  return { cells: run.cells, shuffles: run.shuffles, pairs: run.pairs, score: run.score, combo: run.combo, lastPairAt: run.lastPairAt, bank: run.bank, bankAt: run.bankAt, spark: run.spark, moves: run.moves.length };
+  return {
+    cells: run.cells,
+    shuffles: run.shuffles,
+    pairs: run.pairs,
+    score: run.score,
+    combo: run.combo,
+    lastPairAt: run.lastPairAt,
+    bank: run.bank,
+    bankAt: run.bankAt,
+    spark: run.spark,
+    moves: run.moves.length,
+  };
 }
 
 /** The game's verdict on itself: won, lost because nothing can be done, or still going. */
@@ -506,7 +568,8 @@ export function runTake(run: AwaseRun, a: number, b: number, at: number): AwaseR
   const combo = quick ? Math.min(timed.combo + 1, n.combo.length - 1) : 0;
   const high = Math.max(layout.slots[a]!.z, layout.slots[b]!.z);
   const sparked = timed.spark !== null && code === timed.spark;
-  let score = timed.score + Math.round((n.pairPoints + n.layerPoints * high) * n.combo[combo]!) + (sparked ? n.sparkPoints : 0);
+  let score =
+    timed.score + Math.round((n.pairPoints + n.layerPoints * high) * n.combo[combo]!) + (sparked ? n.sparkPoints : 0);
   const cells = [...timed.cells].map((one, slot) => (slot === a || slot === b ? EMPTY_SLOT : one)).join("");
   // Time: what is left, plus what this pair earns, up to the reserve.
   let bank = timed.bank === null ? null : (runRemaining(timed, at) as number);
@@ -526,7 +589,8 @@ export function runTake(run: AwaseRun, a: number, b: number, at: number): AwaseR
     spark: sparked ? nextSpark(cells, code) : timed.spark,
     history: [...timed.history, snapshot(timed)],
   };
-  const gold = next.gold !== null && code === next.gold ? { ...next, over: "won" as const, because: "gold" as const } : next;
+  const gold =
+    next.gold !== null && code === next.gold ? { ...next, over: "won" as const, because: "gold" as const } : next;
   return judge(gold);
 }
 
@@ -623,10 +687,15 @@ export function runUndo(run: AwaseRun, at: number): AwaseRun | null {
  * console.log(runHint(run)?.pair);
  * ```
  */
-export function runHint(run: AwaseRun, chosen?: number | null): { run: AwaseRun; pair: [number, number]; found: Exclude<HintKind, "none"> } | null {
+export function runHint(
+  run: AwaseRun,
+  chosen?: number | null,
+): { run: AwaseRun; pair: [number, number]; found: Exclude<HintKind, "none"> } | null {
   if (run.over !== null || (run.rules.hints !== null && run.hintsUsed >= run.rules.hints)) return null;
   const hint = hintFor(geometryOfRun(run), run.cells, ruleOfRun(run), chosen);
-  return hint.pair === null || hint.found === "none" ? null : { run: { ...run, hintsUsed: run.hintsUsed + 1 }, pair: hint.pair, found: hint.found };
+  return hint.pair === null || hint.found === "none"
+    ? null
+    : { run: { ...run, hintsUsed: run.hintsUsed + 1 }, pair: hint.pair, found: hint.found };
 }
 
 /** The game as it stands, for a page to read: how the clock, the goal and the hunt are going, without working them out again.
@@ -723,7 +792,13 @@ export function runMoves(run: AwaseRun): readonly MahjongMove[] {
  * console.log(dailyAwase("2026-10-12"));
  * ```
  */
-export function dailyAwase(date: string | Date): { date: string; size: number; level: AwaseLevel; seed: number; challenge: AwaseChallenge } {
+export function dailyAwase(date: string | Date): {
+  date: string;
+  size: number;
+  level: AwaseLevel;
+  seed: number;
+  challenge: AwaseChallenge;
+} {
   const day = typeof date === "string" ? date.slice(0, 10) : date.toISOString().slice(0, 10);
   // The mega layouts (more than one set of tiles) are never the day's: the day's choice is what it was before they came.
   const layouts = ALL_LAYOUTS.filter((layout) => layout.key !== "tiny" && layout.slots.length <= 144);

@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { arrangeIndexes, arrangeTiles, describeSlot, groupStarts, groupTiles, kindOf, mixTiles, readSlotKeys, sortSlots } from "./arrange.ts";
+import {
+  arrangeIndexes,
+  arrangeTiles,
+  describeSlot,
+  groupStarts,
+  groupTiles,
+  kindOf,
+  mixTiles,
+  readSlotKeys,
+  sortSlots,
+} from "./arrange.ts";
 import { layoutFor } from "./layouts.ts";
 
 describe("arranging tiles", () => {

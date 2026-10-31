@@ -21,9 +21,14 @@ export function initBacks(ctx) {
     for (const button of picks.children) button.setAttribute("aria-pressed", String(button.dataset.back === chosen));
     const how = options();
     show.innerHTML = tileBackSvg(chosen, { ...how, title: `${chosen} back` }) ?? "";
-    const given = Object.entries(how).filter(([key]) => key !== "design").map(([key, value]) => `${key}: ${JSON.stringify(value)}`);
+    const given = Object.entries(how)
+      .filter(([key]) => key !== "design")
+      .map(([key, value]) => `${key}: ${JSON.stringify(value)}`);
     const design = brought.includes(chosen) ? `, design: await loadTileDesign("${chosen}")` : "";
-    ctx.show("back-code", `import { tileBackSvg${design === "" ? "" : ", loadTileDesign"} } from "@johnmorrisdotca/jarajara/faces";\n\ntileBackSvg("${chosen}"${given.length === 0 && design === "" ? "" : `, { ${[...given, design.slice(2)].filter(Boolean).join(", ")} }`});\n\n<jarajara-tile code="a" face-down back="${chosen}"${useColour && design === "" ? ` back-colour="${colour.value}"` : ""}${how.mark === undefined ? "" : ` mark="${how.mark}"`}></jarajara-tile>`);
+    ctx.show(
+      "back-code",
+      `import { tileBackSvg${design === "" ? "" : ", loadTileDesign"} } from "@johnmorrisdotca/jarajara/faces";\n\ntileBackSvg("${chosen}"${given.length === 0 && design === "" ? "" : `, { ${[...given, design.slice(2)].filter(Boolean).join(", ")} }`});\n\n<jarajara-tile code="a" face-down back="${chosen}"${useColour && design === "" ? ` back-colour="${colour.value}"` : ""}${how.mark === undefined ? "" : ` mark="${how.mark}"`}></jarajara-tile>`,
+    );
   };
   const button = (name) => {
     const one = document.createElement("button");
@@ -40,7 +45,8 @@ export function initBacks(ctx) {
     return one;
   };
   picks.replaceChildren(...[...TILE_BACKS, ...brought].map(button));
-  for (const name of TILE_BACKS) picks.querySelector(`[data-back="${name}"] .back-swatch`).innerHTML = tileBackSvg(name, { title: "" });
+  for (const name of TILE_BACKS)
+    picks.querySelector(`[data-back="${name}"] .back-swatch`).innerHTML = tileBackSvg(name, { title: "" });
   // The riichi backs arrive with their designs, fetched now that the panel is here.
   for (const name of brought) {
     loadTileDesign(name).then((design) => {

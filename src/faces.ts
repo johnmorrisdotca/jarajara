@@ -56,7 +56,13 @@ export const TILE_INK = {
  * console.log(TILE_BODY);
  * ```
  */
-export const TILE_BODY = { face: "#fffdf6", rim: "#b9ad96", side: "#d9c59b", sideEdge: "#a8926a", body: "#3a8a68" } as const;
+export const TILE_BODY = {
+  face: "#fffdf6",
+  rim: "#b9ad96",
+  side: "#d9c59b",
+  sideEdge: "#a8926a",
+  body: "#3a8a68",
+} as const;
 
 /** The box a solid tile is drawn in, in the face's units: the face, its thickness down and to the left, and a margin for the outlines.
  *
@@ -66,7 +72,12 @@ export const TILE_BODY = { face: "#fffdf6", rim: "#b9ad96", side: "#d9c59b", sid
  * console.log(TILE_BOX);
  * ```
  */
-export const TILE_BOX = { x: -(TILE_DEPTH + 1), y: -1, width: 30 + TILE_DEPTH + 2, height: 40 + TILE_DEPTH + 2 } as const;
+export const TILE_BOX = {
+  x: -(TILE_DEPTH + 1),
+  y: -1,
+  width: 30 + TILE_DEPTH + 2,
+  height: 40 + TILE_DEPTH + 2,
+} as const;
 
 /** The fonts the characters are drawn in, Japanese serif first; a page may load its own and name it here.
  *
@@ -90,20 +101,97 @@ const SEASON_KANJI = ["春", "夏", "秋", "冬"];
 /* Circles: where each dot sits, and its radius, for one to nine. */
 const DOTS: Record<number, { r: number; at: [number, number][] }> = {
   1: { r: 10, at: [[15, 20]] },
-  2: { r: 6.5, at: [[15, 11], [15, 29]] },
-  3: { r: 5.5, at: [[8, 9], [15, 20], [22, 31]] },
-  4: { r: 5.5, at: [[9, 12], [21, 12], [9, 28], [21, 28]] },
-  5: { r: 5, at: [[8, 10], [22, 10], [15, 20], [8, 30], [22, 30]] },
-  6: { r: 4.6, at: [[9, 9], [21, 9], [9, 20], [21, 20], [9, 31], [21, 31]] },
-  7: { r: 3.8, at: [[7, 7], [15, 11], [23, 15], [9, 24], [21, 24], [9, 33], [21, 33]] },
-  8: { r: 3.8, at: [[9, 6.5], [21, 6.5], [9, 15.5], [21, 15.5], [9, 24.5], [21, 24.5], [9, 33.5], [21, 33.5]] },
-  9: { r: 3.8, at: [[7, 9], [15, 9], [23, 9], [7, 20], [15, 20], [23, 20], [7, 31], [15, 31], [23, 31]] },
+  2: {
+    r: 6.5,
+    at: [
+      [15, 11],
+      [15, 29],
+    ],
+  },
+  3: {
+    r: 5.5,
+    at: [
+      [8, 9],
+      [15, 20],
+      [22, 31],
+    ],
+  },
+  4: {
+    r: 5.5,
+    at: [
+      [9, 12],
+      [21, 12],
+      [9, 28],
+      [21, 28],
+    ],
+  },
+  5: {
+    r: 5,
+    at: [
+      [8, 10],
+      [22, 10],
+      [15, 20],
+      [8, 30],
+      [22, 30],
+    ],
+  },
+  6: {
+    r: 4.6,
+    at: [
+      [9, 9],
+      [21, 9],
+      [9, 20],
+      [21, 20],
+      [9, 31],
+      [21, 31],
+    ],
+  },
+  7: {
+    r: 3.8,
+    at: [
+      [7, 7],
+      [15, 11],
+      [23, 15],
+      [9, 24],
+      [21, 24],
+      [9, 33],
+      [21, 33],
+    ],
+  },
+  8: {
+    r: 3.8,
+    at: [
+      [9, 6.5],
+      [21, 6.5],
+      [9, 15.5],
+      [21, 15.5],
+      [9, 24.5],
+      [21, 24.5],
+      [9, 33.5],
+      [21, 33.5],
+    ],
+  },
+  9: {
+    r: 3.8,
+    at: [
+      [7, 9],
+      [15, 9],
+      [23, 9],
+      [7, 20],
+      [15, 20],
+      [23, 20],
+      [7, 31],
+      [15, 31],
+      [23, 31],
+    ],
+  },
 };
 
 /* The colour of each dot, in the order above: blue, green and a red at the heart where a real set puts one. */
 function dotColour(rank: number, index: number): string {
   if (rank === 1) return TILE_INK.red;
-  if (rank === 3 || rank === 5) return index === (rank === 3 ? 1 : 2) ? TILE_INK.red : rank === 3 ? TILE_INK.blue : TILE_INK.green;
+  if (rank === 3 || rank === 5)
+    return index === (rank === 3 ? 1 : 2) ? TILE_INK.red : rank === 3 ? TILE_INK.blue : TILE_INK.green;
   if (rank === 7) return index < 3 ? TILE_INK.green : TILE_INK.red;
   if (rank === 9) return index >= 3 && index < 6 ? TILE_INK.red : TILE_INK.blue;
   if (rank === 6) return index < 2 ? TILE_INK.green : TILE_INK.red;
@@ -112,14 +200,66 @@ function dotColour(rank: number, index: number): string {
 
 /* Bamboo: each stick's centre, top and length, and whether it is the red one, for two to nine. */
 const STICKS: Record<number, [number, number, number, boolean?][]> = {
-  2: [[15, 4, 14], [15, 22, 14]],
-  3: [[15, 4, 14], [10, 22, 14], [20, 22, 14]],
-  4: [[10, 4, 14], [20, 4, 14], [10, 22, 14], [20, 22, 14]],
-  5: [[8, 4, 14], [22, 4, 14], [15, 13, 14, true], [8, 22, 14], [22, 22, 14]],
-  6: [[7, 4, 14], [15, 4, 14], [23, 4, 14], [7, 22, 14], [15, 22, 14], [23, 22, 14]],
-  7: [[15, 3, 10, true], [7, 15, 10], [15, 15, 10], [23, 15, 10], [7, 27, 10], [15, 27, 10], [23, 27, 10]],
-  8: [[6, 4, 14], [12, 4, 14], [18, 4, 14], [24, 4, 14], [6, 22, 14], [12, 22, 14], [18, 22, 14], [24, 22, 14]],
-  9: [[7, 3, 10], [15, 3, 10, true], [23, 3, 10], [7, 15, 10], [15, 15, 10, true], [23, 15, 10], [7, 27, 10], [15, 27, 10, true], [23, 27, 10]],
+  2: [
+    [15, 4, 14],
+    [15, 22, 14],
+  ],
+  3: [
+    [15, 4, 14],
+    [10, 22, 14],
+    [20, 22, 14],
+  ],
+  4: [
+    [10, 4, 14],
+    [20, 4, 14],
+    [10, 22, 14],
+    [20, 22, 14],
+  ],
+  5: [
+    [8, 4, 14],
+    [22, 4, 14],
+    [15, 13, 14, true],
+    [8, 22, 14],
+    [22, 22, 14],
+  ],
+  6: [
+    [7, 4, 14],
+    [15, 4, 14],
+    [23, 4, 14],
+    [7, 22, 14],
+    [15, 22, 14],
+    [23, 22, 14],
+  ],
+  7: [
+    [15, 3, 10, true],
+    [7, 15, 10],
+    [15, 15, 10],
+    [23, 15, 10],
+    [7, 27, 10],
+    [15, 27, 10],
+    [23, 27, 10],
+  ],
+  8: [
+    [6, 4, 14],
+    [12, 4, 14],
+    [18, 4, 14],
+    [24, 4, 14],
+    [6, 22, 14],
+    [12, 22, 14],
+    [18, 22, 14],
+    [24, 22, 14],
+  ],
+  9: [
+    [7, 3, 10],
+    [15, 3, 10, true],
+    [23, 3, 10],
+    [7, 15, 10],
+    [15, 15, 10, true],
+    [23, 15, 10],
+    [7, 27, 10],
+    [15, 27, 10, true],
+    [23, 27, 10],
+  ],
 };
 
 const round = (n: number): string => String(Math.round(n * 1000) / 1000);
@@ -141,7 +281,11 @@ function glyph(text: string, y: number, size: number, colour: string): string {
 function drawing(face: MahjongFace): string {
   switch (face.suit) {
     case "characters":
-      return index(String(face.rank)) + glyph(NUMERALS[face.rank - 1]!, 19, 15, TILE_INK.ink) + glyph("萬", 35, 13, TILE_INK.red);
+      return (
+        index(String(face.rank)) +
+        glyph(NUMERALS[face.rank - 1]!, 19, 15, TILE_INK.ink) +
+        glyph("萬", 35, 13, TILE_INK.red)
+      );
     case "circles": {
       const dots = DOTS[face.rank]!;
       const corner = face.rank > 1 ? index(String(face.rank)) : "";
@@ -170,7 +314,10 @@ function drawing(face: MahjongFace): string {
           `<line x1="17" x2="18" y1="30" y2="36" stroke="${TILE_INK.red}" stroke-width="1.2"/></g>`
         );
       }
-      return index(String(face.rank)) + STICKS[face.rank]!.map(([x, y, length, red]) => stick(x, y, length, red === true)).join("");
+      return (
+        index(String(face.rank)) +
+        STICKS[face.rank]!.map(([x, y, length, red]) => stick(x, y, length, red === true)).join("")
+      );
     case "winds":
       return index(WIND_LETTERS[face.rank - 1]!) + glyph(WIND_KANJI[face.rank - 1]!, 29, 21, TILE_INK.ink);
     case "dragons":
@@ -266,7 +413,13 @@ export function tileBackDrawing(design: TileDesign): string {
  * console.log(tileColours(jarajaraDesign()));
  * ```
  */
-export function tileColours(design?: TileDesign): { face: string; rim: string; side: string; sideEdge: string; body?: string } {
+export function tileColours(design?: TileDesign): {
+  face: string;
+  rim: string;
+  side: string;
+  sideEdge: string;
+  body?: string;
+} {
   return design?.colours ?? TILE_BODY;
 }
 
@@ -315,7 +468,8 @@ export function tileFaceSymbols(prefix: string, options: TileSymbolOptions = {})
   for (const face of MAHJONG_FACES) {
     if (wanted !== null && !wanted.has(face.code)) continue;
     symbols.push(`<symbol id="${prefix}-${face.code}" ${box}>${tileFaceSvg(face.code, design)}</symbol>`);
-    if (red && design?.red?.[face.code] !== undefined) symbols.push(`<symbol id="${prefix}-${face.code}-red" ${box}>${tileFaceSvg(face.code, design, true)}</symbol>`);
+    if (red && design?.red?.[face.code] !== undefined)
+      symbols.push(`<symbol id="${prefix}-${face.code}-red" ${box}>${tileFaceSvg(face.code, design, true)}</symbol>`);
   }
   return `<defs>${symbols.join("")}</defs>`;
 }
@@ -374,16 +528,35 @@ export function tileSvg(code: string, options: TileSvgOptions = {}): string | nu
   const { design, red = false } = options;
   const colours = tileColours(design);
   const body = tileBodySvg(design);
-  const plate = body === null ? `<rect x="0" y="0" width="30" height="40" rx="3" fill="${colours.face}" stroke="${colours.rim}" stroke-width="0.8"/>` : body;
+  const plate =
+    body === null
+      ? `<rect x="0" y="0" width="30" height="40" rx="3" fill="${colours.face}" stroke="${colours.rim}" stroke-width="0.8"/>`
+      : body;
   if (options.flat === true) {
-    return tileOpen(face, options.title, "-1 -1 32 42") + `<rect x="-0.5" y="-0.5" width="31" height="41" rx="3" fill="${colours.side}"/>` + plate + `${tileFaceSvg(code, design, red)}</svg>`;
+    return (
+      tileOpen(face, options.title, "-1 -1 32 42") +
+      `<rect x="-0.5" y="-0.5" width="31" height="41" rx="3" fill="${colours.side}"/>` +
+      plate +
+      `${tileFaceSvg(code, design, red)}</svg>`
+    );
   }
   const block = blockColours(design);
   if (options.bare === true) {
-    return tileOpen(face, options.title, "0 0 30 40", ` overflow="visible"`) + (body === null ? `<rect x="0" y="0" width="30" height="40" rx="3" fill="${colours.face}"/>` : body) + faceEdgeSvg(block) + `${tileFaceSvg(code, design, red)}</svg>`;
+    return (
+      tileOpen(face, options.title, "0 0 30 40", ` overflow="visible"`) +
+      (body === null ? `<rect x="0" y="0" width="30" height="40" rx="3" fill="${colours.face}"/>` : body) +
+      faceEdgeSvg(block) +
+      `${tileFaceSvg(code, design, red)}</svg>`
+    );
   }
   const direction = directionOf(options.mirror);
   const box = `${direction.x > 0 ? TILE_BOX.x : -1} ${direction.y > 0 ? TILE_BOX.y : TILE_BOX.x} ${TILE_BOX.width} ${TILE_BOX.height}`;
   const solid = blockSvg(block, direction);
-  return tileOpen(face, options.title, box) + solid + (body === null ? `<rect x="0" y="0" width="30" height="40" rx="3" fill="${colours.face}"/>` : body) + faceEdgeSvg(block) + `${tileFaceSvg(code, design, red)}</svg>`;
+  return (
+    tileOpen(face, options.title, box) +
+    solid +
+    (body === null ? `<rect x="0" y="0" width="30" height="40" rx="3" fill="${colours.face}"/>` : body) +
+    faceEdgeSvg(block) +
+    `${tileFaceSvg(code, design, red)}</svg>`
+  );
 }

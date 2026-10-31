@@ -78,13 +78,17 @@ describe("a hint that looks first for the chosen tile's match", () => {
 
 describe("the tiles that match one", () => {
   it("tells the ones that could be taken with it now from the ones that are held, and leaves out itself", () => {
-    const slot = slotsOf(dealt).find((one) => isFree(geometry, dealt, one) && matchesOf(geometry, dealt, "group", one).blocked.length > 0)!;
+    const slot = slotsOf(dealt).find(
+      (one) => isFree(geometry, dealt, one) && matchesOf(geometry, dealt, "group", one).blocked.length > 0,
+    )!;
     const found = matchesOf(geometry, dealt, "group", slot);
     expect(found.free.length + found.blocked.length).toBeGreaterThan(0);
     expect([...found.free, ...found.blocked]).not.toContain(slot);
     for (const other of found.free) expect(isFree(geometry, dealt, other)).toBe(true);
     for (const other of found.blocked) expect(isFree(geometry, dealt, other)).toBe(false);
-    const every = slotsOf(dealt).filter((other) => other !== slot && matchClass(dealt[other]!, "group") === matchClass(dealt[slot]!, "group"));
+    const every = slotsOf(dealt).filter(
+      (other) => other !== slot && matchClass(dealt[other]!, "group") === matchClass(dealt[slot]!, "group"),
+    );
     expect([...found.free, ...found.blocked].sort((a, b) => a - b)).toEqual(every);
   });
 

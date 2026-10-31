@@ -1,7 +1,29 @@
-import { copiesOf, countTiles, findFaces, groupFaces, groupWords, isNotation, isTileGroup, readTiles, setInventory, SUIT_WORDS, tileName, writeNotation } from "../names.ts";
+import {
+  copiesOf,
+  countTiles,
+  findFaces,
+  groupFaces,
+  groupWords,
+  isNotation,
+  isTileGroup,
+  readTiles,
+  setInventory,
+  SUIT_WORDS,
+  tileName,
+  writeNotation,
+} from "../names.ts";
 import { RED_FIVE_CODES, redFiveIndexes } from "../designs.ts";
 import { faceOf, pairPoints } from "../tiles.ts";
-import { CLOTH_STYLE, ELEMENT_SIZES, ElementBase, followLanguage, isOn, languageOf, say, wearCloth } from "./elementKit.ts";
+import {
+  CLOTH_STYLE,
+  ELEMENT_SIZES,
+  ElementBase,
+  followLanguage,
+  isOn,
+  languageOf,
+  say,
+  wearCloth,
+} from "./elementKit.ts";
 
 /** The tile width a viewer gives the tiles inside it, in pixels, from its `width` or `size`; null to leave it to the page's `--jarajara-tile-width`. */
 function tilePixels(element: Element, fallback: number | null): number | null {
@@ -16,10 +38,29 @@ function tilePixels(element: Element, fallback: number | null): number | null {
 const PASSED = ["design", "back", "back-colour", "mark", "lang"] as const;
 
 /** One tile as a viewer draws it: a `<jarajara-tile>` carrying the viewer's design and back, with its caption and copies under it. */
-function tileFigure(viewer: Element, code: string, options: { caption: boolean; copies: number | null; down: boolean; flip: boolean; dim?: boolean; have?: number; red?: boolean }): string {
+function tileFigure(
+  viewer: Element,
+  code: string,
+  options: {
+    caption: boolean;
+    copies: number | null;
+    down: boolean;
+    flip: boolean;
+    dim?: boolean;
+    have?: number;
+    red?: boolean;
+  },
+): string {
   const language = languageOf(viewer);
-  const passed = PASSED.flatMap((name) => (viewer.getAttribute(name) === null ? [] : [` ${name}="${(viewer.getAttribute(name) as string).replace(/"/g, "&quot;")}"`])).join("");
-  const copies = options.copies === null ? "" : `<span class="copies">${options.have === undefined ? say(language, "copies", { n: options.copies }) : `${options.have}/${options.copies}`}</span>`;
+  const passed = PASSED.flatMap((name) =>
+    viewer.getAttribute(name) === null
+      ? []
+      : [` ${name}="${(viewer.getAttribute(name) as string).replace(/"/g, "&quot;")}"`],
+  ).join("");
+  const copies =
+    options.copies === null
+      ? ""
+      : `<span class="copies">${options.have === undefined ? say(language, "copies", { n: options.copies }) : `${options.have}/${options.copies}`}</span>`;
   const caption = options.caption ? `<span class="name">${tileName(code, language)}</span>` : "";
   return `<figure class="figure" data-code="${code}"${options.dim === true ? ' data-dim="true"' : ""}><jarajara-tile code="${code}"${passed}${options.red === true ? " red" : ""}${options.down ? " face-down" : ""}${options.flip ? " flip" : ""}></jarajara-tile>${caption}${copies}</figure>`;
 }
@@ -68,7 +109,24 @@ ${CLOTH_STYLE}
  */
 export class JarajaraGroup extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["group", "tiles", "captions", "copies", "heading", "face-down", "flip", "red-fives", "design", "back", "back-colour", "mark", "size", "width", "lang", "cloth"];
+    return [
+      "group",
+      "tiles",
+      "captions",
+      "copies",
+      "heading",
+      "face-down",
+      "flip",
+      "red-fives",
+      "design",
+      "back",
+      "back-colour",
+      "mark",
+      "size",
+      "width",
+      "lang",
+      "cloth",
+    ];
   }
 
   #root: ShadowRoot | null = null;
@@ -87,8 +145,13 @@ export class JarajaraGroup extends ElementBase {
     if (this.#root === null) {
       this.#root = this.attachShadow({ mode: "open" });
       this.#root.addEventListener("click", (event) => {
-        const figure = event.composedPath().find((one): one is HTMLElement => one instanceof HTMLElement && one.classList.contains("figure"));
-        if (figure !== undefined) this.dispatchEvent(new CustomEvent("jarajara-view", { bubbles: true, composed: true, detail: { code: figure.dataset.code } }));
+        const figure = event
+          .composedPath()
+          .find((one): one is HTMLElement => one instanceof HTMLElement && one.classList.contains("figure"));
+        if (figure !== undefined)
+          this.dispatchEvent(
+            new CustomEvent("jarajara-view", { bubbles: true, composed: true, detail: { code: figure.dataset.code } }),
+          );
       });
     }
     this.#draw();
@@ -110,16 +173,31 @@ export class JarajaraGroup extends ElementBase {
     const tiles = this.shown;
     const group = this.getAttribute("group");
     const named = this.getAttribute("tiles") === null ? (isTileGroup(group) ? group : "winds") : null;
-    const heading = isOn(this, "heading") || !this.hasAttribute("heading") ? (named === null ? "" : groupWords(named, language)) : "";
+    const heading =
+      isOn(this, "heading") || !this.hasAttribute("heading") ? (named === null ? "" : groupWords(named, language)) : "";
     const pixels = tilePixels(this, null);
     if (pixels !== null) this.style.setProperty("--jarajara-tile-width", `${pixels}px`);
     else this.style.removeProperty("--jarajara-tile-width");
     const captions = !this.hasAttribute("captions") || isOn(this, "captions");
     const counts = !this.hasAttribute("copies") || isOn(this, "copies");
     const reds = isOn(this, "red-fives") ? redFiveIndexes(tiles) : new Set<number>();
-    const figures = tiles.map((code, at) => tileFigure(this, code, { caption: captions, copies: counts ? copiesOf(code) : null, down: this.hasAttribute("face-down"), flip: isOn(this, "flip"), red: reds.has(at) }));
+    const figures = tiles.map((code, at) =>
+      tileFigure(this, code, {
+        caption: captions,
+        copies: counts ? copiesOf(code) : null,
+        down: this.hasAttribute("face-down"),
+        flip: isOn(this, "flip"),
+        red: reds.has(at),
+      }),
+    );
     this.setAttribute("role", "group");
-    this.setAttribute("aria-label", say(language, "groupLabel", { group: heading || tiles.length, tiles: tiles.map((code) => tileName(code, language)).join(", ") }));
+    this.setAttribute(
+      "aria-label",
+      say(language, "groupLabel", {
+        group: heading || tiles.length,
+        tiles: tiles.map((code) => tileName(code, language)).join(", "),
+      }),
+    );
     root.innerHTML = `<style>${FIGURE_STYLE}</style>${heading === "" ? "" : `<h3>${heading}</h3>`}<div class="row">${figures.join("")}</div>`;
   }
 }
@@ -149,7 +227,20 @@ export class JarajaraGroup extends ElementBase {
  */
 export class JarajaraSet extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["tiles", "mode", "captions", "red-fives", "design", "back", "back-colour", "mark", "size", "width", "lang", "cloth"];
+    return [
+      "tiles",
+      "mode",
+      "captions",
+      "red-fives",
+      "design",
+      "back",
+      "back-colour",
+      "mark",
+      "size",
+      "width",
+      "lang",
+      "cloth",
+    ];
   }
 
   #root: ShadowRoot | null = null;
@@ -160,8 +251,13 @@ export class JarajaraSet extends ElementBase {
     if (this.#root === null) {
       this.#root = this.attachShadow({ mode: "open" });
       this.#root.addEventListener("click", (event) => {
-        const figure = event.composedPath().find((one): one is HTMLElement => one instanceof HTMLElement && one.classList.contains("figure"));
-        if (figure !== undefined) this.dispatchEvent(new CustomEvent("jarajara-view", { bubbles: true, composed: true, detail: { code: figure.dataset.code } }));
+        const figure = event
+          .composedPath()
+          .find((one): one is HTMLElement => one instanceof HTMLElement && one.classList.contains("figure"));
+        if (figure !== undefined)
+          this.dispatchEvent(
+            new CustomEvent("jarajara-view", { bubbles: true, composed: true, detail: { code: figure.dataset.code } }),
+          );
       });
     }
     this.#draw();
@@ -195,13 +291,37 @@ export class JarajaraSet extends ElementBase {
       const faces = inventory.filter((one) => one.face.suit === suit);
       const figures = faces.flatMap(({ face, copies }) => {
         const have = counts?.get(face.code) ?? 0;
-        if (!every) return [tileFigure(this, face.code, { caption: captions, copies, have: counts === null ? undefined : have, down: false, flip: false, dim: counts !== null && have === 0 })];
-        return Array.from({ length: copies }, (_, at) => tileFigure(this, face.code, { caption: false, copies: null, down: false, flip: false, dim: counts !== null && at >= have, red: redFives && at === 0 && RED_FIVE.includes(face.code) }));
+        if (!every)
+          return [
+            tileFigure(this, face.code, {
+              caption: captions,
+              copies,
+              have: counts === null ? undefined : have,
+              down: false,
+              flip: false,
+              dim: counts !== null && have === 0,
+            }),
+          ];
+        return Array.from({ length: copies }, (_, at) =>
+          tileFigure(this, face.code, {
+            caption: false,
+            copies: null,
+            down: false,
+            flip: false,
+            dim: counts !== null && at >= have,
+            red: redFives && at === 0 && RED_FIVE.includes(face.code),
+          }),
+        );
       });
       return `<div class="suit"><h3>${SUIT_WORDS[suit][language]}</h3><div class="row">${figures.join("")}</div></div>`;
     });
     this.setAttribute("role", "group");
-    this.setAttribute("aria-label", counts === null ? say(language, "setLabel", { n: 144, faces: inventory.length }) : say(language, "setHolds", { have: held ?? 0, total: 144 }));
+    this.setAttribute(
+      "aria-label",
+      counts === null
+        ? say(language, "setLabel", { n: 144, faces: inventory.length })
+        : say(language, "setHolds", { have: held ?? 0, total: 144 }),
+    );
     root.innerHTML = `<style>${FIGURE_STYLE}</style>${rows.join("")}`;
   }
 }
@@ -288,11 +408,19 @@ export class JarajaraViewer extends ElementBase {
           go();
           return;
         }
-        const pick = path.find((one): one is HTMLElement => one instanceof HTMLElement && one.dataset.pick !== undefined);
+        const pick = path.find(
+          (one): one is HTMLElement => one instanceof HTMLElement && one.dataset.pick !== undefined,
+        );
         if (pick !== undefined) {
           this.#picked = pick.dataset.pick as string;
           this.#draw();
-          this.dispatchEvent(new CustomEvent("jarajara-view", { bubbles: true, composed: true, detail: { code: this.#picked, query: this.getAttribute("query") } }));
+          this.dispatchEvent(
+            new CustomEvent("jarajara-view", {
+              bubbles: true,
+              composed: true,
+              detail: { code: this.#picked, query: this.getAttribute("query") },
+            }),
+          );
         }
       });
       this.#root.addEventListener("keydown", (event) => {
@@ -326,7 +454,11 @@ export class JarajaraViewer extends ElementBase {
       : "";
     const pixels = tilePixels(this, ELEMENT_SIZES.large) as number;
     this.style.setProperty("--jarajara-tile-width", `${pixels}px`);
-    const passed = PASSED.flatMap((name) => (this.getAttribute(name) === null ? [] : [` ${name}="${(this.getAttribute(name) as string).replace(/"/g, "&quot;")}"`])).join("");
+    const passed = PASSED.flatMap((name) =>
+      this.getAttribute(name) === null
+        ? []
+        : [` ${name}="${(this.getAttribute(name) as string).replace(/"/g, "&quot;")}"`],
+    ).join("");
     let body = `<div class="empty" role="status">${query.trim() === "" ? say(language, "viewerType") : say(language, "viewerNone")}</div>`;
     if (shown !== null) {
       const face = faceOf(shown)!;

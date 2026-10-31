@@ -206,7 +206,10 @@ const RUNS: Partial<Record<TileSoundKind, { count: number; gap: number; rate: (a
  * ```
  */
 export function createTileSounds(options: TileSoundsOptions = {}): TileSounds {
-  const win: TileSoundWindow | undefined = options.window === null ? undefined : (options.window ?? (typeof window === "undefined" ? undefined : (window as unknown as TileSoundWindow)));
+  const win: TileSoundWindow | undefined =
+    options.window === null
+      ? undefined
+      : (options.window ?? (typeof window === "undefined" ? undefined : (window as unknown as TileSoundWindow)));
   const load = options.load ?? ((): Promise<{ TILE_SOUND_DATA: TileSoundData }> => import("../sounds.ts"));
   let muted = options.muted === true;
   let volume = clampVolume(options.volume ?? 0.6);
@@ -232,11 +235,14 @@ export function createTileSounds(options: TileSoundsOptions = {}): TileSounds {
         const atob = win?.atob ?? globalThis.atob;
         const { TILE_SOUND_DATA } = await load();
         const names = Object.keys(TILE_SOUND_DATA).sort();
-        const buffers = await Promise.all(names.map((name) => decode(audio, bytesOf(TILE_SOUND_DATA[name] as string, atob))));
+        const buffers = await Promise.all(
+          names.map((name) => decode(audio, bytesOf(TILE_SOUND_DATA[name] as string, atob))),
+        );
         const made: Loaded = {};
         names.forEach((name, at) => {
           const kind = name.replace(/-\d+$/, "") as TileSoundKind;
-          if ((TILE_SOUND_KINDS as readonly string[]).includes(kind)) (made[kind] ??= []).push(buffers[at] as AudioBuffer);
+          if ((TILE_SOUND_KINDS as readonly string[]).includes(kind))
+            (made[kind] ??= []).push(buffers[at] as AudioBuffer);
         });
         return Object.keys(made).length > 0 ? made : null;
       } catch {
@@ -291,7 +297,10 @@ export function createTileSounds(options: TileSoundsOptions = {}): TileSounds {
       const run = RUNS[kind];
       const rate = run === undefined ? undefined : run.rate(index);
       // A sound that is a run of clicks (a shuffle, a win) plays its short takes, one after another: its long take only opens it.
-      const take = run === undefined || takes === undefined ? undefined : takes[index === 0 ? 0 : 1 + ((index - 1) % Math.max(1, takes.length - 1))];
+      const take =
+        run === undefined || takes === undefined
+          ? undefined
+          : takes[index === 0 ? 0 : 1 + ((index - 1) % Math.max(1, takes.length - 1))];
       if (takes !== undefined && takes.length > 0) recorded(audio, take ?? pick(takes), at, gain, rate);
       else madeHere(audio, kind, at, gain);
     }
@@ -304,7 +313,9 @@ export function createTileSounds(options: TileSoundsOptions = {}): TileSounds {
         const audio = context();
         if (audio === null) return;
         const run = RUNS[kind];
-        const times = soundTimes(how.count ?? run?.count ?? 1, how.gap ?? run?.gap ?? 85).map((ms) => ms + Math.max(0, how.delay ?? 0));
+        const times = soundTimes(how.count ?? run?.count ?? 1, how.gap ?? run?.gap ?? 85).map(
+          (ms) => ms + Math.max(0, how.delay ?? 0),
+        );
         const go = () => {
           const began = audio.currentTime;
           void recordings(audio).then((sounds) => {

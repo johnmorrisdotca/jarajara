@@ -14,7 +14,10 @@ export function initViewers(ctx) {
       button.textContent = text;
       button.addEventListener("click", () => {
         viewer.lookup(text);
-        ctx.show("viewer-code", `<jarajara-viewer query="${text}" editable></jarajara-viewer>\n\nviewer.lookup("${text}");`);
+        ctx.show(
+          "viewer-code",
+          `<jarajara-viewer query="${text}" editable></jarajara-viewer>\n\nviewer.lookup("${text}");`,
+        );
       });
       return button;
     }),
@@ -22,7 +25,10 @@ export function initViewers(ctx) {
   viewer.addEventListener("jarajara-view", () => {
     ctx.show("viewer-code", `<jarajara-viewer query="${viewer.getAttribute("query")}" editable></jarajara-viewer>`);
   });
-  ctx.show("viewer-code", `<jarajara-viewer query="east" editable></jarajara-viewer>\n<jarajara-group group="winds"></jarajara-group>`);
+  ctx.show(
+    "viewer-code",
+    `<jarajara-viewer query="east" editable></jarajara-viewer>\n<jarajara-group group="winds"></jarajara-group>`,
+  );
 
   // A group.
   const group = document.getElementById("group");
@@ -30,11 +36,22 @@ export function initViewers(ctx) {
   const hidden = document.getElementById("group-hidden");
   const fill = () => {
     const chosen = group.getAttribute("group") ?? "winds";
-    pick.replaceChildren(...TILE_GROUPS.map((name) => Object.assign(document.createElement("option"), { value: name, textContent: groupWords(name, ctx.lang()), selected: name === chosen })));
+    pick.replaceChildren(
+      ...TILE_GROUPS.map((name) =>
+        Object.assign(document.createElement("option"), {
+          value: name,
+          textContent: groupWords(name, ctx.lang()),
+          selected: name === chosen,
+        }),
+      ),
+    );
   };
   pick.addEventListener("change", () => {
     group.setAttribute("group", pick.value);
-    ctx.show("viewer-code", `<jarajara-group group="${pick.value}"${group.hasAttribute("face-down") ? " face-down flip" : ""}></jarajara-group>`);
+    ctx.show(
+      "viewer-code",
+      `<jarajara-group group="${pick.value}"${group.hasAttribute("face-down") ? " face-down flip" : ""}></jarajara-group>`,
+    );
   });
   hidden.addEventListener("click", () => {
     const on = !group.hasAttribute("face-down");
@@ -53,10 +70,14 @@ export function initViewers(ctx) {
     const text = hand.value.trim();
     if (text === "") set.removeAttribute("tiles");
     else set.setAttribute("tiles", text);
-    for (const button of document.querySelectorAll("[data-set-mode]")) button.setAttribute("aria-pressed", String(button.dataset.setMode === mode));
+    for (const button of document.querySelectorAll("[data-set-mode]"))
+      button.setAttribute("aria-pressed", String(button.dataset.setMode === mode));
     const have = [...countTiles(readTiles(text)).values()].reduce((total, n) => total + n, 0);
     count.textContent = text === "" ? "" : ctx.word("setCount")(have, 144);
-    ctx.show("set-code", `<jarajara-set${mode === "tiles" ? ' mode="tiles"' : ""}${text === "" ? "" : ` tiles="${text}"`}></jarajara-set>`);
+    ctx.show(
+      "set-code",
+      `<jarajara-set${mode === "tiles" ? ' mode="tiles"' : ""}${text === "" ? "" : ` tiles="${text}"`}></jarajara-set>`,
+    );
   };
   for (const button of document.querySelectorAll("[data-set-mode]")) {
     button.addEventListener("click", () => {

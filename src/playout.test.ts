@@ -34,12 +34,19 @@ describe("playing a deal out at random", () => {
           const make = seededRandom(hashText(`playout-test:${layout.key}:${rule}:${seed}`) || 1);
           const sets = Math.ceil(layout.slots.length / 144);
           const pairs = shuffled(setPairs(rule, make, sets), make).slice(0, layout.slots.length / 2);
-          const laid = layPairs(geometry, layout.slots.map(() => true), pairs, make);
+          const laid = layPairs(
+            geometry,
+            layout.slots.map(() => true),
+            pairs,
+            make,
+          );
           expect(laid, `${layout.key} ${rule} ${seed}`).not.toBeNull();
           const quick = seededRandom(seed);
           const plain = seededRandom(seed);
           const times = layout.slots.length > 300 ? 3 : 12;
-          expect(clearRate(geometry, laid!.cells, rule, quick, times), `${layout.key} ${rule} ${seed}`).toBe(plainRate(laid!.cells, layout.size, rule, plain, times));
+          expect(clearRate(geometry, laid!.cells, rule, quick, times), `${layout.key} ${rule} ${seed}`).toBe(
+            plainRate(laid!.cells, layout.size, rule, plain, times),
+          );
           // The same number of draws from the stream, so the games after it would go the same way.
           expect(quick()).toBe(plain());
         }

@@ -47,7 +47,13 @@ function underOf(geometry: MahjongGeometry): readonly (readonly number[])[] {
  * console.log(clearRate(geometry,cells,"group",seededRandom(42),4));
  * ```
  */
-export function clearRate(geometry: MahjongGeometry, cells: string, rule: MahjongBonusRule, random: Random, times: number): number {
+export function clearRate(
+  geometry: MahjongGeometry,
+  cells: string,
+  rule: MahjongBonusRule,
+  random: Random,
+  times: number,
+): number {
   return playOut(geometry, cells, rule, random, times).cleared / times;
 }
 
@@ -57,12 +63,24 @@ export function clearRate(geometry: MahjongGeometry, cells: string, rule: Mahjon
  * Great Wall is cleared about one game in fifty), while how far a game gets before it is stuck tells a forgiving
  * deal from an unforgiving one in sixteen games as well as it does in a hundred.
  */
-export function clearShare(geometry: MahjongGeometry, cells: string, rule: MahjongBonusRule, random: Random, times: number): number {
+export function clearShare(
+  geometry: MahjongGeometry,
+  cells: string,
+  rule: MahjongBonusRule,
+  random: Random,
+  times: number,
+): number {
   const tiles = [...cells].filter((code) => code !== EMPTY_SLOT).length;
   return playOut(geometry, cells, rule, random, times).taken / (tiles * times);
 }
 
-function playOut(geometry: MahjongGeometry, cells: string, rule: MahjongBonusRule, random: Random, times: number): { cleared: number; taken: number } {
+function playOut(
+  geometry: MahjongGeometry,
+  cells: string,
+  rule: MahjongBonusRule,
+  random: Random,
+  times: number,
+): { cleared: number; taken: number } {
   const count = cells.length;
   const under = underOf(geometry);
   const classNumber = new Map<string, number>();
@@ -118,7 +136,7 @@ function playOut(geometry: MahjongGeometry, cells: string, rule: MahjongBonusRul
       }
       const a = list[first]!;
       let second = first + 1;
-      for (;; second += 1) {
+      for (; ; second += 1) {
         if (classes[list[second]!] === classes[a]) {
           if (pick === 0) break;
           pick -= 1;

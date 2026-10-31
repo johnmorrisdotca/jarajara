@@ -82,7 +82,11 @@ function lookOf(name: (typeof TILE_BACKS)[number], colour: string | undefined): 
   const parsed = colour === undefined ? null : rgb(colour);
   if (parsed === null) return own;
   const light = (0.299 * parsed[0] + 0.587 * parsed[1] + 0.114 * parsed[2]) / 255 > 0.58;
-  return { ...own, base: mix(parsed, parsed, 0), line: light ? mix(parsed, [0, 0, 0], 0.4) : mix(parsed, [255, 255, 255], 0.6) };
+  return {
+    ...own,
+    base: mix(parsed, parsed, 0),
+    line: light ? mix(parsed, [0, 0, 0], 0.4) : mix(parsed, [255, 255, 255], 0.6),
+  };
 }
 
 const round = (value: number): string => String(Math.round(value * 100) / 100);
@@ -100,14 +104,18 @@ function pattern(name: string, look: Look): string {
     }
     case "grain": {
       const xs = [4.5, 8, 11.6, 15, 18.5, 22, 25.5];
-      const grain = xs.map((x, at) => `<line x1="${x}" y1="${4 + (at % 3)}" x2="${x + ((at % 2) - 0.5)}" y2="${36 - (at % 4)}"/>`).join("");
+      const grain = xs
+        .map((x, at) => `<line x1="${x}" y1="${4 + (at % 3)}" x2="${x + ((at % 2) - 0.5)}" y2="${36 - (at % 4)}"/>`)
+        .join("");
       return `<g stroke="${look.line}" stroke-width="0.5" opacity="0.8">${grain}</g><g stroke="${look.line}" stroke-width="1.3" stroke-linecap="round"><line x1="2.5" y1="13" x2="27.5" y2="13"/><line x1="2.5" y1="27" x2="27.5" y2="27"/></g>`;
     }
     case "ring":
       return `${inset}<circle cx="15" cy="20" r="8.5" ${stroke} stroke-width="1.1"/><circle cx="15" cy="20" r="3.2" fill="${look.line}"/><g stroke="${look.line}" stroke-width="0.8"><line x1="15" y1="8" x2="15" y2="9.6"/><line x1="15" y1="30.4" x2="15" y2="32"/><line x1="3" y1="20" x2="4.6" y2="20"/><line x1="25.4" y1="20" x2="27" y2="20"/></g>`;
     case "dots": {
       const dots: string[] = [];
-      for (let y = 6; y <= 35; y += 5.8) for (let x = 6; x <= 25; x += 6) dots.push(`<circle cx="${x + (Math.round(y / 5.8) % 2 === 0 ? 0 : 3)}" cy="${round(y)}" r="0.9"/>`);
+      for (let y = 6; y <= 35; y += 5.8)
+        for (let x = 6; x <= 25; x += 6)
+          dots.push(`<circle cx="${x + (Math.round(y / 5.8) % 2 === 0 ? 0 : 3)}" cy="${round(y)}" r="0.9"/>`);
       return `${inset}<g fill="${look.line}" opacity="0.85">${dots.join("")}</g>`;
     }
   }
@@ -180,14 +188,22 @@ export function backBase(name: TileBackName = "jade", options: TileBackOptions =
  * console.log(tileBackSvg("jade")?.startsWith("<svg"));
  * ```
  */
-export function tileBackSvg(name: TileBackName = "jade", options: TileBackOptions & { flat?: boolean; bare?: boolean; mirror?: TileMirror } = {}): string | null {
+export function tileBackSvg(
+  name: TileBackName = "jade",
+  options: TileBackOptions & { flat?: boolean; bare?: boolean; mirror?: TileMirror } = {},
+): string | null {
   if (!isBuiltInBack(name) && options.design === undefined) return null;
   const said = options.title ?? "tile, face down";
   const named = said === "" ? ` aria-hidden="true"` : ` role="img" aria-label="${said}"`;
-  const open = (box: string, extra = "") => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${box}"${named}${extra} data-back="${name}">`;
+  const open = (box: string, extra = "") =>
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${box}"${named}${extra} data-back="${name}">`;
   if (options.flat === true) {
     const side = !isBuiltInBack(name) && options.design !== undefined ? options.design.colours.side : TILE_BODY.side;
-    return open("-1 -1 32 42") + `<rect x="-0.5" y="-0.5" width="31" height="41" rx="3" fill="${side}"/>` + `${tileBackFace(name, options)}</svg>`;
+    return (
+      open("-1 -1 32 42") +
+      `<rect x="-0.5" y="-0.5" width="31" height="41" rx="3" fill="${side}"/>` +
+      `${tileBackFace(name, options)}</svg>`
+    );
   }
   if (options.bare === true) return open("0 0 30 40", ` overflow="visible"`) + `${tileBackFace(name, options)}</svg>`;
   const direction = directionOf(options.mirror);

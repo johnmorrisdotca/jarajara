@@ -21,13 +21,26 @@ export function initTile(ctx) {
       }),
     );
     design.replaceChildren(
-      ...designs.map((name) => Object.assign(document.createElement("option"), { value: name, textContent: name, selected: name === state.design })),
+      ...designs.map((name) =>
+        Object.assign(document.createElement("option"), {
+          value: name,
+          textContent: name,
+          selected: name === state.design,
+        }),
+      ),
     );
     const backs = ["", ...TILE_BACKS, ...designs.filter((name) => name !== "jarajara")];
     back.replaceChildren(
-      ...backs.map((name) => Object.assign(document.createElement("option"), { value: name, textContent: name === "" ? ctx.word("designOwn") ?? "own" : name, selected: name === state.back })),
+      ...backs.map((name) =>
+        Object.assign(document.createElement("option"), {
+          value: name,
+          textContent: name === "" ? (ctx.word("designOwn") ?? "own") : name,
+          selected: name === state.back,
+        }),
+      ),
     );
-    for (const button of document.querySelectorAll("[data-tile-size]")) button.setAttribute("aria-pressed", String(button.dataset.tileSize === state.size));
+    for (const button of document.querySelectorAll("[data-tile-size]"))
+      button.setAttribute("aria-pressed", String(button.dataset.tileSize === state.size));
   };
 
   const show = () => {
@@ -38,8 +51,18 @@ export function initTile(ctx) {
     else tile.setAttribute("design", state.design);
     if (state.back === "") tile.removeAttribute("back");
     else tile.setAttribute("back", state.back);
-    const attrs = [`code="${state.code}"`, state.red ? "red" : "", state.design === "jarajara" ? "" : `design="${state.design}"`, state.back === "" ? "" : `back="${state.back}"`, `size="${state.size}"`, "flip"].filter(Boolean);
-    ctx.show("tile-code", `<script type="module" src="…/dist/element-define.js"></script>\n<jarajara-tile ${attrs.join(" ")}></jarajara-tile>`);
+    const attrs = [
+      `code="${state.code}"`,
+      state.red ? "red" : "",
+      state.design === "jarajara" ? "" : `design="${state.design}"`,
+      state.back === "" ? "" : `back="${state.back}"`,
+      `size="${state.size}"`,
+      "flip",
+    ].filter(Boolean);
+    ctx.show(
+      "tile-code",
+      `<script type="module" src="…/dist/element-define.js"></script>\n<jarajara-tile ${attrs.join(" ")}></jarajara-tile>`,
+    );
     fill();
   };
 

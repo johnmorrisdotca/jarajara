@@ -87,7 +87,11 @@ export const SEED_MOST = 2_147_483_647;
  * console.log(freshAwaseSeed("same",seededRandom(42)));
  * ```
  */
-export function freshAwaseSeed(rule: MahjongBonusRule, random: Random = Math.random, draw: () => number = () => 1 + Math.floor(random() * SEED_MOST)): number {
+export function freshAwaseSeed(
+  rule: MahjongBonusRule,
+  random: Random = Math.random,
+  draw: () => number = () => 1 + Math.floor(random() * SEED_MOST),
+): number {
   if (rule === "same") return AWASE_SAME_BLOCK.from + Math.floor(random() * AWASE_SAME_BLOCK.size);
   for (;;) {
     const seed = draw();
@@ -101,7 +105,12 @@ function dealFrom(geometry: MahjongGeometry, rule: MahjongBonusRule, random: Ran
   // A layout of more than 144 tiles is dealt from as many sets as it needs; up to 144 it is the one set it always was.
   const sets = Math.ceil(count / SET_SIZE);
   const pairs = shuffled(setPairs(rule, random, sets), random).slice(0, count / 2);
-  return layPairs(geometry, geometry.layout.slots.map(() => true), pairs, random);
+  return layPairs(
+    geometry,
+    geometry.layout.slots.map(() => true),
+    pairs,
+    random,
+  );
 }
 
 /** A deal of this layout at this level, made from this seed.
@@ -128,11 +137,16 @@ export function generateAwase(size: number, level: AwaseLevel, seed: number): Aw
     if (laid === null) continue;
     // On more than one set of tiles a random player almost never clears the layout, so how far it gets ranks the deals instead.
     const measure = layout.slots.length > SET_SIZE ? clearShare : clearRate;
-    deals.push({ laid, rate: measure(geometry, laid.cells, rule, seededRandom(hashText(`playout:${seed}:${order}`) || 1), PLAYOUTS), order });
+    deals.push({
+      laid,
+      rate: measure(geometry, laid.cells, rule, seededRandom(hashText(`playout:${seed}:${order}`) || 1), PLAYOUTS),
+      order,
+    });
   }
   if (deals.length === 0) throw new Error(`no deal of the ${layout.key} from seed ${seed}`);
   deals.sort((a, b) => b.rate - a.rate || a.order - b.order);
-  const chosen = level === "easy" ? deals[0]! : level === "hard" ? deals[deals.length - 1]! : deals[Math.floor(deals.length / 2)]!;
+  const chosen =
+    level === "easy" ? deals[0]! : level === "hard" ? deals[deals.length - 1]! : deals[Math.floor(deals.length / 2)]!;
   return {
     size,
     level,

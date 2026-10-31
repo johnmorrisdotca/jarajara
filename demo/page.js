@@ -14,7 +14,14 @@ import { initChallenges } from "./challenges.js";
 
 const listeners = [];
 // `familyLanguage` is the family's shared script, loaded before this one.
-const language = familyLanguage({ id: "jarajara", words: WORDS, onChange: (lang) => { docsLink(lang); listeners.forEach((listen) => listen(lang)); } });
+const language = familyLanguage({
+  id: "jarajara",
+  words: WORDS,
+  onChange: (lang) => {
+    docsLink(lang);
+    listeners.forEach((listen) => listen(lang));
+  },
+});
 const ctx = {
   word: (key) => language.word(key),
   lang: () => language.lang,
@@ -112,5 +119,9 @@ initDesigns(ctx);
 initSounds(ctx);
 initChallenges(ctx);
 
-function docsLink(lang) { document.querySelector('[data-say="pageDocs"]')?.setAttribute("href", lang === "ja" ? "docs/ja/index.html" : "docs/index.html"); }
+function docsLink(lang) {
+  document
+    .querySelector('[data-say="pageDocs"]')
+    ?.setAttribute("href", lang === "ja" ? "docs/ja/index.html" : "docs/index.html");
+}
 docsLink(language.lang);

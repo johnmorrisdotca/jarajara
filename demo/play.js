@@ -79,19 +79,33 @@ export function initPlay(ctx) {
       game.setAttribute("size", String(size));
       refresh();
     });
-    segment(document.getElementById("levels"), LEVELS, (level) => ctx.word("levels")[level], state.level, (level) => {
-      state.level = level;
-      game.setAttribute("level", level);
-      refresh();
-    });
-    segment(document.getElementById("challenge-picks"), ["none", ...AWASE_CHALLENGES], (name) => (name === "none" ? ctx.word("challengeNone") : ctx.word("challenges")[name]), state.challenge, (name) => {
-      state.challenge = name;
-      if (name === "none") game.removeAttribute("challenge");
-      else game.setAttribute("challenge", name);
-      refresh();
-    });
-    document.getElementById("challenge-note").textContent = state.challenge === "none" ? "" : ctx.word("challengeNotes")[state.challenge];
-    const allowance = (value) => (value === "unlimited" ? ctx.word("unlimited") : value === "off" ? ctx.word("off") : value);
+    segment(
+      document.getElementById("levels"),
+      LEVELS,
+      (level) => ctx.word("levels")[level],
+      state.level,
+      (level) => {
+        state.level = level;
+        game.setAttribute("level", level);
+        refresh();
+      },
+    );
+    segment(
+      document.getElementById("challenge-picks"),
+      ["none", ...AWASE_CHALLENGES],
+      (name) => (name === "none" ? ctx.word("challengeNone") : ctx.word("challenges")[name]),
+      state.challenge,
+      (name) => {
+        state.challenge = name;
+        if (name === "none") game.removeAttribute("challenge");
+        else game.setAttribute("challenge", name);
+        refresh();
+      },
+    );
+    document.getElementById("challenge-note").textContent =
+      state.challenge === "none" ? "" : ctx.word("challengeNotes")[state.challenge];
+    const allowance = (value) =>
+      value === "unlimited" ? ctx.word("unlimited") : value === "off" ? ctx.word("off") : value;
     for (const key of ["hints", "shuffles"]) {
       segment(document.getElementById(key), ALLOWANCES, allowance, state[key], (value) => {
         state[key] = value;
@@ -99,22 +113,44 @@ export function initPlay(ctx) {
         refresh();
       });
     }
-    segment(document.getElementById("game-design"), ["jarajara", ...DESIGNS.filter((name) => name !== "jarajara")], (name) => name, state.design, (name) => {
-      state.design = name;
-      apply();
-      refresh();
-    });
-    segment(document.getElementById("undo-allowed"), ["on", "off"], (value) => (value === "on" ? ctx.word("on") : ctx.word("off")), state.undo, (value) => {
-      state.undo = value;
-      apply();
-      refresh();
-    });
-    segment(document.getElementById("game-view"), VIEWS, (name) => ctx.word("views")[name], state.view, (name) => {
-      state.view = name;
-      apply();
-      refresh();
-    });
-    for (const [id, key] of [["show-free", "showFree"], ["show-matching", "showMatching"], ["find", "find"]]) {
+    segment(
+      document.getElementById("game-design"),
+      ["jarajara", ...DESIGNS.filter((name) => name !== "jarajara")],
+      (name) => name,
+      state.design,
+      (name) => {
+        state.design = name;
+        apply();
+        refresh();
+      },
+    );
+    segment(
+      document.getElementById("undo-allowed"),
+      ["on", "off"],
+      (value) => (value === "on" ? ctx.word("on") : ctx.word("off")),
+      state.undo,
+      (value) => {
+        state.undo = value;
+        apply();
+        refresh();
+      },
+    );
+    segment(
+      document.getElementById("game-view"),
+      VIEWS,
+      (name) => ctx.word("views")[name],
+      state.view,
+      (name) => {
+        state.view = name;
+        apply();
+        refresh();
+      },
+    );
+    for (const [id, key] of [
+      ["show-free", "showFree"],
+      ["show-matching", "showMatching"],
+      ["find", "find"],
+    ]) {
       document.getElementById(id).setAttribute("aria-pressed", String(state[key]));
     }
   };
@@ -123,7 +159,11 @@ export function initPlay(ctx) {
     save();
   };
 
-  for (const [id, key] of [["show-free", "showFree"], ["show-matching", "showMatching"], ["find", "find"]]) {
+  for (const [id, key] of [
+    ["show-free", "showFree"],
+    ["show-matching", "showMatching"],
+    ["find", "find"],
+  ]) {
     document.getElementById(id).addEventListener("click", () => {
       state[key] = !state[key];
       apply();
@@ -141,7 +181,8 @@ export function initPlay(ctx) {
     game.setAttribute("challenge", day.challenge);
     game.newDeal(day.seed);
     refresh();
-    document.getElementById("challenge-note").textContent = `${ctx.word("dailyNote")} ${day.date}: ${ctx.word("challenges")[day.challenge]}. ${ctx.word("challengeNotes")[day.challenge]}`;
+    document.getElementById("challenge-note").textContent =
+      `${ctx.word("dailyNote")} ${day.date}: ${ctx.word("challenges")[day.challenge]}. ${ctx.word("challengeNotes")[day.challenge]}`;
   });
 
   // The kept game: the layout and level, then the deal's seed, then the moves played on it.
@@ -154,7 +195,15 @@ export function initPlay(ctx) {
     if (state.moves !== "") game.restore(state.moves);
   }
   // Whatever happens on the board is kept.
-  for (const name of ["jarajara-deal", "jarajara-take", "jarajara-shuffle", "jarajara-undo", "jarajara-clear", "jarajara-lost"]) game.addEventListener(name, save);
+  for (const name of [
+    "jarajara-deal",
+    "jarajara-take",
+    "jarajara-shuffle",
+    "jarajara-undo",
+    "jarajara-clear",
+    "jarajara-lost",
+  ])
+    game.addEventListener(name, save);
   labels();
   save();
   ctx.onLang(labels);

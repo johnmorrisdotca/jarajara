@@ -45,24 +45,58 @@ export type CliResult = {
 };
 
 /** The language the command line speaks: `--lang`, or the environment's, or the system's; Japanese for `ja…`, English for anything else. */
-export function cliLanguage(flag: string | undefined, env: Record<string, string | undefined> = {}, locale?: string): TileLanguage {
-  const named = [flag, env.LC_ALL, env.LC_MESSAGES, env.LANG].find((value) => value !== undefined && value !== "" && value !== "C" && value !== "POSIX" && !value.startsWith("C."));
+export function cliLanguage(
+  flag: string | undefined,
+  env: Record<string, string | undefined> = {},
+  locale?: string,
+): TileLanguage {
+  const named = [flag, env.LC_ALL, env.LC_MESSAGES, env.LANG].find(
+    (value) => value !== undefined && value !== "" && value !== "C" && value !== "POSIX" && !value.startsWith("C."),
+  );
   return (named ?? locale ?? "en").toLowerCase().startsWith("ja") ? "ja" : "en";
 }
 
-const FLAGS_WITH_VALUES: Record<string, string> = { "-l": "layout", "--layout": "layout", "--level": "level", "-s": "seed", "--seed": "seed", "--rule": "rule", "-p": "players", "--players": "players", "--date": "date", "--givens": "givens", "--lang": "lang" };
-const FLAGS: Record<string, string> = { "--stdin": "stdin", "-j": "json", "--json": "json", "-h": "help", "--help": "help", "-v": "version", "--version": "version" };
+const FLAGS_WITH_VALUES: Record<string, string> = {
+  "-l": "layout",
+  "--layout": "layout",
+  "--level": "level",
+  "-s": "seed",
+  "--seed": "seed",
+  "--rule": "rule",
+  "-p": "players",
+  "--players": "players",
+  "--date": "date",
+  "--givens": "givens",
+  "--lang": "lang",
+};
+const FLAGS: Record<string, string> = {
+  "--stdin": "stdin",
+  "-j": "json",
+  "--json": "json",
+  "-h": "help",
+  "--help": "help",
+  "-v": "version",
+  "--version": "version",
+};
 const LEVELS: readonly AwaseLevel[] = ["easy", "medium", "hard"];
 const RULES: readonly MahjongBonusRule[] = ["group", "same"];
 
-type Asked = { values: Record<string, string>; flags: Set<string>; words: string[]; wrong: { message: "unknownOption" | "needsValue"; part: string } | null };
+type Asked = {
+  values: Record<string, string>;
+  flags: Set<string>;
+  words: string[];
+  wrong: { message: "unknownOption" | "needsValue"; part: string } | null;
+};
 
 /** The arguments sorted into options and words: the command, and what it is given. */
 function sortArguments(args: readonly string[]): Asked {
   const asked: Asked = { values: {}, flags: new Set(), words: [], wrong: null };
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i] as string;
-    const [name, inline] = arg.startsWith("--") && arg.includes("=") ? [arg.slice(0, arg.indexOf("=")), arg.slice(arg.indexOf("=") + 1)] : [arg, undefined];
+    const [name, inline] =
+      arg.startsWith("--") && arg.includes("=")
+        ? [arg.slice(0, arg.indexOf("=")), arg.slice(arg.indexOf("=") + 1)]
+        : [arg, undefined];
     if (name in FLAGS_WITH_VALUES) {
       const value = inline ?? args[++i];
       if (value === undefined) {
@@ -78,7 +112,8 @@ function sortArguments(args: readonly string[]): Asked {
   return asked;
 }
 
-const whole = (text: string | undefined, least: number, most: number): number | null => (text !== undefined && /^\d{1,10}$/.test(text) && Number(text) >= least && Number(text) <= most ? Number(text) : null);
+const whole = (text: string | undefined, least: number, most: number): number | null =>
+  text !== undefined && /^\d{1,10}$/.test(text) && Number(text) >= least && Number(text) <= most ? Number(text) : null;
 
 /** A layout named by its width, its key, or its name in English or Japanese. */
 function findLayout(text: string): MahjongLayout | null {
@@ -89,7 +124,9 @@ function findLayout(text: string): MahjongLayout | null {
 
 /** A layout's name in a language: its key capitalised, or its Japanese name. */
 function layoutName(layout: MahjongLayout, language: TileLanguage): string {
-  return language === "ja" ? (LAYOUT_NAMES_JA[layout.key] ?? layout.key) : layout.key.charAt(0).toUpperCase() + layout.key.slice(1);
+  return language === "ja"
+    ? (LAYOUT_NAMES_JA[layout.key] ?? layout.key)
+    : layout.key.charAt(0).toUpperCase() + layout.key.slice(1);
 }
 
 /** Whether a text is a day that exists, written 2026-10-01. */
@@ -128,18 +165,43 @@ export function runCli(args: readonly string[], around: CliSurroundings = {}): C
   if (asked.wrong !== null) return wrong(fillIn(t[asked.wrong.message] as string, { part: asked.wrong.part }));
   if (lang !== undefined && lang !== "en" && lang !== "ja") return wrong(t.langBad as string);
   const [command, ...rest] = asked.words;
-  if (asked.flags.has("help") || (command === undefined && !asked.flags.has("version"))) return { code: 0, out: t.usage as string, err: "" };
+  if (asked.flags.has("help") || (command === undefined && !asked.flags.has("version")))
+    return { code: 0, out: t.usage as string, err: "" };
   if (asked.flags.has("version")) return { code: 0, out: `${VERSION}\n`, err: "" };
   const json = asked.flags.has("json");
-  const print = (body: Record<string, unknown>) => `${JSON.stringify({ generator: `jarajara ${VERSION}`, ...body }, null, 2)}\n`;
+  const print = (body: Record<string, unknown>) =>
+    `${JSON.stringify({ generator: `jarajara ${VERSION}`, ...body }, null, 2)}\n`;
   const words = (key: string, values: Record<string, string | number> = {}) => fillIn(t[key] as string, values);
 
   if (command === "layouts") {
     const bySize = [...ALL_LAYOUTS].sort((a, b) => a.size - b.size);
-    if (json) return { code: 0, out: print({ layouts: bySize.map((layout) => ({ size: layout.size, key: layout.key, name: layoutName(layout, "en"), nameJa: layoutName(layout, "ja"), tiles: layout.slots.length, layers: layoutExtent(layout).layers })) }), err: "" };
+    if (json)
+      return {
+        code: 0,
+        out: print({
+          layouts: bySize.map((layout) => ({
+            size: layout.size,
+            key: layout.key,
+            name: layoutName(layout, "en"),
+            nameJa: layoutName(layout, "ja"),
+            tiles: layout.slots.length,
+            layers: layoutExtent(layout).layers,
+          })),
+        }),
+        err: "",
+      };
     const wide = Math.max(...bySize.map((layout) => layout.key.length));
     const tiles = String(Math.max(...bySize.map((layout) => layout.slots.length))).length;
-    return { code: 0, out: bySize.map((layout) => `${words("layoutRow", { size: String(layout.size).padStart(2), key: layout.key.padEnd(wide), name: layoutName(layout, language), tiles: String(layout.slots.length).padStart(tiles), layers: layoutExtent(layout).layers })}\n`).join(""), err: "" };
+    return {
+      code: 0,
+      out: bySize
+        .map(
+          (layout) =>
+            `${words("layoutRow", { size: String(layout.size).padStart(2), key: layout.key.padEnd(wide), name: layoutName(layout, language), tiles: String(layout.slots.length).padStart(tiles), layers: layoutExtent(layout).layers })}\n`,
+        )
+        .join(""),
+      err: "",
+    };
   }
 
   if (command === "tile") {
@@ -148,14 +210,31 @@ export function runCli(args: readonly string[], around: CliSurroundings = {}): C
     const found = findFaces(text);
     // A name, a code or a hand written in notation; a word that is none of them is not read as a run of letters.
     const hand = text.split(/\s+/).map((word) => readNotation(word));
-    const codes = found.length > 0 ? found.map((face) => face.code) : hand.every((word) => word !== null) ? hand.flat() as string[] : [];
+    const codes =
+      found.length > 0
+        ? found.map((face) => face.code)
+        : hand.every((word) => word !== null)
+          ? (hand.flat() as string[])
+          : [];
     if (codes.length === 0) return { code: 1, out: "", err: `jarajara: ${t.tileNone}\n` };
     const tiles = codes.map((code) => {
       const face = faceOf(code)!;
-      return { code, en: tileName(code, "en"), ja: tileName(code, "ja"), suit: face.suit, rank: face.rank, copies: copiesOf(code), notation: writeNotation([code]) };
+      return {
+        code,
+        en: tileName(code, "en"),
+        ja: tileName(code, "ja"),
+        suit: face.suit,
+        rank: face.rank,
+        copies: copiesOf(code),
+        notation: writeNotation([code]),
+      };
     });
     if (json) return { code: 0, out: print({ tiles }), err: "" };
-    return { code: 0, out: tiles.map((tile) => `${words("tileLine", { ...tile, suit: SUIT_WORDS[tile.suit][language] })}\n`).join(""), err: "" };
+    return {
+      code: 0,
+      out: tiles.map((tile) => `${words("tileLine", { ...tile, suit: SUIT_WORDS[tile.suit][language] })}\n`).join(""),
+      err: "",
+    };
   }
 
   if (command === "daily") {
@@ -164,10 +243,15 @@ export function runCli(args: readonly string[], around: CliSurroundings = {}): C
     const day = dailyAwase(date);
     const layout = layoutFor(day.size)!;
     if (json) return { code: 0, out: print({ ...day, layout: layout.key, tiles: layout.slots.length }), err: "" };
-    return { code: 0, out: `${words("dailyLine", { date: day.date, name: layoutName(layout, language), level: day.level, seed: day.seed, challenge: day.challenge })}\n${words("dailyDeal", { size: day.size, level: day.level, seed: day.seed })}\n`, err: "" };
+    return {
+      code: 0,
+      out: `${words("dailyLine", { date: day.date, name: layoutName(layout, language), level: day.level, seed: day.seed, challenge: day.challenge })}\n${words("dailyDeal", { size: day.size, level: day.level, seed: day.seed })}\n`,
+      err: "",
+    };
   }
 
-  if (command !== "deal" && command !== "check" && command !== "play") return wrong(words("noCommand", { part: command ?? "" }));
+  if (command !== "deal" && command !== "check" && command !== "play")
+    return wrong(words("noCommand", { part: command ?? "" }));
 
   // The layout, the level, the rule and the seed, which every other command takes.
   const layout = asked.values.layout === undefined ? (layoutFor(15) as MahjongLayout) : findLayout(asked.values.layout);
@@ -190,10 +274,24 @@ export function runCli(args: readonly string[], around: CliSurroundings = {}): C
     const moves = checked.ok ? (decodeMoves(text, givens.length) ?? []) : [];
     const pairs = moves.filter((move) => "pair" in move).length;
     const shuffles = moves.length - pairs;
-    const reasons: Record<string, string> = { "the givens are not a deal of that layout": "checkNotDeal", "the answer is not a list of moves": "checkNotMoves", "a move the rules do not allow": "checkNotAllowed", "tiles are left on the layout": "checkLeft" };
-    if (json) return { code: checked.ok ? 0 : 1, out: print({ ...checked, layout: layout.key, size: layout.size, ...(checked.ok ? { pairs, shuffles } : {}) }), err: "" };
+    const reasons: Record<string, string> = {
+      "the givens are not a deal of that layout": "checkNotDeal",
+      "the answer is not a list of moves": "checkNotMoves",
+      "a move the rules do not allow": "checkNotAllowed",
+      "tiles are left on the layout": "checkLeft",
+    };
+    if (json)
+      return {
+        code: checked.ok ? 0 : 1,
+        out: print({ ...checked, layout: layout.key, size: layout.size, ...(checked.ok ? { pairs, shuffles } : {}) }),
+        err: "",
+      };
     if (checked.ok) return { code: 0, out: `${words("checkCleared", { pairs, shuffles })}\n`, err: "" };
-    return { code: 1, out: "", err: `${words("checkNot", { reason: t[reasons[checked.reason] ?? "checkNotAllowed"] as string })}\n` };
+    return {
+      code: 1,
+      out: "",
+      err: `${words("checkNot", { reason: t[reasons[checked.reason] ?? "checkNotAllowed"] as string })}\n`,
+    };
   }
 
   // The seed: named, or drawn and said.
@@ -203,7 +301,8 @@ export function runCli(args: readonly string[], around: CliSurroundings = {}): C
     const read = whole(asked.values.seed, 1, SEED_MOST);
     if (read === null) return wrong(t.seedBad as string);
     seed = read;
-    if (ruleAsked !== undefined && bonusRuleOfSeed(seed) !== ruleAsked) return wrong(words("seedRuleClash", { seed, seedRule: bonusRuleOfSeed(seed), rule: ruleAsked }));
+    if (ruleAsked !== undefined && bonusRuleOfSeed(seed) !== ruleAsked)
+      return wrong(words("seedRuleClash", { seed, seedRule: bonusRuleOfSeed(seed), rule: ruleAsked }));
   } else {
     seed = freshAwaseSeed(ruleAsked ?? "group", around.random ?? Math.random);
     if (!json) err = `jarajara: ${words("freshSeed", { seed })}\n`;
@@ -213,16 +312,48 @@ export function runCli(args: readonly string[], around: CliSurroundings = {}): C
 
   if (command === "deal") {
     const layers = layoutExtent(layout).layers;
-    if (json) return { code: 0, out: print({ layout: layout.key, size: layout.size, level, seed, rule, tiles: layout.slots.length, givens: deal.givens, solution: deal.solution, layers: Array.from({ length: layers }, (_, z) => layerText(layout, deal.givens, z).split("\n")) }), err };
-    const head = words("dealHead", { name: layoutName(layout, language), tiles: layout.slots.length, level, seed, rule: t[`rule_${rule}`] as string });
-    const body = Array.from({ length: layers }, (_, z) => `${words("layerHead", { n: z + 1 })}\n${layerText(layout, deal.givens, z)}\n`).join("\n");
-    return { code: 0, out: `${head}\n\n${body}\n${words("dealTiles", { givens: deal.givens })}\n${words("dealAnswer", { answer: deal.solution })}\n`, err };
+    if (json)
+      return {
+        code: 0,
+        out: print({
+          layout: layout.key,
+          size: layout.size,
+          level,
+          seed,
+          rule,
+          tiles: layout.slots.length,
+          givens: deal.givens,
+          solution: deal.solution,
+          layers: Array.from({ length: layers }, (_, z) => layerText(layout, deal.givens, z).split("\n")),
+        }),
+        err,
+      };
+    const head = words("dealHead", {
+      name: layoutName(layout, language),
+      tiles: layout.slots.length,
+      level,
+      seed,
+      rule: t[`rule_${rule}`] as string,
+    });
+    const body = Array.from(
+      { length: layers },
+      (_, z) => `${words("layerHead", { n: z + 1 })}\n${layerText(layout, deal.givens, z)}\n`,
+    ).join("\n");
+    return {
+      code: 0,
+      out: `${head}\n\n${body}\n${words("dealTiles", { givens: deal.givens })}\n${words("dealAnswer", { answer: deal.solution })}\n`,
+      err,
+    };
   }
 
   // A table of computers, played to the end.
-  const count = asked.values.players === undefined ? 2 : whole(asked.values.players, AWASE_TABLE.least, AWASE_TABLE.most);
+  const count =
+    asked.values.players === undefined ? 2 : whole(asked.values.players, AWASE_TABLE.least, AWASE_TABLE.most);
   if (count === null) return wrong(words("playersBad", { least: AWASE_TABLE.least, most: AWASE_TABLE.most }));
-  let table: AwaseTable = startTable(deal, Array.from({ length: count }, () => ({ name: "", computer: true as const })));
+  let table: AwaseTable = startTable(
+    deal,
+    Array.from({ length: count }, () => ({ name: "", computer: true as const })),
+  );
   let state = readTable(table)!;
   while (!state.over) {
     const pair = computerPair(table, state);
@@ -234,7 +365,38 @@ export function runCli(args: readonly string[], around: CliSurroundings = {}): C
   }
   const names = Array.from({ length: count }, (_, seat) => words("seatName", { n: seat + 1 }));
   const winners = state.winners.map((seat) => names[seat] as string);
-  if (json) return { code: 0, out: print({ layout: layout.key, size: layout.size, level, seed, rule, players: names, scores: state.scores, pairs: state.pairs, shuffles: state.shuffles, over: state.over, winners: state.winners, table: encodeTable(table) }), err };
-  const lines = [words("played", { n: count, name: layoutName(layout, language), level, seed, pairs: state.taken.length, shuffles: state.shuffles }), ...names.map((name, seat) => words("seatLine", { name, points: state.scores[seat] as number, pairs: state.pairs[seat] as number })), words(winners.length > 1 ? "winners" : "winner", { names: namesList(winners, t.and as string) })];
+  if (json)
+    return {
+      code: 0,
+      out: print({
+        layout: layout.key,
+        size: layout.size,
+        level,
+        seed,
+        rule,
+        players: names,
+        scores: state.scores,
+        pairs: state.pairs,
+        shuffles: state.shuffles,
+        over: state.over,
+        winners: state.winners,
+        table: encodeTable(table),
+      }),
+      err,
+    };
+  const lines = [
+    words("played", {
+      n: count,
+      name: layoutName(layout, language),
+      level,
+      seed,
+      pairs: state.taken.length,
+      shuffles: state.shuffles,
+    }),
+    ...names.map((name, seat) =>
+      words("seatLine", { name, points: state.scores[seat] as number, pairs: state.pairs[seat] as number }),
+    ),
+    words(winners.length > 1 ? "winners" : "winner", { names: namesList(winners, t.and as string) }),
+  ];
   return { code: 0, out: `${lines.join("\n")}\n`, err };
 }

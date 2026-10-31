@@ -42,7 +42,12 @@ export const TILE_ORDERS: readonly TileOrder[] = ["dealt", "suit", "rank", "kind
  */
 export type TileGrouping = "suit" | "kind";
 
-const SUIT_AT = new Map<MahjongSuit, number>(["characters", "circles", "bamboo", "winds", "dragons", "flowers", "seasons"].map((suit, at) => [suit as MahjongSuit, at]));
+const SUIT_AT = new Map<MahjongSuit, number>(
+  ["characters", "circles", "bamboo", "winds", "dragons", "flowers", "seasons"].map((suit, at) => [
+    suit as MahjongSuit,
+    at,
+  ]),
+);
 const FACE_AT = new Map(MAHJONG_FACES.map((face, at) => [face.code, at]));
 const NUMBER_SUITS = new Set<MahjongSuit>(["characters", "circles", "bamboo"]);
 
@@ -92,7 +97,9 @@ export function arrangeIndexes(codes: readonly string[], order: TileOrder = "sui
         return [FACE_AT.get(code) ?? 99];
       case "rank": {
         const face = faceOf(code);
-        return face === null ? [99, 99, 99] : [kindOf(code) === 0 ? face.rank : 10 + kindOf(code), suitAt(code), face.rank];
+        return face === null
+          ? [99, 99, 99]
+          : [kindOf(code) === 0 ? face.rank : 10 + kindOf(code), suitAt(code), face.rank];
       }
       case "kind":
         return [kindOf(code), FACE_AT.get(code) ?? 99];
@@ -141,7 +148,8 @@ const groupKey = (code: string, by: TileGrouping): number => (by === "kind" ? ki
  */
 export function groupStarts(codes: readonly string[], by: TileGrouping = "suit"): number[] {
   const starts: number[] = [];
-  for (let at = 1; at < codes.length; at += 1) if (groupKey(codes[at]!, by) !== groupKey(codes[at - 1]!, by)) starts.push(at);
+  for (let at = 1; at < codes.length; at += 1)
+    if (groupKey(codes[at]!, by) !== groupKey(codes[at - 1]!, by)) starts.push(at);
   return starts;
 }
 

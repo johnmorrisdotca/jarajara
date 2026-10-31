@@ -61,7 +61,10 @@ export function geometryOf(layout: MahjongLayout): MahjongGeometry {
 export function overlapsOnLayer(layout: MahjongLayout): boolean {
   const { slots } = layout;
   return slots.some((slot, index) =>
-    slots.some((other, near) => near > index && other.z === slot.z && Math.abs(other.x - slot.x) < 2 && Math.abs(other.y - slot.y) < 2),
+    slots.some(
+      (other, near) =>
+        near > index && other.z === slot.z && Math.abs(other.x - slot.x) < 2 && Math.abs(other.y - slot.y) < 2,
+    ),
   );
 }
 
@@ -220,7 +223,13 @@ export function freePairs(geometry: MahjongGeometry, cells: MahjongCells, rule: 
  * console.log(canTake(geometry,cells,"group",pair[0],pair[1]));
  * ```
  */
-export function canTake(geometry: MahjongGeometry, cells: MahjongCells, rule: MahjongBonusRule, a: number, b: number): boolean {
+export function canTake(
+  geometry: MahjongGeometry,
+  cells: MahjongCells,
+  rule: MahjongBonusRule,
+  a: number,
+  b: number,
+): boolean {
   if (a === b || a < 0 || b < 0 || a >= cells.length || b >= cells.length) return false;
   if (!isFree(geometry, cells, a) || !isFree(geometry, cells, b)) return false;
   return matchClass(cells[a]!, rule) === matchClass(cells[b]!, rule);
@@ -336,7 +345,12 @@ export type MatchesOf = {
  * console.log(matchesOf(geometry,cells,"group",pair[0]));
  * ```
  */
-export function matchesOf(geometry: MahjongGeometry, cells: MahjongCells, rule: MahjongBonusRule, slot: number): MatchesOf {
+export function matchesOf(
+  geometry: MahjongGeometry,
+  cells: MahjongCells,
+  rule: MahjongBonusRule,
+  slot: number,
+): MatchesOf {
   const none: MatchesOf = { free: [], blocked: [] };
   if (!Number.isInteger(slot) || slot < 0 || slot >= cells.length || cells[slot] === EMPTY_SLOT) return none;
   const wanted = matchClass(cells[slot]!, rule);
@@ -404,7 +418,12 @@ export type Hint = { pair: [number, number] | null; found: HintKind };
  * console.log(hintFor(geometry,cells,"group"));
  * ```
  */
-export function hintFor(geometry: MahjongGeometry, cells: MahjongCells, rule: MahjongBonusRule, chosen?: number | null): Hint {
+export function hintFor(
+  geometry: MahjongGeometry,
+  cells: MahjongCells,
+  rule: MahjongBonusRule,
+  chosen?: number | null,
+): Hint {
   const slots = geometry.layout.slots;
   const height = (a: number, b: number) => slots[a]!.z + slots[b]!.z;
   const best = (pairs: [number, number][]): [number, number] | null => {
@@ -421,7 +440,9 @@ export function hintFor(geometry: MahjongGeometry, cells: MahjongCells, rule: Ma
   const pairs = freePairs(geometry, cells, rule);
   if (pairs.length === 0) return { pair: null, found: "none" };
   if (chosen !== undefined && chosen !== null && isFree(geometry, cells, chosen)) {
-    const own = pairs.filter(([a, b]) => a === chosen || b === chosen).map(([a, b]): [number, number] => (a === chosen ? [a, b] : [b, a]));
+    const own = pairs
+      .filter(([a, b]) => a === chosen || b === chosen)
+      .map(([a, b]): [number, number] => (a === chosen ? [a, b] : [b, a]));
     const pair = best(own);
     if (pair !== null) return { pair, found: "match" };
     return { pair: best(pairs), found: "other" };

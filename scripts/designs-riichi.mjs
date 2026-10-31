@@ -23,7 +23,12 @@ if (from === undefined) {
 /** Jarajara's face letters: a–i characters (Man), j–r circles (Pin), s–A bamboo (Sou), B–E winds, F–H dragons. */
 const LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP";
 const FILES = {};
-for (const [prefix, start] of [["Man", 0], ["Pin", 9], ["Sou", 18]]) for (let rank = 1; rank <= 9; rank += 1) FILES[LETTERS[start + rank - 1]] = `${prefix}${rank}`;
+for (const [prefix, start] of [
+  ["Man", 0],
+  ["Pin", 9],
+  ["Sou", 18],
+])
+  for (let rank = 1; rank <= 9; rank += 1) FILES[LETTERS[start + rank - 1]] = `${prefix}${rank}`;
 Object.assign(FILES, { B: "Ton", C: "Nan", D: "Shaa", E: "Pei", F: "Chun", G: "Hatsu", H: "Haku" });
 const RED = { e: "Man5-Dora", n: "Pin5-Dora", w: "Sou5-Dora" };
 
@@ -31,18 +36,45 @@ const small = (svg, id) =>
   optimize(svg, {
     multipass: true,
     floatPrecision: 1,
-    plugins: [{ name: "preset-default", params: { overrides: { cleanupIds: { minify: true } } } }, "convertStyleToAttrs", "removeDimensions", { name: "prefixIds", params: { prefix: id, delim: "-" } }],
+    plugins: [
+      { name: "preset-default", params: { overrides: { cleanupIds: { minify: true } } } },
+      "convertStyleToAttrs",
+      "removeDimensions",
+      { name: "prefixIds", params: { prefix: id, delim: "-" } },
+    ],
   }).data;
 const inside = (svg) => svg.slice(svg.indexOf(">") + 1, svg.lastIndexOf("</svg>"));
 
 const STYLES = [
-  { folder: "Regular", file: "riichi", name: "riichi", constant: "RIICHI", words: "regular", colours: { face: "#f3efe9", rim: "#c8c1b4", side: "#d8d1c3", sideEdge: "#a39a89", body: "#3f8a69" }, plate: "" },
-  { folder: "Black", file: "riichi-black", name: "riichi-black", constant: "RIICHI_BLACK", words: "black", colours: { face: "#1c1c1c", rim: "#000000", side: "#2a2a2a", sideEdge: "#000000", body: "#141414" }, plate: `<rect x="1.4" y="1.6" width="27.2" height="36.8" rx="2.4" fill="#f3efe9"/>` },
+  {
+    folder: "Regular",
+    file: "riichi",
+    name: "riichi",
+    constant: "RIICHI",
+    words: "regular",
+    colours: { face: "#f3efe9", rim: "#c8c1b4", side: "#d8d1c3", sideEdge: "#a39a89", body: "#3f8a69" },
+    plate: "",
+  },
+  {
+    folder: "Black",
+    file: "riichi-black",
+    name: "riichi-black",
+    constant: "RIICHI_BLACK",
+    words: "black",
+    colours: { face: "#1c1c1c", rim: "#000000", side: "#2a2a2a", sideEdge: "#000000", body: "#141414" },
+    plate: `<rect x="1.4" y="1.6" width="27.2" height="36.8" rx="2.4" fill="#f3efe9"/>`,
+  },
 ];
 
 mkdirSync("src/designs", { recursive: true });
 for (const style of STYLES) {
-  const read = (name) => inside(small(readFileSync(join(from, style.folder, `${name}.svg`), "utf8"), `r${style.words[0]}${name.toLowerCase().replace(/[^a-z0-9]/g, "")}`));
+  const read = (name) =>
+    inside(
+      small(
+        readFileSync(join(from, style.folder, `${name}.svg`), "utf8"),
+        `r${style.words[0]}${name.toLowerCase().replace(/[^a-z0-9]/g, "")}`,
+      ),
+    );
   const faces = Object.fromEntries(Object.entries(FILES).map(([code, name]) => [code, read(name)]));
   const red = Object.fromEntries(Object.entries(RED).map(([code, name]) => [code, read(name)]));
   const body = read("Front");
@@ -59,7 +91,7 @@ for (const style of STYLES) {
       " *",
       " * ```ts",
       ` * import { ${style.constant} } from "@johnmorrisdotca/jarajara/designs/${style.file}";`,
-      " * import { tileSvg } from \"@johnmorrisdotca/jarajara/faces\";",
+      ' * import { tileSvg } from "@johnmorrisdotca/jarajara/faces";',
       " *",
       ` * tileSvg("F", { design: ${style.constant} });`,
       " * ```",
@@ -80,5 +112,7 @@ for (const style of STYLES) {
       "",
     ].join("\n"),
   );
-  console.log(`src/designs/${style.file}.ts: ${Object.keys(faces).length} faces, ${Object.keys(red).length} red fives, ${size} bytes of drawings`);
+  console.log(
+    `src/designs/${style.file}.ts: ${Object.keys(faces).length} faces, ${Object.keys(red).length} red fives, ${size} bytes of drawings`,
+  );
 }

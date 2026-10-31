@@ -97,7 +97,8 @@ export function seatName(seats: readonly AwaseSeat[], at: number): string {
   const seat = seats[at];
   if (seat === undefined) return SEAT_WINDS[at]?.label ?? `Player ${at + 1}`;
   if (seat.name !== "") return seat.name;
-  if (seat.computer === true) return `Computer ${seats.slice(0, at + 1).filter((each) => each.computer === true).length}`;
+  if (seat.computer === true)
+    return `Computer ${seats.slice(0, at + 1).filter((each) => each.computer === true).length}`;
   return SEAT_WINDS[at]?.label ?? `Player ${at + 1}`;
 }
 
@@ -115,7 +116,10 @@ export function seatName(seats: readonly AwaseSeat[], at: number): string {
  * console.log(startTable(deal,[{name:"Seat 1"},{name:"Seat 2"}]).seats.length);
  * ```
  */
-export function startTable(deal: { size: number; level: AwaseLevel; seed: number; givens: string }, seats: readonly AwaseSeat[]): AwaseTable {
+export function startTable(
+  deal: { size: number; level: AwaseLevel; seed: number; givens: string },
+  seats: readonly AwaseSeat[],
+): AwaseTable {
   const count = Math.min(Math.max(seats.length, AWASE_TABLE.least), AWASE_TABLE.most);
   const seated = Array.from({ length: count }, (_, at) => {
     const seat = seats[at] ?? { name: "" };
@@ -144,7 +148,13 @@ function over(state: AwaseTableState): AwaseTableState {
 }
 
 /** One pair taken by the player to move, from where the game stands; null where the rules do not allow it. */
-function applyTake(geometry: MahjongGeometry, rule: MahjongBonusRule, state: AwaseTableState, a: number, b: number): AwaseTableState | null {
+function applyTake(
+  geometry: MahjongGeometry,
+  rule: MahjongBonusRule,
+  state: AwaseTableState,
+  a: number,
+  b: number,
+): AwaseTableState | null {
   if (state.over || !canTake(geometry, state.cells, rule, a, b)) return null;
   const codes = [state.cells[a]!, state.cells[b]!] as const;
   const points = pairPoints(codes[0]);
@@ -160,7 +170,8 @@ function applyTake(geometry: MahjongGeometry, rule: MahjongBonusRule, state: Awa
 function rulesOf(table: AwaseTable): { geometry: MahjongGeometry; rule: MahjongBonusRule } | null {
   const layout = layoutFor(table.size);
   const count = table.seats.length;
-  if (layout === null || !dealFits(table.size, table.givens) || count < AWASE_TABLE.least || count > AWASE_TABLE.most) return null;
+  if (layout === null || !dealFits(table.size, table.givens) || count < AWASE_TABLE.least || count > AWASE_TABLE.most)
+    return null;
   return { geometry: geometryOf(layout), rule: bonusRuleOf(table.givens) };
 }
 
@@ -249,7 +260,12 @@ export function tablePairs(table: AwaseTable, state: AwaseTableState | null = re
  * console.log(playAtTable(table,pair[0],pair[1],state)?.state.scores);
  * ```
  */
-export function playAtTable(table: AwaseTable, a: number, b: number, state: AwaseTableState | null = readTable(table)): { table: AwaseTable; state: AwaseTableState } | null {
+export function playAtTable(
+  table: AwaseTable,
+  a: number,
+  b: number,
+  state: AwaseTableState | null = readTable(table),
+): { table: AwaseTable; state: AwaseTableState } | null {
   const rules = rulesOf(table);
   if (rules === null || state === null) return null;
   const next = applyTake(rules.geometry, rules.rule, state, a, b);
@@ -355,10 +371,15 @@ export function decodeTable(text: string | null): AwaseTable | null {
   if (text === null) return null;
   try {
     const raw = JSON.parse(text) as Partial<AwaseTable> & { v?: number };
-    if (raw.v !== 1 || typeof raw.size !== "number" || typeof raw.seed !== "number" || typeof raw.givens !== "string") return null;
+    if (raw.v !== 1 || typeof raw.size !== "number" || typeof raw.seed !== "number" || typeof raw.givens !== "string")
+      return null;
     if (raw.level !== "easy" && raw.level !== "medium" && raw.level !== "hard") return null;
     if (!Array.isArray(raw.seats) || !Array.isArray(raw.takes)) return null;
-    const seats: AwaseSeat[] = raw.seats.map((seat) => (seat?.computer === true ? { name: "", computer: true as const } : { name: tidySeatName(String(seat?.name ?? "")) }));
+    const seats: AwaseSeat[] = raw.seats.map((seat) =>
+      seat?.computer === true
+        ? { name: "", computer: true as const }
+        : { name: tidySeatName(String(seat?.name ?? "")) },
+    );
     const takes = raw.takes.map((pair) => [Number(pair?.[0]), Number(pair?.[1])] as const);
     const table: AwaseTable = { size: raw.size, level: raw.level, seed: raw.seed, givens: raw.givens, seats, takes };
     return readTable(table) === null ? null : table;

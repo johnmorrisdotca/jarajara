@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { blockedBy, canTake, freePairs, freeSlots, geometryOf, isFree, overlapsOnLayer, takePair, tilesLeft } from "./board.ts";
+import {
+  blockedBy,
+  canTake,
+  freePairs,
+  freeSlots,
+  geometryOf,
+  isFree,
+  overlapsOnLayer,
+  takePair,
+  tilesLeft,
+} from "./board.ts";
 import { checkAwase } from "./check.ts";
 import { layPairs, pairsLeft, shuffleTiles } from "./deal.ts";
 import { AWASE_SAME_BLOCK, bonusRuleOfSeed, freshAwaseSeed, generateAwase } from "./awase.ts";
@@ -66,7 +76,8 @@ describe("the set", () => {
   });
 
   it("prices a pair for the table: plain suits 1, ones and nines 2, winds 3, dragons 4, bonus 2", () => {
-    const code = (suit: string, rank: number) => MAHJONG_FACES.find((face) => face.suit === suit && face.rank === rank)!.code;
+    const code = (suit: string, rank: number) =>
+      MAHJONG_FACES.find((face) => face.suit === suit && face.rank === rank)!.code;
     expect(pairPoints(code("circles", 5))).toBe(1);
     expect(pairPoints(code("bamboo", 1))).toBe(2);
     expect(pairPoints(code("characters", 9))).toBe(2);
@@ -103,12 +114,15 @@ describe("what makes a tile free", () => {
 });
 
 describe("the layouts", () => {
-  it.each(MAHJONG_LAYOUTS.map((each) => [each.key, each] as const))("%s has an even count, one width, and no two tiles in one place", (_, each) => {
-    expect(each.slots.length % 2).toBe(0);
-    expect(overlapsOnLayer(each)).toBe(false);
-    expect(layoutExtent(each).width).toBe(each.size * 2);
-    expect(layoutFor(each.size)).toBe(each);
-  });
+  it.each(MAHJONG_LAYOUTS.map((each) => [each.key, each] as const))(
+    "%s has an even count, one width, and no two tiles in one place",
+    (_, each) => {
+      expect(each.slots.length % 2).toBe(0);
+      expect(overlapsOnLayer(each)).toBe(false);
+      expect(layoutExtent(each).width).toBe(each.size * 2);
+      expect(layoutFor(each.size)).toBe(each);
+    },
+  );
 
   it("offers the classic Turtle of 144", () => {
     expect(layoutFor(15)!.slots).toHaveLength(144);
@@ -119,7 +133,15 @@ describe("the layouts", () => {
 describe("a deal", () => {
   it("is laid in reverse, so the order it was laid in clears it", () => {
     const geometry = geometryOf(ROW);
-    const laid = layPairs(geometry, [true, true, true, true], [["a", "a"], ["b", "b"]], seededRandom(5))!;
+    const laid = layPairs(
+      geometry,
+      [true, true, true, true],
+      [
+        ["a", "a"],
+        ["b", "b"],
+      ],
+      seededRandom(5),
+    )!;
     expect(laid.cells).not.toContain(".");
     let cells = laid.cells;
     for (const [a, b] of laid.order) {
@@ -129,14 +151,17 @@ describe("a deal", () => {
     expect(tilesLeft(cells)).toBe(0);
   });
 
-  it.each(MAHJONG_LAYOUTS.map((each) => [each.key, each.size] as const))("of the %s is the same from the same seed, at every level, and clears", (_, size) => {
-    for (const level of (["easy", "medium", "hard"] as const)) {
-      const puzzle = generateAwase(size, level, 4242);
-      expect(generateAwase(size, level, 4242)).toEqual(puzzle);
-      expect(checkAwase(size, puzzle.givens, puzzle.solution)).toEqual({ ok: true });
-      expect(checkAwase(size, puzzle.givens, puzzle.solution)).toEqual({ ok: true });
-    }
-  });
+  it.each(MAHJONG_LAYOUTS.map((each) => [each.key, each.size] as const))(
+    "of the %s is the same from the same seed, at every level, and clears",
+    (_, size) => {
+      for (const level of ["easy", "medium", "hard"] as const) {
+        const puzzle = generateAwase(size, level, 4242);
+        expect(generateAwase(size, level, 4242)).toEqual(puzzle);
+        expect(checkAwase(size, puzzle.givens, puzzle.solution)).toEqual({ ok: true });
+        expect(checkAwase(size, puzzle.givens, puzzle.solution)).toEqual({ ok: true });
+      }
+    },
+  );
 
   it("says its flowers' rule by the block its seed is drawn from", () => {
     expect(bonusRuleOfSeed(20260929)).toBe("group");
@@ -163,7 +188,10 @@ describe("a solve", () => {
 
   it("is refused for a pair out of order, a pair left on, or a shuffle while a pair is free", () => {
     expect(checkAwase(8, puzzle.givens, encodeMoves([...moves].reverse())).ok).toBe(false);
-    expect(checkAwase(8, puzzle.givens, encodeMoves(moves.slice(0, -1)))).toEqual({ ok: false, reason: "tiles are left on the layout" });
+    expect(checkAwase(8, puzzle.givens, encodeMoves(moves.slice(0, -1)))).toEqual({
+      ok: false,
+      reason: "tiles are left on the layout",
+    });
     expect(checkAwase(8, puzzle.givens, `${SHUFFLE_MARK}${puzzle.solution}`).ok).toBe(false);
     expect(checkAwase(8, puzzle.givens.slice(1), puzzle.solution).ok).toBe(false);
     expect(checkAwase(9, puzzle.givens, puzzle.solution).ok).toBe(false);

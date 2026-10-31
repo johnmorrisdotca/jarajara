@@ -10,7 +10,11 @@ import { layoutFrame, layoutSvg, tileAt, TILE_MARKS } from "./draw.ts";
 import { TILE_SIZE, tileSvg } from "./faces.ts";
 import { ALL_LAYOUTS, layoutExtent, layoutFor } from "./layouts.ts";
 
-const slotsOf = (svg: string): { slot: number; free: boolean }[] => [...svg.matchAll(/data-slot="(\d+)"[^>]*data-free="(true|false)"/g)].map((match) => ({ slot: Number(match[1]), free: match[2] === "true" }));
+const slotsOf = (svg: string): { slot: number; free: boolean }[] =>
+  [...svg.matchAll(/data-slot="(\d+)"[^>]*data-free="(true|false)"/g)].map((match) => ({
+    slot: Number(match[1]),
+    free: match[2] === "true",
+  }));
 
 describe("a tile as a solid block", () => {
   it("draws a tile with its thickness, in a box that has room for it, and still has the old looks on request", async () => {
@@ -46,7 +50,8 @@ describe("a tile as a solid block", () => {
       const colours = blockColours(design);
       expect(Math.abs(lightness(colours.seam) - lightness(design.colours.face)), name).toBeGreaterThanOrEqual(0.25);
       // A dark face is edged in something lighter; a light one in a highlight.
-      if (lightness(design.colours.face) < 0.4) expect(lightness(colours.bevel) - lightness(design.colours.face), name).toBeGreaterThanOrEqual(0.1);
+      if (lightness(design.colours.face) < 0.4)
+        expect(lightness(colours.bevel) - lightness(design.colours.face), name).toBeGreaterThanOrEqual(0.1);
       expect(colours.body, name).not.toBe(design.colours.face);
     }
   });
@@ -74,7 +79,8 @@ describe("a layout seen from the other side", () => {
     const ground = layout.slots.filter((slot) => slot.z === 0);
     const left = ground.reduce((best, slot) => (slot.x < best.x ? slot : best));
     const right = ground.reduce((best, slot) => (slot.x > best.x ? slot : best));
-    const at = (slot: typeof left, mirror: "none" | "horizontal" | "vertical") => tileAt(slot, extent.layers, mirror, extent);
+    const at = (slot: typeof left, mirror: "none" | "horizontal" | "vertical") =>
+      tileAt(slot, extent.layers, mirror, extent);
     expect(at(left, "none").x).toBeLessThan(at(right, "none").x);
     expect(at(left, "horizontal").x).toBeGreaterThan(at(right, "horizontal").x);
     const top = ground.reduce((best, slot) => (slot.y < best.y ? slot : best));
@@ -85,7 +91,10 @@ describe("a layout seen from the other side", () => {
 
   it("is the same size in every view, so turning the board never moves its frame", () => {
     for (const layout of ALL_LAYOUTS) {
-      const sizes = TILE_MIRRORS.map((mirror) => layoutFrame(layout.size, { mirror, margin: 3 })!).map((frame) => [frame.width, frame.height]);
+      const sizes = TILE_MIRRORS.map((mirror) => layoutFrame(layout.size, { mirror, margin: 3 })!).map((frame) => [
+        frame.width,
+        frame.height,
+      ]);
       for (const size of sizes) expect(size[0]).toBeCloseTo(sizes[0]![0]!, 0);
       for (const size of sizes) expect(size[1]).toBeCloseTo(sizes[0]![1]!, 0);
     }
@@ -119,7 +128,9 @@ describe("the frame round what is drawn", () => {
     const size = 15;
     const cells = generateAwase(size, "easy", 5).givens;
     const frame = layoutFrame(size, { margin: 3 })!;
-    expect(layoutSvg(size, cells, { margin: 3 })).toContain(`viewBox="${frame.x} ${frame.y} ${frame.width} ${frame.height}"`);
+    expect(layoutSvg(size, cells, { margin: 3 })).toContain(
+      `viewBox="${frame.x} ${frame.y} ${frame.width} ${frame.height}"`,
+    );
     expect(layoutSvg(size, cells)).toMatch(/viewBox="0 0 \d+ \d+"/);
     expect(layoutFrame(99)).toBeNull();
   });
@@ -130,7 +141,12 @@ describe("what Find lights", () => {
     const size = 9;
     const cells = generateAwase(size, "easy", 2026).givens;
     const geometry = geometryOf(layoutFor(size)!);
-    const slot = [...cells].findIndex((_, at) => isFree(geometry, cells, at) && matchesOf(geometry, cells, "group", at).blocked.length > 0 && matchesOf(geometry, cells, "group", at).free.length > 0);
+    const slot = [...cells].findIndex(
+      (_, at) =>
+        isFree(geometry, cells, at) &&
+        matchesOf(geometry, cells, "group", at).blocked.length > 0 &&
+        matchesOf(geometry, cells, "group", at).free.length > 0,
+    );
     const found = matchesOf(geometry, cells, "group", slot);
     const svg = layoutSvg(size, cells, { found })!;
     const lit = (index: number) => svg.slice(svg.indexOf(`data-slot="${index}"`)).split("</g>")[0]!;

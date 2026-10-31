@@ -21,22 +21,36 @@ test("takes pairs by tapping, says how it stands, and clears a layout", async ({
   const events = [];
   await page.exposeFunction("told", (name, detail) => events.push([name, detail]));
   await page.evaluate(() => {
-    for (const name of ["jarajara-take", "jarajara-clear", "jarajara-deal"]) document.addEventListener(name, (event) => window.told(name, event.detail));
+    for (const name of ["jarajara-take", "jarajara-clear", "jarajara-deal"])
+      document.addEventListener(name, (event) => window.told(name, event.detail));
   });
   const status = () => page.locator("#g").evaluate((el) => el.shadowRoot.querySelector(".line").textContent);
   expect(await status()).toMatch(/^8 tiles left · \d+ pairs? you can take$/);
   expect(await page.locator("#g").evaluate((el) => el.seed)).toBe(7);
   // Tapping a tile and tapping it again lets it go; tapping a tile that cannot be taken says why.
-  const free = await page.locator("#g").evaluate((el) => [...el.shadowRoot.querySelectorAll('[data-free="true"]')].map((t) => Number(t.dataset.slot)));
-  const blocked = await page.locator("#g").evaluate((el) => [...el.shadowRoot.querySelectorAll('[data-free="false"]')].map((t) => Number(t.dataset.slot)));
+  const free = await page
+    .locator("#g")
+    .evaluate((el) => [...el.shadowRoot.querySelectorAll('[data-free="true"]')].map((t) => Number(t.dataset.slot)));
+  const blocked = await page
+    .locator("#g")
+    .evaluate((el) => [...el.shadowRoot.querySelectorAll('[data-free="false"]')].map((t) => Number(t.dataset.slot)));
   expect(free.length).toBeGreaterThan(1);
   await press(page, "#g", free[0]);
   await expect(page.locator("#g [aria-pressed='true']")).toHaveCount(1);
   await press(page, "#g", free[0]);
   await expect(page.locator("#g [aria-pressed='true']")).toHaveCount(0);
   await press(page, "#g", blocked[0]);
-  await expect.poll(status).toBe("8 tiles left · " + (await page.locator("#g").evaluate((el) => el.shadowRoot.querySelector(".status .line").textContent.split("·")[1].trim())));
-  expect(await page.locator("#g").evaluate((el) => el.shadowRoot.querySelector(".note").textContent)).toBe("That tile is not free: something lies on it, or both its sides are closed.");
+  await expect
+    .poll(status)
+    .toBe(
+      "8 tiles left · " +
+        (await page
+          .locator("#g")
+          .evaluate((el) => el.shadowRoot.querySelector(".status .line").textContent.split("·")[1].trim())),
+    );
+  expect(await page.locator("#g").evaluate((el) => el.shadowRoot.querySelector(".note").textContent)).toBe(
+    "That tile is not free: something lies on it, or both its sides are closed.",
+  );
   expect(await clear(page, "#g")).toBeGreaterThan(0);
   expect(await page.locator("#g").evaluate((el) => el.tilesLeft)).toBe(0);
   expect(await status()).toMatch(/^Cleared, in \d+ seconds\.$/);
@@ -48,7 +62,10 @@ test("takes pairs by tapping, says how it stands, and clears a layout", async ({
 });
 
 test("a game written as text plays back to where it was, and the same seed deals the same tiles", async ({ page }) => {
-  await bare(page, '<jarajara-layout id="a" size="9" level="hard" seed="31"></jarajara-layout><jarajara-layout id="b" size="9" level="hard" seed="31"></jarajara-layout>');
+  await bare(
+    page,
+    '<jarajara-layout id="a" size="9" level="hard" seed="31"></jarajara-layout><jarajara-layout id="b" size="9" level="hard" seed="31"></jarajara-layout>',
+  );
   const cells = (id) => page.locator(id).evaluate((el) => el.cells);
   expect(await cells("#a")).toBe(await cells("#b"));
   const moves = await page.locator("#a").evaluate((el) => {
@@ -69,24 +86,35 @@ test("a game written as text plays back to where it was, and the same seed deals
 });
 
 test("hints, shuffles and undo can be limited or taken away", async ({ page }) => {
-  await bare(page, '<jarajara-layout id="g" size="9" seed="5" hints="1" shuffles="off" undo="off" controls></jarajara-layout>');
+  await bare(
+    page,
+    '<jarajara-layout id="g" size="9" seed="5" hints="1" shuffles="off" undo="off" controls></jarajara-layout>',
+  );
   const hint = page.locator("#g").evaluate((el) => el.hint());
   expect(await hint).not.toBeNull();
   expect(await page.locator("#g").evaluate((el) => el.hint())).toBeNull();
-  expect(await page.locator("#g").evaluate((el) => el.shadowRoot.querySelector(".note").textContent)).toBe("No hints are left.");
-  expect(await page.locator("#g").evaluate((el) => el.shadowRoot.querySelector('[data-action="hint"]').disabled)).toBe(true);
+  expect(await page.locator("#g").evaluate((el) => el.shadowRoot.querySelector(".note").textContent)).toBe(
+    "No hints are left.",
+  );
+  expect(await page.locator("#g").evaluate((el) => el.shadowRoot.querySelector('[data-action="hint"]').disabled)).toBe(
+    true,
+  );
   const pair = await page.locator("#g").evaluate((el) => el.hint());
   expect(pair).toBeNull();
   await page.locator("#g").evaluate((el) => el.setAttribute("hints", "unlimited"));
   const next = await page.locator("#g").evaluate((el) => el.hint());
   await page.locator("#g").evaluate((el, p) => el.take(p[0], p[1]), next);
   expect(await page.locator("#g").evaluate((el) => el.undo())).toBe(false);
-  expect(await page.locator("#g").evaluate((el) => el.shadowRoot.querySelector('[data-action="undo"]').disabled)).toBe(true);
+  expect(await page.locator("#g").evaluate((el) => el.shadowRoot.querySelector('[data-action="undo"]').disabled)).toBe(
+    true,
+  );
   expect(await page.locator("#g").evaluate((el) => el.shuffle())).toBe(false);
   expect(await page.locator("#g").evaluate((el) => el.tilesLeft)).toBe(98);
 });
 
-test("shuffles the tiles that are left when no pair can be taken, once, and the shuffle is part of the game", async ({ page }) => {
+test("shuffles the tiles that are left when no pair can be taken, once, and the shuffle is part of the game", async ({
+  page,
+}) => {
   await bare(page, '<jarajara-layout id="g" size="4" cells="aa.b...." shuffles="1" controls></jarajara-layout>');
   // Two pairs of tiles on a layout whose slots are stacked: find a position with no pair by playing a position of our own.
   await page.locator("#g").evaluate((el) => el.setAttribute("cells", "abababab"));
@@ -98,20 +126,34 @@ test("shuffles the tiles that are left when no pair can be taken, once, and the 
 
 test("lights the free tiles and rings the matches of the tile chosen", async ({ page }) => {
   await bare(page, '<jarajara-layout id="g" size="9" seed="9" show-free show-matching></jarajara-layout>');
-  const washed = await page.locator("#g").evaluate((el) => el.shadowRoot.querySelectorAll('[data-free="false"] rect[fill^="rgba"]').length);
+  const washed = await page
+    .locator("#g")
+    .evaluate((el) => el.shadowRoot.querySelectorAll('[data-free="false"] rect[fill^="rgba"]').length);
   expect(washed).toBeGreaterThan(10);
   const slot = await page.locator("#g").evaluate((el) => {
     const pair = el.hint();
-    el.shadowRoot.querySelector(`[data-slot="${pair[0]}"]`).dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }));
+    el.shadowRoot
+      .querySelector(`[data-slot="${pair[0]}"]`)
+      .dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }));
     return pair[0];
   });
   expect(typeof slot).toBe("number");
-  expect(await page.locator("#g").evaluate((el) => el.shadowRoot.querySelectorAll("[stroke-dasharray]").length)).toBeGreaterThan(0);
+  expect(
+    await page.locator("#g").evaluate((el) => el.shadowRoot.querySelectorAll("[stroke-dasharray]").length),
+  ).toBeGreaterThan(0);
 });
 
 test("lines the slots up sorted by x, y or z, each tile saying where it lies", async ({ page }) => {
   const errors = await bare(page, '<jarajara-layout id="g" size="8" static view="lined" sort="x"></jarajara-layout>');
-  const cells = () => page.locator("#g").evaluate((el) => [...el.shadowRoot.querySelectorAll(".cell")].map((c) => ({ slot: Number(c.dataset.slot), where: c.querySelector(".where").textContent })));
+  const cells = () =>
+    page
+      .locator("#g")
+      .evaluate((el) =>
+        [...el.shadowRoot.querySelectorAll(".cell")].map((c) => ({
+          slot: Number(c.dataset.slot),
+          where: c.querySelector(".where").textContent,
+        })),
+      );
   let list = await cells();
   expect(list).toHaveLength(64);
   const xs = list.map((c) => Number(c.where.match(/x ([\d.]+)/)[1]));
@@ -120,19 +162,23 @@ test("lines the slots up sorted by x, y or z, each tile saying where it lies", a
   list = await cells();
   const zs = list.map((c) => Number(c.where.match(/z (\d+)/)[1]));
   expect(zs).toEqual([...zs].sort((a, b) => b - a));
-  expect(await page.locator("#g").evaluate((el) => el.getAttribute("aria-label"))).toBe("64 tiles lined up, sorted by -z y x");
+  expect(await page.locator("#g").evaluate((el) => el.getAttribute("aria-label"))).toBe(
+    "64 tiles lined up, sorted by -z y x",
+  );
   // A tile's picture is named, and a tap does nothing to a layout that is only looked at.
   await tap(page, page.locator("#g .cell").first());
   expect(await page.locator("#g").evaluate((el) => el.tilesLeft)).toBe(64);
   expect(errors).toEqual([]);
 });
 
-test("the demo's game keeps its layout, level and moves between visits, and its cloth follows the header", async ({ page }) => {
+test("the demo's game keeps its layout, level and moves between visits, and its cloth follows the header", async ({
+  page,
+}) => {
   const errors = await open(page, "?cloth=blue");
   await expect(page.locator(at("game"))).toHaveAttribute("cloth", "blue");
   await tap(page, page.locator('#layouts [data-value="8"]'));
   await expect(page.locator(at("game"))).toHaveAttribute("size", "8");
-  await tap(page, page.locator('#levels button').nth(2));
+  await tap(page, page.locator("#levels button").nth(2));
   await expect(page.locator(at("game"))).toHaveAttribute("level", "hard");
   await tap(page, at("show-free"));
   await expect(page.locator(at("game"))).toHaveAttribute("show-free", "");
@@ -143,7 +189,17 @@ test("the demo's game keeps its layout, level and moves between visits, and its 
   const state = await page.locator(at("game")).evaluate((el) => ({ seed: el.seed, moves: el.moves, cells: el.cells }));
   await page.reload();
   await expect(page.locator("#game .board svg").first()).toBeVisible();
-  expect(await page.locator(at("game")).evaluate((el) => ({ seed: el.seed, moves: el.moves, cells: el.cells, size: el.getAttribute("size"), level: el.getAttribute("level") }))).toEqual({ ...state, size: "8", level: "hard" });
+  expect(
+    await page
+      .locator(at("game"))
+      .evaluate((el) => ({
+        seed: el.seed,
+        moves: el.moves,
+        cells: el.cells,
+        size: el.getAttribute("size"),
+        level: el.getAttribute("level"),
+      })),
+  ).toEqual({ ...state, size: "8", level: "hard" });
   await tap(page, '[data-cloth="wood"]');
   await expect(page.locator(at("game"))).toHaveAttribute("cloth", "wood");
   expect(await sideways(page)).toBe(false);
@@ -151,12 +207,25 @@ test("the demo's game keeps its layout, level and moves between visits, and its 
 });
 
 test("a table of computers plays to the end, and a person's turn waits for a tap", async ({ page }) => {
-  const errors = await bare(page, '<jarajara-table id="t" size="4" players="3" people="0" delay="0" seed="3"></jarajara-table>');
-  await page.waitForFunction(() => document.querySelector("#t").table !== null && document.querySelector("#t").shadowRoot.querySelector(".status").textContent.startsWith("Done"), null, { timeout: 15000 });
-  const scores = await page.locator("#t").evaluate((el) => [...el.shadowRoot.querySelectorAll(".score")].map((s) => Number(s.textContent)));
+  const errors = await bare(
+    page,
+    '<jarajara-table id="t" size="4" players="3" people="0" delay="0" seed="3"></jarajara-table>',
+  );
+  await page.waitForFunction(
+    () =>
+      document.querySelector("#t").table !== null &&
+      document.querySelector("#t").shadowRoot.querySelector(".status").textContent.startsWith("Done"),
+    null,
+    { timeout: 15000 },
+  );
+  const scores = await page
+    .locator("#t")
+    .evaluate((el) => [...el.shadowRoot.querySelectorAll(".score")].map((s) => Number(s.textContent)));
   expect(scores).toHaveLength(3);
   expect(scores.reduce((a, b) => a + b, 0)).toBeGreaterThan(0);
-  const winner = await page.locator("#t").evaluate((el) => [...el.shadowRoot.querySelectorAll(".seat")].filter((s) => s.dataset.winner === "true").length);
+  const winner = await page
+    .locator("#t")
+    .evaluate((el) => [...el.shadowRoot.querySelectorAll(".seat")].filter((s) => s.dataset.winner === "true").length);
   expect(winner).toBeGreaterThan(0);
   expect(errors).toEqual([]);
   // One person and a computer: it is the person's turn first, and the board waits.

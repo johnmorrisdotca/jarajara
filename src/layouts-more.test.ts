@@ -9,7 +9,14 @@ import { bonusRuleOf } from "./tiles.ts";
 
 describe("the more layouts", () => {
   it("are six, each a new width and a new name, after the five that never change", () => {
-    expect(MORE_LAYOUTS.map((layout) => layout.key)).toEqual(["pagoda", "fortress", "pyramid", "bridge", "butterfly", "dragon"]);
+    expect(MORE_LAYOUTS.map((layout) => layout.key)).toEqual([
+      "pagoda",
+      "fortress",
+      "pyramid",
+      "bridge",
+      "butterfly",
+      "dragon",
+    ]);
     expect(MAHJONG_LAYOUTS.map((layout) => layout.size)).toEqual([4, 8, 9, 10, 15]);
     expect(ALL_LAYOUTS).toHaveLength(13);
     expect(new Set(ALL_LAYOUTS.map((layout) => layout.size)).size).toBe(13);
@@ -46,11 +53,15 @@ describe("the more layouts", () => {
   it("start with pairs to take, and never a tile with nothing to rest on", () => {
     for (const layout of MORE_LAYOUTS) {
       const deal = generateAwase(layout.size, "medium", 4242);
-      expect(freePairs(geometryOf(layout), deal.givens, bonusRuleOf(deal.givens)).length, layout.key).toBeGreaterThan(3);
+      expect(freePairs(geometryOf(layout), deal.givens, bonusRuleOf(deal.givens)).length, layout.key).toBeGreaterThan(
+        3,
+      );
       // A tile on a higher layer lies over a tile below it: nothing floats.
       for (const slot of layout.slots.filter((one) => one.z > 0)) {
         expect(
-          layout.slots.some((below) => below.z === slot.z - 1 && Math.abs(below.x - slot.x) < 2 && Math.abs(below.y - slot.y) < 2),
+          layout.slots.some(
+            (below) => below.z === slot.z - 1 && Math.abs(below.x - slot.x) < 2 && Math.abs(below.y - slot.y) < 2,
+          ),
           `${layout.key} ${slot.x},${slot.y},${slot.z}`,
         ).toBe(true);
       }
@@ -63,7 +74,9 @@ describe("the more layouts", () => {
         for (const seed of [1, 2, 3, 99, 20261001, 1_234_567_890, AWASE_SAME_BLOCK.from + 5]) {
           const deal = generateAwase(layout.size, level, seed);
           expect(deal.givens, `${layout.key} ${level} ${seed}`).toHaveLength(layout.slots.length);
-          expect(checkAwase(layout.size, deal.givens, deal.solution), `${layout.key} ${level} ${seed}`).toEqual({ ok: true });
+          expect(checkAwase(layout.size, deal.givens, deal.solution), `${layout.key} ${level} ${seed}`).toEqual({
+            ok: true,
+          });
         }
       }
     }

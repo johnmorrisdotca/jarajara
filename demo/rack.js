@@ -18,7 +18,11 @@ export function initRack(ctx) {
   const showHand = (deal = false) => {
     if (deal) rack.deal(HANDS[hand % HANDS.length]);
     else rack.setAttribute("tiles", HANDS[hand % HANDS.length]);
-    code(deal ? `rack.deal("${HANDS[hand % HANDS.length]}");   // a new hand: nothing turned, raised, marked or sorted` : `<jarajara-rack tiles="${HANDS[hand % HANDS.length]}" capacity="14" pick></jarajara-rack>`);
+    code(
+      deal
+        ? `rack.deal("${HANDS[hand % HANDS.length]}");   // a new hand: nothing turned, raised, marked or sorted`
+        : `<jarajara-rack tiles="${HANDS[hand % HANDS.length]}" capacity="14" pick></jarajara-rack>`,
+    );
     say("");
   };
 

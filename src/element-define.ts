@@ -9,7 +9,15 @@
  *
  * A tag already defined is left as it is, and on a server, where there is no page, nothing happens.
  */
-import { JarajaraGroup, JarajaraLayout, JarajaraRack, JarajaraSet, JarajaraTable, JarajaraTile, JarajaraViewer } from "./element.ts";
+import {
+  JarajaraGroup,
+  JarajaraLayout,
+  JarajaraRack,
+  JarajaraSet,
+  JarajaraTable,
+  JarajaraTile,
+  JarajaraViewer,
+} from "./element.ts";
 import { defineElement } from "./ui/elementKit.ts";
 
 defineElement("jarajara-tile", JarajaraTile);

@@ -3,10 +3,33 @@ import { computerPair } from "../computer.ts";
 import { layoutSvg } from "../draw.ts";
 import { tileFaceSymbols } from "../faces.ts";
 import { layoutFor } from "../layouts.ts";
-import { AWASE_TABLE, isComputerSeat, playAtTable, readTable, seatName, SEAT_WINDS, startTable, tablePlayersAsked, tidySeatName } from "../table.ts";
+import {
+  AWASE_TABLE,
+  isComputerSeat,
+  playAtTable,
+  readTable,
+  seatName,
+  SEAT_WINDS,
+  startTable,
+  tablePlayersAsked,
+  tidySeatName,
+} from "../table.ts";
 import type { AwaseTable, AwaseTableState } from "../table.types.ts";
 import type { AwaseLevel } from "../types.ts";
-import { boxOf, CLOTH_STYLE, designNamed, ElementBase, followLanguage, isOn, languageOf, playSound, say, wearCloth, FRAME_MARGIN, FRAME_STYLE } from "./elementKit.ts";
+import {
+  boxOf,
+  CLOTH_STYLE,
+  designNamed,
+  ElementBase,
+  followLanguage,
+  isOn,
+  languageOf,
+  playSound,
+  say,
+  wearCloth,
+  FRAME_MARGIN,
+  FRAME_STYLE,
+} from "./elementKit.ts";
 
 const LEVELS: readonly AwaseLevel[] = ["easy", "medium", "hard"];
 
@@ -46,7 +69,22 @@ const LEVELS: readonly AwaseLevel[] = ["easy", "medium", "hard"];
  */
 export class JarajaraTable extends ElementBase {
   static get observedAttributes(): readonly string[] {
-    return ["players", "people", "names", "size", "level", "seed", "delay", "show-free", "design", "lang", "cloth", "sound", "mirror", "box"];
+    return [
+      "players",
+      "people",
+      "names",
+      "size",
+      "level",
+      "seed",
+      "delay",
+      "show-free",
+      "design",
+      "lang",
+      "cloth",
+      "sound",
+      "mirror",
+      "box",
+    ];
   }
 
   #root: ShadowRoot | null = null;
@@ -75,12 +113,27 @@ export class JarajaraTable extends ElementBase {
     const level = this.getAttribute("level") as AwaseLevel | null;
     const asked = this.getAttribute("seed");
     let chosen = seed;
-    if (chosen === undefined && asked !== null && asked !== this.#dealtFrom && Number.isInteger(Number(asked)) && Number(asked) > 0) {
+    if (
+      chosen === undefined &&
+      asked !== null &&
+      asked !== this.#dealtFrom &&
+      Number.isInteger(Number(asked)) &&
+      Number(asked) > 0
+    ) {
       chosen = Number(asked);
       this.#dealtFrom = asked;
     }
-    const deal = generateAwase(layout, level !== null && LEVELS.includes(level) ? level : "medium", chosen ?? freshAwaseSeed("group"));
-    this.#table = startTable(deal, Array.from({ length: seats }, (_, at) => (at < people ? { name: names[at] ?? "" } : { name: "", computer: true as const })));
+    const deal = generateAwase(
+      layout,
+      level !== null && LEVELS.includes(level) ? level : "medium",
+      chosen ?? freshAwaseSeed("group"),
+    );
+    this.#table = startTable(
+      deal,
+      Array.from({ length: seats }, (_, at) =>
+        at < people ? { name: names[at] ?? "" } : { name: "", computer: true as const },
+      ),
+    );
     this.#state = readTable(this.#table);
     this.#chosen = null;
     this.#note = "";
@@ -93,8 +146,11 @@ export class JarajaraTable extends ElementBase {
     if (this.#root === null) {
       this.#root = this.attachShadow({ mode: "open" });
       this.#root.addEventListener("click", (event) => {
-        const tile = event.composedPath().find((one): one is Element => one instanceof Element && one.hasAttribute("data-slot"));
-        if (tile !== undefined) this.#tapped(Number(tile.getAttribute("data-slot")), tile.getAttribute("data-free") === "true");
+        const tile = event
+          .composedPath()
+          .find((one): one is Element => one instanceof Element && one.hasAttribute("data-slot"));
+        if (tile !== undefined)
+          this.#tapped(Number(tile.getAttribute("data-slot")), tile.getAttribute("data-free") === "true");
       });
       this.deal();
       return;
@@ -153,7 +209,21 @@ export class JarajaraTable extends ElementBase {
     const last = played.state.taken[played.state.taken.length - 1]!;
     playSound(this, played.state.over ? "win" : "pair");
     this.#draw();
-    this.dispatchEvent(new CustomEvent("jarajara-table", { bubbles: true, composed: true, detail: { seat, pair: [a, b], codes: last.codes, points: last.points, scores: played.state.scores, over: played.state.over, winners: played.state.winners } }));
+    this.dispatchEvent(
+      new CustomEvent("jarajara-table", {
+        bubbles: true,
+        composed: true,
+        detail: {
+          seat,
+          pair: [a, b],
+          codes: last.codes,
+          points: last.points,
+          scores: played.state.scores,
+          over: played.state.over,
+          winners: played.state.winners,
+        },
+      }),
+    );
     this.#maybeComputer();
     return true;
   }
@@ -164,8 +234,12 @@ export class JarajaraTable extends ElementBase {
     this.#timer = null;
     const table = this.#table;
     const state = this.#state;
-    if (table === null || state === null || state.over || !this.isConnected || !isComputerSeat(table, state.turn)) return;
-    const delay = Math.max(0, Number.isFinite(Number(this.getAttribute("delay") ?? 700)) ? Number(this.getAttribute("delay") ?? 700) : 700);
+    if (table === null || state === null || state.over || !this.isConnected || !isComputerSeat(table, state.turn))
+      return;
+    const delay = Math.max(
+      0,
+      Number.isFinite(Number(this.getAttribute("delay") ?? 700)) ? Number(this.getAttribute("delay") ?? 700) : 700,
+    );
     this.#timer = setTimeout(() => {
       this.#timer = null;
       const pair = this.#table === null ? null : computerPair(this.#table, this.#state);
@@ -200,7 +274,18 @@ export class JarajaraTable extends ElementBase {
     const ratio = boxOf(this.getAttribute("box"));
     board.style.aspectRatio = ratio === null ? "" : `var(--jarajara-box, ${ratio})`;
     board.dataset.box = ratio === null ? "none" : "fixed";
-    board.innerHTML = design === null ? "" : (layoutSvg(table.size, state.cells, { chosen: this.#chosen, showFree: isOn(this, "show-free"), design, prefix: "jjt", symbols: false, mirror: this.getAttribute("mirror") ?? "none", margin: FRAME_MARGIN }) ?? "");
+    board.innerHTML =
+      design === null
+        ? ""
+        : (layoutSvg(table.size, state.cells, {
+            chosen: this.#chosen,
+            showFree: isOn(this, "show-free"),
+            design,
+            prefix: "jjt",
+            symbols: false,
+            mirror: this.getAttribute("mirror") ?? "none",
+            margin: FRAME_MARGIN,
+          }) ?? "");
     const status = root.querySelector(".status") as HTMLElement;
     const turnName = seatName(table.seats, state.turn);
     const text = state.over

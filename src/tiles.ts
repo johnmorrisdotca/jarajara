@@ -188,7 +188,9 @@ export function bonusRuleOf(cells: string): MahjongBonusRule {
 export function setPairs(rule: MahjongBonusRule, random: () => number, sets = 1): [string, string][] {
   const pairs: [string, string][] = [];
   const ordinary = MAHJONG_FACES.filter((face) => face.suit !== "flowers" && face.suit !== "seasons");
-  const bonus = MAHJONG_FACES.filter((face) => face.suit === "flowers" || face.suit === "seasons").map((face) => face.code);
+  const bonus = MAHJONG_FACES.filter((face) => face.suit === "flowers" || face.suit === "seasons").map(
+    (face) => face.code,
+  );
   for (let set = 0; set < sets; set += 1) {
     for (const face of ordinary) pairs.push([face.code, face.code], [face.code, face.code]);
     if (set > 0 && rule === "group") {

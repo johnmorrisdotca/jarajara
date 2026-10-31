@@ -92,7 +92,7 @@ describe("a layout drawn in a design", () => {
     expect(svg).toContain("#123456");
     expect(svg).toContain("-e-red");
     // Without the option, no red.
-    expect(layoutSvg(9, deal.givens, { design: made })!).not.toContain("-e-red\"/>");
+    expect(layoutSvg(9, deal.givens, { design: made })!).not.toContain('-e-red"/>');
     // A design with no red fives draws none.
     expect(layoutSvg(9, deal.givens, { design: { ...made, red: undefined }, redFives: true })!).not.toContain("-e-red");
   });
@@ -143,7 +143,11 @@ describe("the cloths", () => {
     expect(isCloth("blue")).toBe(true);
     expect(isCloth("toString")).toBe(false);
     expect(isCloth(7)).toBe(false);
-    expect(clothVars("red")).toEqual({ "--jarajara-felt": "#a3342e", "--jarajara-felt-deep": "#7a231f", "--jarajara-felt-ink": "#f3efe4" });
+    expect(clothVars("red")).toEqual({
+      "--jarajara-felt": "#a3342e",
+      "--jarajara-felt-deep": "#7a231f",
+      "--jarajara-felt-ink": "#f3efe4",
+    });
     expect(clothVars("plaid")).toEqual({});
     expect(clothVars(null)).toEqual({});
   });
@@ -172,7 +176,12 @@ describe("the riichi designs", () => {
       expect(design.back).toContain("<");
       expect(design.box).toEqual([300, 400]);
       // Whatever it draws is text a page may hold: no script, no outside reference.
-      for (const drawing of [design.body!, design.back, ...Object.values(design.faces), ...Object.values(design.red!)]) {
+      for (const drawing of [
+        design.body!,
+        design.back,
+        ...Object.values(design.faces),
+        ...Object.values(design.red!),
+      ]) {
         expect(drawing).not.toMatch(/<script|href="http|xlink:href="http|onload=/);
       }
     }
@@ -200,9 +209,16 @@ describe("the riichi designs", () => {
   it("keep the pictures to a size a page can afford, and give every drawing's ids a prefix of its own", async () => {
     for (const name of ["riichi", "riichi-black"]) {
       const design = (await loadTileDesign(name))!;
-      const size = [design.body!, design.back, ...Object.values(design.faces), ...Object.values(design.red!)].reduce((sum, one) => sum + one.length, 0);
+      const size = [design.body!, design.back, ...Object.values(design.faces), ...Object.values(design.red!)].reduce(
+        (sum, one) => sum + one.length,
+        0,
+      );
       expect(size).toBeLessThan(160_000);
-      const ids = [...[design.body!, design.back, ...Object.values(design.faces), ...Object.values(design.red!)].join("").matchAll(/ id="([^"]+)"/g)].map((match) => match[1]);
+      const ids = [
+        ...[design.body!, design.back, ...Object.values(design.faces), ...Object.values(design.red!)]
+          .join("")
+          .matchAll(/ id="([^"]+)"/g),
+      ].map((match) => match[1]);
       expect(new Set(ids).size).toBe(ids.length);
     }
   });

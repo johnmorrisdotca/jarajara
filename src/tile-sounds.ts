@@ -14,4 +14,11 @@
  * Audio, CC0: see CREDITS.md.
  */
 export { MOST_SOUNDS_AT_ONCE, TILE_SOUND_KINDS, createTileSounds, soundTimes } from "./ui/tileSounds.ts";
-export type { PlayTileSoundOptions, TileSoundData, TileSoundKind, TileSoundWindow, TileSounds, TileSoundsOptions } from "./ui/tileSounds.ts";
+export type {
+  PlayTileSoundOptions,
+  TileSoundData,
+  TileSoundKind,
+  TileSoundWindow,
+  TileSounds,
+  TileSoundsOptions,
+} from "./ui/tileSounds.ts";

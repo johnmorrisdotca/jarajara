@@ -42,7 +42,9 @@ function slotText(slot: number): string {
  * ```
  */
 export function encodeMoves(moves: readonly MahjongMove[]): string {
-  return moves.map((move) => ("shuffle" in move ? SHUFFLE_MARK : `${slotText(move.pair[0])}${slotText(move.pair[1])}`)).join("");
+  return moves
+    .map((move) => ("shuffle" in move ? SHUFFLE_MARK : `${slotText(move.pair[0])}${slotText(move.pair[1])}`))
+    .join("");
 }
 
 /** The moves a string holds, each slot below `slots`; null for anything else.
@@ -101,7 +103,12 @@ export function decodeMoves(text: string, slots: number): MahjongMove[] | null {
  */
 export function dealFits(size: number, givens: string): boolean {
   const layout = layoutFor(size);
-  return layout !== null && typeof givens === "string" && givens.length === layout.slots.length && [...givens].every(isFaceCode);
+  return (
+    layout !== null &&
+    typeof givens === "string" &&
+    givens.length === layout.slots.length &&
+    [...givens].every(isFaceCode)
+  );
 }
 
 /** Where a solve stands after its moves: the tiles, and how many shuffles it has had.
@@ -147,7 +154,12 @@ export type Replayed = { cells: MahjongCells; shuffles: number };
  * console.log(playSolve(4,cells,[{pair}],"group")?.cells);
  * ```
  */
-export function playSolve(size: number, givens: string, moves: readonly MahjongMove[], rule: MahjongBonusRule = bonusRuleOf(givens)): Replayed | null {
+export function playSolve(
+  size: number,
+  givens: string,
+  moves: readonly MahjongMove[],
+  rule: MahjongBonusRule = bonusRuleOf(givens),
+): Replayed | null {
   const layout = layoutFor(size);
   if (layout === null || !dealFits(size, givens)) return null;
   const geometry = geometryOf(layout);

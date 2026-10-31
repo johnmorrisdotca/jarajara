@@ -47,7 +47,10 @@ function bestAfter(geometry: MahjongGeometry, cells: string, rule: MahjongBonusR
  * console.log(computerPair(table,state));
  * ```
  */
-export function computerPair(table: AwaseTable, state: AwaseTableState | null = readTable(table)): [number, number] | null {
+export function computerPair(
+  table: AwaseTable,
+  state: AwaseTableState | null = readTable(table),
+): [number, number] | null {
   const layout = layoutFor(table.size);
   if (layout === null || state === null || state.over) return null;
   const geometry = geometryOf(layout);

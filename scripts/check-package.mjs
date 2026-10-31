@@ -20,7 +20,11 @@ const scratch = mkdtempSync(join(tmpdir(), "jarajara-package-"));
 function run(command, args, cwd, viaShell = false) {
   const shell = viaShell && windows;
   // A path is quoted for the shell; a bare name such as npm is left for the shell to find.
-  const ran = spawnSync(shell && /[\\/]/.test(command) ? `"${command}"` : command, args, { cwd, encoding: "utf8", shell });
+  const ran = spawnSync(shell && /[\\/]/.test(command) ? `"${command}"` : command, args, {
+    cwd,
+    encoding: "utf8",
+    shell,
+  });
   if (ran.status !== 0) {
     console.error(`FAIL ${command} ${args.join(" ")}\n${ran.stdout}\n${ran.stderr}`);
     process.exit(1);
@@ -29,7 +33,9 @@ function run(command, args, cwd, viaShell = false) {
 }
 
 // 1. Pack, with npm.
-const packed = JSON.parse(run("npm", ["pack", "--json", "--ignore-scripts", "--pack-destination", scratch], root, true));
+const packed = JSON.parse(
+  run("npm", ["pack", "--json", "--ignore-scripts", "--pack-destination", scratch], root, true),
+);
 const tarball = join(scratch, packed[0].filename);
 const inTarball = new Set(packed[0].files.map((file) => file.path));
 console.log(`ok   npm pack: ${packed[0].filename}, ${packed[0].files.length} files`);
@@ -42,7 +48,13 @@ if (shipped.length > 0) {
 console.log("ok   no picture and nothing from docs/ is in the tarball");
 
 // 2. Everything package.json points at is in the tarball.
-const pointed = [pkg.main, pkg.module, pkg.types, ...Object.values(pkg.bin ?? {}), ...Object.values(pkg.exports).flatMap((entry) => (typeof entry === "string" ? [entry] : Object.values(entry)))];
+const pointed = [
+  pkg.main,
+  pkg.module,
+  pkg.types,
+  ...Object.values(pkg.bin ?? {}),
+  ...Object.values(pkg.exports).flatMap((entry) => (typeof entry === "string" ? [entry] : Object.values(entry))),
+];
 for (const file of new Set(pointed)) {
   if (!inTarball.has(file.replace(/^\.\//, ""))) {
     console.error(`FAIL package.json points at ${file}, which is not in the tarball`);
@@ -106,7 +118,11 @@ console.log(`ok   require: ${run(process.execPath, ["cjs.cjs"], project).trim()}
 // 5. The command line, as installed: the file the bin points at runs, and plays a deal the package made.
 const installedBin = join(project, "node_modules", ...pkg.name.split("/"), pkg.bin.jarajara);
 console.log(`ok   command line: ${run(process.execPath, [installedBin, "--version"], project).trim()}`);
-const played = run(process.execPath, [installedBin, "check", deal.solution, "--layout", "15", "--givens", deal.givens], project).trim();
+const played = run(
+  process.execPath,
+  [installedBin, "check", deal.solution, "--layout", "15", "--givens", deal.givens],
+  project,
+).trim();
 if (!played.startsWith("Cleared:")) {
   console.error(`FAIL the installed command line says ${played}`);
   process.exit(1);

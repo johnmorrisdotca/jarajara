@@ -11,7 +11,16 @@
 //
 // Run it before a release that names a framework. It needs the network and a few minutes.
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { extname, join, resolve } from "node:path";
 import process from "node:process";
@@ -21,7 +30,13 @@ import { chromium, webkit } from "@playwright/test";
 const root = resolve(process.argv[2] ?? mkdtempSync(join(tmpdir(), "jarajara-frameworks-")));
 rmSync(root, { recursive: true, force: true });
 mkdirSync(root, { recursive: true });
-const run = (cwd, command, args) => execFileSync(command, args, { cwd, stdio: "pipe", shell: process.platform === "win32", env: { ...process.env, NG_CLI_ANALYTICS: "false" } }).toString();
+const run = (cwd, command, args) =>
+  execFileSync(command, args, {
+    cwd,
+    stdio: "pipe",
+    shell: process.platform === "win32",
+    env: { ...process.env, NG_CLI_ANALYTICS: "false" },
+  }).toString();
 const write = (dir, files) => {
   for (const [name, text] of Object.entries(files)) {
     mkdirSync(join(dir, name, ".."), { recursive: true });
@@ -30,9 +45,13 @@ const write = (dir, files) => {
 };
 
 run(process.cwd(), "npm", ["pack", "--ignore-scripts", "--pack-destination", root]);
-const tarball = join(root, readdirSync(root).find((name) => name.endsWith(".tgz")));
+const tarball = join(
+  root,
+  readdirSync(root).find((name) => name.endsWith(".tgz")),
+);
 const jarajara = `file:${tarball}`;
-const page = (script) => `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>jarajara</title></head><body><div id="app"></div>${script}</body></html>`;
+const page = (script) =>
+  `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>jarajara</title></head><body><div id="app"></div>${script}</body></html>`;
 // What each page says of itself: how many of the seven tags the package defined, and whether the layout was cleared.
 const TAGS = `["tile", "rack", "layout", "table", "viewer", "group", "set"].filter((name) => customElements.get("jarajara-" + name)).length`;
 
@@ -40,7 +59,13 @@ const projects = {
   vue: {
     out: "dist",
     files: {
-      "package.json": { name: "check-vue", private: true, type: "module", dependencies: { "@johnmorrisdotca/jarajara": jarajara, vue: "^3.5.0" }, devDependencies: { vite: "^7.0.0", "@vitejs/plugin-vue": "^6.0.0" } },
+      "package.json": {
+        name: "check-vue",
+        private: true,
+        type: "module",
+        dependencies: { "@johnmorrisdotca/jarajara": jarajara, vue: "^3.5.0" },
+        devDependencies: { vite: "^7.0.0", "@vitejs/plugin-vue": "^6.0.0" },
+      },
       "vite.config.js": `import vue from "@vitejs/plugin-vue";\nexport default { base: "./", plugins: [vue({ template: { compilerOptions: { isCustomElement: (tag) => tag.startsWith("jarajara-") } } })] };\n`,
       "index.html": page(`<script type="module" src="/src/main.js"></script>`),
       "src/main.js": `import { createApp } from "vue";\nimport Game from "./Game.vue";\ncreateApp(Game, { seed: 7 }).mount("#app");\n`,
@@ -66,7 +91,13 @@ onMounted(() => { tags.value = ${TAGS}; });
   svelte: {
     out: "dist",
     files: {
-      "package.json": { name: "check-svelte", private: true, type: "module", dependencies: { "@johnmorrisdotca/jarajara": jarajara, svelte: "^5.0.0" }, devDependencies: { vite: "^7.0.0", "@sveltejs/vite-plugin-svelte": "^6.0.0" } },
+      "package.json": {
+        name: "check-svelte",
+        private: true,
+        type: "module",
+        dependencies: { "@johnmorrisdotca/jarajara": jarajara, svelte: "^5.0.0" },
+        devDependencies: { vite: "^7.0.0", "@sveltejs/vite-plugin-svelte": "^6.0.0" },
+      },
       "vite.config.js": `import { svelte } from "@sveltejs/vite-plugin-svelte";\nexport default { base: "./", plugins: [svelte()] };\n`,
       "index.html": page(`<script type="module" src="/src/main.js"></script>`),
       "src/main.js": `import { mount } from "svelte";\nimport Game from "./Game.svelte";\nmount(Game, { target: document.getElementById("app"), props: { seed: 7 } });\n`,
@@ -98,8 +129,21 @@ onMounted(() => { tags.value = ${TAGS}; });
       "package.json": {
         name: "check-angular",
         private: true,
-        dependencies: { "@johnmorrisdotca/jarajara": jarajara, "@angular/common": "^20.0.0", "@angular/compiler": "^20.0.0", "@angular/core": "^20.0.0", "@angular/platform-browser": "^20.0.0", rxjs: "^7.8.0", tslib: "^2.8.0" },
-        devDependencies: { "@angular/build": "^20.0.0", "@angular/cli": "^20.0.0", "@angular/compiler-cli": "^20.0.0", typescript: "~5.8.0" },
+        dependencies: {
+          "@johnmorrisdotca/jarajara": jarajara,
+          "@angular/common": "^20.0.0",
+          "@angular/compiler": "^20.0.0",
+          "@angular/core": "^20.0.0",
+          "@angular/platform-browser": "^20.0.0",
+          rxjs: "^7.8.0",
+          tslib: "^2.8.0",
+        },
+        devDependencies: {
+          "@angular/build": "^20.0.0",
+          "@angular/cli": "^20.0.0",
+          "@angular/compiler-cli": "^20.0.0",
+          typescript: "~5.8.0",
+        },
       },
       "angular.json": {
         version: 1,
@@ -108,11 +152,35 @@ onMounted(() => { tags.value = ${TAGS}; });
             projectType: "application",
             root: "",
             sourceRoot: "src",
-            architect: { build: { builder: "@angular/build:application", options: { outputPath: "dist/check-angular", index: "src/index.html", browser: "src/main.ts", tsConfig: "tsconfig.json", baseHref: "./" }, configurations: { production: {} }, defaultConfiguration: "production" } },
+            architect: {
+              build: {
+                builder: "@angular/build:application",
+                options: {
+                  outputPath: "dist/check-angular",
+                  index: "src/index.html",
+                  browser: "src/main.ts",
+                  tsConfig: "tsconfig.json",
+                  baseHref: "./",
+                },
+                configurations: { production: {} },
+                defaultConfiguration: "production",
+              },
+            },
           },
         },
       },
-      "tsconfig.json": { compilerOptions: { target: "ES2022", module: "ES2022", moduleResolution: "bundler", strict: true, experimentalDecorators: true, skipLibCheck: true, lib: ["ES2022", "dom"] }, files: ["src/main.ts"] },
+      "tsconfig.json": {
+        compilerOptions: {
+          target: "ES2022",
+          module: "ES2022",
+          moduleResolution: "bundler",
+          strict: true,
+          experimentalDecorators: true,
+          skipLibCheck: true,
+          lib: ["ES2022", "dom"],
+        },
+        files: ["src/main.ts"],
+      },
       "src/index.html": page(`<check-root></check-root>`),
       "src/game.ts": `import { Component, CUSTOM_ELEMENTS_SCHEMA, input, signal } from "@angular/core";
 import "@johnmorrisdotca/jarajara/element/define";
@@ -153,7 +221,13 @@ bootstrapApplication(App, { providers: [provideZonelessChangeDetection()] });
   react: {
     out: "dist",
     files: {
-      "package.json": { name: "check-react", private: true, type: "module", dependencies: { "@johnmorrisdotca/jarajara": jarajara, react: "^19.0.0", "react-dom": "^19.0.0" }, devDependencies: { vite: "^7.0.0", "@vitejs/plugin-react": "^5.0.0" } },
+      "package.json": {
+        name: "check-react",
+        private: true,
+        type: "module",
+        dependencies: { "@johnmorrisdotca/jarajara": jarajara, react: "^19.0.0", "react-dom": "^19.0.0" },
+        devDependencies: { vite: "^7.0.0", "@vitejs/plugin-react": "^5.0.0" },
+      },
       "vite.config.js": `import react from "@vitejs/plugin-react";\nexport default { base: "./", plugins: [react()] };\n`,
       "index.html": page(`<script type="module" src="/src/main.jsx"></script>`),
       "src/Game.jsx": `import { useEffect, useRef, useState } from "react";
@@ -223,14 +297,28 @@ for (const [name, project] of Object.entries(projects)) {
     built.push([name, join(dir, project.out)]);
     console.log(`built   ${name.padEnd(8)} in ${Math.round((Date.now() - started) / 1000)} s`);
   } catch (error) {
-    console.log(`FAILED  ${name}: ${String(error.stderr ?? error.stdout ?? error.message).split("\n").slice(-12).join("\n")}`);
+    console.log(
+      `FAILED  ${name}: ${String(error.stderr ?? error.stdout ?? error.message)
+        .split("\n")
+        .slice(-12)
+        .join("\n")}`,
+    );
     process.exitCode = 1;
   }
 }
 
 // Open each built page and play the layout to its end: tap the two tiles the hint names, until none is left.
-const types = { ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css", ".json": "application/json" };
-for (const [engine, launcher] of [["chromium", chromium], ["webkit", webkit]]) {
+const types = {
+  ".html": "text/html",
+  ".js": "text/javascript",
+  ".mjs": "text/javascript",
+  ".css": "text/css",
+  ".json": "application/json",
+};
+for (const [engine, launcher] of [
+  ["chromium", chromium],
+  ["webkit", webkit],
+]) {
   const browser = await launcher.launch();
   for (const [name, out] of built) {
     const context = await browser.newContext({ viewport: { width: 390, height: 800 }, reducedMotion: "reduce" });
@@ -241,7 +329,10 @@ for (const [engine, launcher] of [["chromium", chromium], ["webkit", webkit]]) {
       let file = join(out, decodeURIComponent(new URL(route.request().url()).pathname));
       if (existsSync(file) && statSync(file).isDirectory()) file = join(file, "index.html");
       if (!existsSync(file)) return route.fulfill({ status: 404, body: "" });
-      return route.fulfill({ body: readFileSync(file), contentType: types[extname(file)] ?? "application/octet-stream" });
+      return route.fulfill({
+        body: readFileSync(file),
+        contentType: types[extname(file)] ?? "application/octet-stream",
+      });
     });
     await tab.goto("http://check.test/");
     let status = "nothing";
@@ -254,7 +345,11 @@ for (const [engine, launcher] of [["chromium", chromium], ["webkit", webkit]]) {
       await tab.locator("#game [data-slot]").first().waitFor({ timeout: 8000 });
       tiles = await tab.locator("#game [data-slot]").count();
       await tab.locator("#tile").click();
-      await tab.waitForFunction(() => document.querySelector("#tile")?.getAttribute("aria-label") === "tile, face down", null, { timeout: 3000 });
+      await tab.waitForFunction(
+        () => document.querySelector("#tile")?.getAttribute("aria-label") === "tile, face down",
+        null,
+        { timeout: 3000 },
+      );
       turned = "face down";
       for (let step = 0; step < 20; step += 1) {
         const pair = await tab.locator("#game").evaluate((layout) => layout.hint());
@@ -262,14 +357,32 @@ for (const [engine, launcher] of [["chromium", chromium], ["webkit", webkit]]) {
         for (const slot of pair) await tab.locator(`#game [data-slot="${slot}"]`).dispatchEvent("click");
         taken += 1;
       }
-      await tab.waitForFunction(() => document.querySelector("#status")?.textContent === "Cleared", null, { timeout: 5000 });
+      await tab.waitForFunction(() => document.querySelector("#status")?.textContent === "Cleared", null, {
+        timeout: 5000,
+      });
     } catch {
       // Nothing was drawn, or it could not be played: reported below.
     }
-    status = (await tab.locator("#status").textContent().catch(() => null)) ?? "nothing";
-    tags = (await tab.locator("#tags").textContent().catch(() => null)) ?? "nothing";
-    const ok = errors.length === 0 && tiles === 8 && taken === 4 && turned === "face down" && status.trim() === "Cleared" && tags.trim() === "7 tags";
-    console.log(`${ok ? "played " : "FAILED "} ${name.padEnd(8)} in ${engine}: ${tiles} tiles, a tile turned ${turned}, ${taken} pairs taken, the page says “${status.trim()}” and “${tags.trim()}”${errors.length > 0 ? ` ${errors.join("; ")}` : ""}`);
+    status =
+      (await tab
+        .locator("#status")
+        .textContent()
+        .catch(() => null)) ?? "nothing";
+    tags =
+      (await tab
+        .locator("#tags")
+        .textContent()
+        .catch(() => null)) ?? "nothing";
+    const ok =
+      errors.length === 0 &&
+      tiles === 8 &&
+      taken === 4 &&
+      turned === "face down" &&
+      status.trim() === "Cleared" &&
+      tags.trim() === "7 tags";
+    console.log(
+      `${ok ? "played " : "FAILED "} ${name.padEnd(8)} in ${engine}: ${tiles} tiles, a tile turned ${turned}, ${taken} pairs taken, the page says “${status.trim()}” and “${tags.trim()}”${errors.length > 0 ? ` ${errors.join("; ")}` : ""}`,
+    );
     if (!ok) process.exitCode = 1;
     await context.close();
   }

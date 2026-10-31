@@ -60,7 +60,12 @@ export type Laid = { cells: MahjongCells; order: [number, number][] };
  * console.log(layPairs(geometry,layout.slots.map(()=>true),pairsLeft(cells,"group"),seededRandom(42))?.order.length);
  * ```
  */
-export function layPairs(geometry: MahjongGeometry, present: readonly boolean[], pairs: readonly (readonly [string, string])[], random: Random): Laid | null {
+export function layPairs(
+  geometry: MahjongGeometry,
+  present: readonly boolean[],
+  pairs: readonly (readonly [string, string])[],
+  random: Random,
+): Laid | null {
   const count = present.filter(Boolean).length;
   if (count % 2 !== 0 || pairs.length < count / 2) return null;
   const { slots } = geometry.layout;
@@ -72,13 +77,18 @@ export function layPairs(geometry: MahjongGeometry, present: readonly boolean[],
     let stuck = false;
     while (left > 0) {
       const free: number[] = [];
-      for (let slot = 0; slot < filled.length; slot += 1) if (isFreeAmong(geometry, (at) => filled[at]!, slot)) free.push(slot);
+      for (let slot = 0; slot < filled.length; slot += 1)
+        if (isFreeAmong(geometry, (at) => filled[at]!, slot)) free.push(slot);
       if (free.length < 2) {
         stuck = true;
         break;
       }
       const first = weightedPick(free, slots, random);
-      const second = weightedPick(free.filter((slot) => slot !== first), slots, random);
+      const second = weightedPick(
+        free.filter((slot) => slot !== first),
+        slots,
+        random,
+      );
       const [a, b] = pairs[order.length]!;
       const flip = random() < 0.5;
       cells[first] = flip ? b : a;
@@ -182,14 +192,21 @@ export function hashText(text: string): number {
  * console.log(shuffleTiles(geometry,cells,"group",1));
  * ```
  */
-export function shuffleTiles(geometry: MahjongGeometry, cells: MahjongCells, rule: MahjongBonusRule, index: number): MahjongCells | null {
+export function shuffleTiles(
+  geometry: MahjongGeometry,
+  cells: MahjongCells,
+  rule: MahjongBonusRule,
+  index: number,
+): MahjongCells | null {
   const present = [...cells].map((code) => code !== EMPTY_SLOT);
   const random = seededRandom(hashText(`${cells}:${index}`) || 1);
   const pairs = shuffled(pairsLeft(cells, rule), random);
   if (pairs.length === 0) return null;
   const laid = layPairs(geometry, present, pairs, random);
   if (laid !== null) return laid.cells;
-  const free = present.flatMap((filled, slot) => (filled && isFreeAmong(geometry, (at) => present[at]!, slot) ? [slot] : []));
+  const free = present.flatMap((filled, slot) =>
+    filled && isFreeAmong(geometry, (at) => present[at]!, slot) ? [slot] : [],
+  );
   if (free.length < 2) return null;
   const [first, second] = shuffled(free, random);
   const others = shuffled(
@@ -199,6 +216,9 @@ export function shuffleTiles(geometry: MahjongGeometry, cells: MahjongCells, rul
   const next = new Array<string>(cells.length).fill(EMPTY_SLOT);
   next[first!] = pairs[0]![0];
   next[second!] = pairs[0]![1];
-  pairs.slice(1).flat().forEach((code, at) => (next[others[at]!] = code));
+  pairs
+    .slice(1)
+    .flat()
+    .forEach((code, at) => (next[others[at]!] = code));
   return next.join("");
 }
