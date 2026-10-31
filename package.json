@@ -135,7 +135,7 @@
     "family:readme": "node scripts/family-readme.mjs",
     "test:cli": "pnpm build && node scripts/check-cli.mjs",
     "test:frameworks": "pnpm build && node scripts/check-frameworks.mjs",
-    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm check:size",
     "prepublishOnly": "pnpm check && pnpm build",
     "site": "pnpm build && node scripts/site.mjs",
     "screenshots:readme": "pnpm site && node scripts/readme-pictures.mjs",
@@ -146,7 +146,8 @@
     "docs:site": "pnpm build && node scripts/docs-site.mjs build",
     "docs:check": "pnpm build && node scripts/docs-site.mjs check",
     "size": "node scripts/docs-site.mjs size",
-    "format": "biome check --write ."
+    "format": "biome check --write .",
+    "check:size": "node scripts/check-size.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.4",
