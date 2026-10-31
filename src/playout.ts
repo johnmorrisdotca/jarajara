@@ -129,7 +129,8 @@ function playOut(
         const slot = list[at]!;
         later[at] = seen[classes[slot]!]!;
         pairs += later[at]!;
-        seen[classes[slot]!] += 1;
+        const kind = classes[slot]!;
+        seen[kind] = (seen[kind] ?? 0) + 1;
       }
       if (pairs === 0) break;
       let pick = Math.floor(random() * pairs);
