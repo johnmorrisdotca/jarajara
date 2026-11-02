@@ -6,6 +6,8 @@ All notable changes to this project are written here. The format follows
 
 ## [Unreleased]
 
+## [1.8.0] - 2026-11-02
+
 ### Added
 
 - **`checkAwase` gives its reason as a code as well as in English.** A refusal is now `{ ok: false, reason, code }`: `reason` is the sentence it has always been, and `code` is `"givens-not-deal"`, `"answer-not-moves"`, `"move-not-allowed"` or `"tiles-left"`, which a site says in its own language. `AWASE_CHECK_REASONS` lists each with its English sentence, `awaseRefusal(code)` makes a refusal, and the type is `AwaseCheckCode`; all are in `@johnmorrisdotca/jarajara/awase`. The `check` command's `--json` output carries `code` too, and the command reads the code rather than the English to find its Japanese line.

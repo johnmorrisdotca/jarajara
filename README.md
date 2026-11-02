@@ -989,7 +989,7 @@ Please follow the [code of conduct](./CODE_OF_CONDUCT.md). A way to make the che
 
 ## Changes
 
-See [CHANGELOG.md](./CHANGELOG.md). The latest release, 1.7.1, changes nothing a player sees.
+See [CHANGELOG.md](./CHANGELOG.md). The latest release, 1.8.0, gives a check's reason as a code beside the English, and changes nothing a player sees.
 
 ## Licence
 
