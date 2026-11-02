@@ -209,7 +209,7 @@ It is ES modules only, with its types included, and needs Node 22 or later outsi
 import { generateAwase, checkAwase } from "@johnmorrisdotca/jarajara/awase";
 
 const { givens } = generateAwase(15, "medium", 12345);   // send `givens` to the browser; keep the seed and the answer
-checkAwase(15, givens, answerFromThePlayer);              // { ok: true } or { ok: false, reason }, with no search
+checkAwase(15, givens, answerFromThePlayer);              // { ok: true } or { ok: false, reason, code }, with no search
 ```
 
 Importing the main entry, `/awase` or `/table` on a server is safe: they touch no page. So are `/faces` (it makes strings) and `/element` (the classes extend nothing where there is no page).
@@ -337,8 +337,8 @@ console.log(checkAwase(4, deal.givens, ""));                   // no moves at al
 ```text
 LssIdCCd 0704060500030102
 { ok: true }
-{ ok: false, reason: 'a move the rules do not allow' }
-{ ok: false, reason: 'tiles are left on the layout' }
+{ ok: false, reason: 'a move the rules do not allow', code: 'move-not-allowed' }
+{ ok: false, reason: 'tiles are left on the layout', code: 'tiles-left' }
 ```
 
 ### Play a deal to the end

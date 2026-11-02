@@ -1,3 +1,5 @@
+import type { AwaseCheckCode } from "./check-reasons.ts";
+
 /**
  * The vocabulary of Mahjong Solitaire: tiles on a stacked layout, taken off in
  * matching pairs of free tiles. See docs/plans/mahjong/README.md.
@@ -160,7 +162,7 @@ export type AwaseLevel = "easy" | "medium" | "hard";
  */
 export type AwaseDeal = { size: number; level: AwaseLevel; seed: number; givens: string; solution: string };
 
-/** What a check of a finished game says: cleared, or the first reason it is not.
+/** What a check of a finished game says: cleared, or the first reason it is not, in English (`reason`) and as a stable `code` (`AWASE_CHECK_REASONS`).
  *
  * @example
  * ```ts
@@ -172,4 +174,4 @@ export type AwaseDeal = { size: number; level: AwaseLevel; seed: number; givens:
  * console.log(value);
  * ```
  */
-export type AwaseCheck = { ok: true } | { ok: false; reason: string };
+export type AwaseCheck = { ok: true } | { ok: false; reason: string; code: AwaseCheckCode };

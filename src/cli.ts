@@ -1,6 +1,7 @@
 import { bonusRuleOfSeed, freshAwaseSeed, generateAwase, SEED_MOST } from "./awase.ts";
 import { dailyAwase } from "./challenge.ts";
 import { checkAwase } from "./check.ts";
+import type { AwaseCheckCode } from "./check-reasons.ts";
 import { CLI_STRINGS, LAYOUT_NAMES_JA } from "./cliWords.ts";
 import { computerPair } from "./computer.ts";
 import { ALL_LAYOUTS, layoutExtent, layoutFor } from "./layouts.ts";
@@ -274,11 +275,11 @@ export function runCli(args: readonly string[], around: CliSurroundings = {}): C
     const moves = checked.ok ? (decodeMoves(text, givens.length) ?? []) : [];
     const pairs = moves.filter((move) => "pair" in move).length;
     const shuffles = moves.length - pairs;
-    const reasons: Record<string, string> = {
-      "the givens are not a deal of that layout": "checkNotDeal",
-      "the answer is not a list of moves": "checkNotMoves",
-      "a move the rules do not allow": "checkNotAllowed",
-      "tiles are left on the layout": "checkLeft",
+    const reasons: Record<AwaseCheckCode, string> = {
+      "givens-not-deal": "checkNotDeal",
+      "answer-not-moves": "checkNotMoves",
+      "move-not-allowed": "checkNotAllowed",
+      "tiles-left": "checkLeft",
     };
     if (json)
       return {
@@ -290,7 +291,7 @@ export function runCli(args: readonly string[], around: CliSurroundings = {}): C
     return {
       code: 1,
       out: "",
-      err: `${words("checkNot", { reason: t[reasons[checked.reason] ?? "checkNotAllowed"] as string })}\n`,
+      err: `${words("checkNot", { reason: t[reasons[checked.code]] as string })}\n`,
     };
   }
 

@@ -1,4 +1,5 @@
 import { isCleared } from "./board.ts";
+import { awaseRefusal } from "./check-reasons.ts";
 import { dealFits, decodeMoves, playSolve } from "./moves.ts";
 import type { AwaseCheck } from "./types.ts";
 
@@ -22,11 +23,11 @@ import type { AwaseCheck } from "./types.ts";
  * ```
  */
 export function checkAwase(size: number, givens: string, answer: string): AwaseCheck {
-  if (!dealFits(size, givens)) return { ok: false, reason: "the givens are not a deal of that layout" };
+  if (!dealFits(size, givens)) return awaseRefusal("givens-not-deal");
   const moves = decodeMoves(answer, givens.length);
-  if (moves === null) return { ok: false, reason: "the answer is not a list of moves" };
+  if (moves === null) return awaseRefusal("answer-not-moves");
   const played = playSolve(size, givens, moves);
-  if (played === null) return { ok: false, reason: "a move the rules do not allow" };
-  if (!isCleared(played.cells)) return { ok: false, reason: "tiles are left on the layout" };
+  if (played === null) return awaseRefusal("move-not-allowed");
+  if (!isCleared(played.cells)) return awaseRefusal("tiles-left");
   return { ok: true };
 }

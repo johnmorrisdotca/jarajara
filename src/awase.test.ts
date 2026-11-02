@@ -12,6 +12,7 @@ import {
   tilesLeft,
 } from "./board.ts";
 import { checkAwase } from "./check.ts";
+import { AWASE_CHECK_REASONS, awaseRefusal } from "./check-reasons.ts";
 import { layPairs, pairsLeft, shuffleTiles } from "./deal.ts";
 import { layoutExtent, layoutFor, MAHJONG_LAYOUTS } from "./layouts.ts";
 import { decodeMoves, encodeMoves, playSolve, SHUFFLE_MARK } from "./moves.ts";
@@ -190,6 +191,7 @@ describe("a solve", () => {
     expect(checkAwase(8, puzzle.givens, encodeMoves(moves.slice(0, -1)))).toEqual({
       ok: false,
       reason: "tiles are left on the layout",
+      code: "tiles-left",
     });
     expect(checkAwase(8, puzzle.givens, `${SHUFFLE_MARK}${puzzle.solution}`).ok).toBe(false);
     expect(checkAwase(8, puzzle.givens.slice(1), puzzle.solution).ok).toBe(false);
@@ -240,5 +242,39 @@ describe("a solve", () => {
       { x: 0, y: 0, z: 1 },
     ]);
     expect(shuffleTiles(geometryOf(tower), "aa", "group", 0)).toBeNull();
+  });
+});
+
+describe("a refusal in a form a site can say in its own language", () => {
+  const puzzle = generateAwase(8, "medium", 99);
+  const moves = decodeMoves(puzzle.solution, puzzle.givens.length)!;
+
+  it("gives every refusal a code, and its reason is that code's English sentence", () => {
+    const refusals = [
+      checkAwase(8, puzzle.givens.slice(1), puzzle.solution),
+      checkAwase(8, puzzle.givens, "0a?"),
+      checkAwase(8, puzzle.givens, encodeMoves([...moves].reverse())),
+      checkAwase(8, puzzle.givens, encodeMoves(moves.slice(0, -1))),
+    ];
+    expect(refusals.map((refusal) => (refusal.ok ? null : refusal.code))).toEqual([
+      "givens-not-deal",
+      "answer-not-moves",
+      "move-not-allowed",
+      "tiles-left",
+    ]);
+    for (const refusal of refusals) {
+      if (!refusal.ok) expect(refusal.reason).toBe(AWASE_CHECK_REASONS[refusal.code]);
+    }
+    expect(Object.keys(AWASE_CHECK_REASONS).sort()).toEqual([
+      "answer-not-moves",
+      "givens-not-deal",
+      "move-not-allowed",
+      "tiles-left",
+    ]);
+    expect(awaseRefusal("tiles-left")).toEqual({
+      ok: false,
+      reason: "tiles are left on the layout",
+      code: "tiles-left",
+    });
   });
 });

@@ -26,6 +26,7 @@ src/
 ├── moves.ts          a game written as text, and played back on a deal
 ├── awase.ts          a deal of Awase from a seed, at three levels
 ├── check.ts          whether a finished game clears its deal
+├── check-reasons.ts  why it does not: a stable code beside the English reason
 ├── challenge.ts      options and challenges: a game as plain data, its clock, goals and the day's game
 ├── cli.ts            the command line as a pure function: arguments in, what to print and the exit code out
 ├── cliWords.ts       what the command line says in English and Japanese, and the layouts' names in Japanese

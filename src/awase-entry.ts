@@ -6,4 +6,5 @@
 export * from "./awase.ts";
 export * from "./challenge.ts";
 export * from "./check.ts";
+export * from "./check-reasons.ts";
 export type { AwaseCheck, AwaseDeal, AwaseLevel } from "./types.ts";
