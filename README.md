@@ -1,3 +1,5 @@
+<p align="center"><a href="https://johnmorrisdotca.github.io/jarajara/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/johnmorrisdotca/jarajara/main/docs/images/thumbnail-dark.png"><img src="https://raw.githubusercontent.com/johnmorrisdotca/jarajara/main/docs/images/thumbnail.png" alt="Jarajara: the Turtle, a mahjong solitaire layout of the package's own tiles, a few pairs taken." width="1200"></picture></a></p>
+
 <h1 align="center">Jarajara <sub>ジャラジャラ</sub> — Mahjong tiles and mahjong solitaire</h1>
 
 <p align="center"><strong>Mahjong tiles for JavaScript and TypeScript.</strong><br>
@@ -821,7 +823,7 @@ A `cloth` is one choice of the three felt properties, which `clothVars(name)` gi
 | `black` | `#2f3236` | `#1b1d20` | `#ece8dc` |
 | `wood` | `#e2ba7a` | `#c4954f` | `#2b1d0e` |
 
-The buttons and the viewer's box are drawn light too, with dark text, whatever the page's theme; on a dark page the tags look best on a `cloth`. The demo's own page is the worked example: its green felt and its cloth patches are the family's stylesheet, [`demo/family.css`](./demo/family.css), the same file byte for byte in every sibling's demo. The parts of the tags carry `part` names (`back`, `board`, `button`, `clock`, `controls`, `face`, `frame`, `marker`, `rack`, `seats`, `status` and `tile`) for anything a property cannot reach.
+The buttons and the viewer's box are drawn light too, with dark text, whatever the page's theme; on a dark page the tags look best on a `cloth`. The demo's felt and cloth patches are the family's [`demo/family.css`](./demo/family.css). The parts of the tags carry `part` names (`back`, `board`, `button`, `clock`, `controls`, `face`, `frame`, `marker`, `rack`, `seats`, `status` and `tile`) for anything a property cannot reach.
 
 ## Limits
 
@@ -843,7 +845,7 @@ All of these are held by tests, and the ones with a name are exported.
 | The riichi designs | over a hundred kilobytes of drawings each, fetched when first asked for | `/designs/riichi`, `/designs/riichi-black` |
 | The recordings | tens of kilobytes as text, fetched when the first sound plays | `/sounds` |
 
-A level is chosen by laying five deals from the seed and playing each out at random, so making a deal is real work, and a server that only checks should never make one: `checkAwase` plays the moves it is given and nothing more.
+Making a deal plays five deals out (see [Awase](#awase)), so a server that only checks should never make one: `checkAwase` plays only the moves it is given.
 
 ## Accessibility
 
@@ -862,7 +864,7 @@ The browser requirements, tested engines and server-safe entry points are detail
 
 ## Languages
 
-English and Japanese. A tag speaks its own `lang`, or the nearest one above it, or the page's, and follows the page's language when it changes. The words of the tags are `STRINGS` (in `@johnmorrisdotca/jarajara/element`), the tiles' names are `faceWords` and `faceWordsJa` (`tileName(code, language)`), and the command line has its own words in `src/cliWords.ts`. The demo has a chooser of its own and takes the browser's language on a first visit. **Japanese: included; not yet reviewed by a native reader. Corrections welcome.** Every string of the tags and the command line is listed beside its English in [docs/strings-ja.md](./docs/strings-ja.md), made from the source by `pnpm docs:make` and held by a test, and a wrong one is a *Fix a translation* issue away: [open one](https://github.com/johnmorrisdotca/jarajara/issues/new?template=fix-a-translation.md).
+English and Japanese. A tag speaks its own `lang`, or the nearest one above it, or the page's, and follows the page's language when it changes. The words of the tags are `STRINGS` (in `@johnmorrisdotca/jarajara/element`), the tiles' names are `faceWords` and `faceWordsJa` (`tileName(code, language)`), and the command line has its own words in `src/cliWords.ts`. **Japanese: included; not yet reviewed by a native reader. Corrections welcome.** Every string of the tags and the command line is listed beside its English in [docs/strings-ja.md](./docs/strings-ja.md), made from the source by `pnpm docs:make` and held by a test, and a wrong one is a *Fix a translation* issue away: [open one](https://github.com/johnmorrisdotca/jarajara/issues/new?template=fix-a-translation.md).
 
 ## Roadmap
 

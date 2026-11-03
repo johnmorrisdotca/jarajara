@@ -148,4 +148,32 @@ await takePictures({
       prepare: tab("designs"),
     },
   ],
+  // The family's thumbnail, dark thumbnail and icon (scripts/family-thumbnail.mjs): the Turtle, the package's
+  // own tiles stacked in their layout, six pairs taken by the game's hint (132 left), off the cloth (the layout without a cloth is
+  // one of its own looks) and without its status line and buttons; the icon is the red dragon, as a tile element.
+  thumbnail: {
+    url: "/?lang=en&help=off",
+    ...kept({ size: 15 }),
+    ready: READY,
+    target: "#game",
+    clear: true,
+    icon: { target: "#thumbnail-tile" },
+    label: "Jarajara ジャラジャラ",
+    async prepare(page) {
+      await take(6)(page);
+      await page.evaluate(async () => {
+        const game = document.querySelector("#game");
+        game.removeAttribute("cloth");
+        const style = document.createElement("style");
+        style.textContent =
+          ".status, .controls { display: none !important; } .frame { border: 0 !important; background: none !important; box-shadow: none !important; }";
+        game.shadowRoot.append(style);
+        document.body.insertAdjacentHTML(
+          "beforeend",
+          '<div id="thumbnail-tile" style="width:max-content;padding:12px"><jarajara-tile code="F" width="300"></jarajara-tile></div>',
+        );
+        await customElements.whenDefined("jarajara-tile");
+      });
+    },
+  },
 });

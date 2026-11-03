@@ -13,8 +13,10 @@ import {
   familyHeader,
   familyUnreviewed,
 } from "./family-template.mjs";
+import { publishThumbnails, thumbnailHead } from "./family-thumbnail.mjs";
 
 const id = "jarajara";
+const ALT = "Jarajara: the Turtle, a mahjong solitaire layout of the package's own tiles, a few pairs taken.";
 const ICON =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232f5d4a'/%3E%3Crect x='24' y='12' width='52' height='72' rx='7' fill='%23d9c59b'/%3E%3Crect x='28' y='10' width='50' height='70' rx='7' fill='%23fffdf6'/%3E%3Ctext x='53' y='62' font-size='42' font-weight='700' text-anchor='middle' fill='%23b2302f'%3E中%3C/text%3E%3C/svg%3E";
 
@@ -50,6 +52,7 @@ const page = `<!doctype html>
       ogDescription:
         "Take the tiles away two at a time, two that match and that are both free, until the layout is clear.",
     })}
+    ${thumbnailHead(JSON.parse(readFileSync("package.json", "utf8")), { alt: ALT })}
     <link rel="icon" href="${ICON}" />
     <link rel="stylesheet" href="family.css" />
     <link rel="stylesheet" href="jarajara.css" />
@@ -78,6 +81,8 @@ for (const file of readdirSync("demo").filter((name) => /\.(css|js)$/.test(name)
   cpSync(`demo/${file}`, `site/${file}`);
 cpSync("dist", "site/dist", { recursive: true });
 writeFileSync("site/index.html", page);
+// The family's card, dark card and icon, at <site>/thumbnail.png, thumbnail-dark.png and icon.png.
+publishThumbnails(".", "site");
 // The API reference, made from the source: every export of every entry point.
 writeFileSync("site/api.css", API_CSS);
 writeFileSync("site/api.html", apiPage({ id, name: "Jarajara", icon: ICON }));
